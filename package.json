@@ -1,7 +1,7 @@
 {
   "name": "youloge",
   "private": false,
-  "version": "0.0.7",
+  "version": "0.1.0",
   "author": "Youfeed",
   "license": "MIT",
   "homepage": "https://youfeed.github.com",
@@ -11,6 +11,11 @@
   "unpkg": "dist/youloge.umd.js",
   "jsdelivr": "dist/youloge.umd.js",
   "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
   "files": [
     "dist"
   ],
@@ -19,7 +24,7 @@
       "import": "./dist/youloge.es.js",
       "require": "./dist/youloge.umd.js"
     },
-    "./dist/style.css": "./dist/style.css"
+    "./dist/index.css": "./dist/index.css"
   },
   "keywords": [
     "vue",
@@ -29,11 +34,6 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/youfeed/youloge.ui.git"
-  },
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
   },
   "dependencies": {
     "vue": "^3.2.45"
