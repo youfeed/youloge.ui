@@ -1,0 +1,46 @@
+{
+  "name": "youloge",
+  "private": false,
+  "version": "0.0.5",
+  "author": "Youfeed",
+  "license": "MIT",
+  "homepage": "https://youfeed.github.com",
+  "description": "youloge.com website dedicated UI library",
+  "main": "dist/youloge.umd.js",
+  "module": "dist/youloge.es.js",
+  "unpkg": "dist/youloge.umd.js",
+  "jsdelivr": "dist/youloge.umd.js",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/youloge.es.js",
+      "require": "./dist/youloge.umd.js"
+    },
+    "./dist/style.css": "./dist/style.css"
+  },
+  "keywords": [
+    "vue",
+    "youloge",
+    "webui"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/youfeed/youloge.ui.git"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "vue": "^3.2.45"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.0.0",
+    "vite": "^4.1.0",
+    "sass": "^1.56.1"
+  }
+}
