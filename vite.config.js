@@ -5,8 +5,9 @@ export default defineConfig({
   plugins: [vue()],
   build:{
     sourcemap:false,
-    cssCodeSplit:false,
+    cssCodeSplit:true,
     lib: {
+      format: 'umd',
       entry: 'lib/index.js',
       name: 'youloge',
       fileName: (format) => `youloge.${format}.js`,
