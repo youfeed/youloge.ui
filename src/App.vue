@@ -3,12 +3,12 @@ import HelloWorld from './components/HelloWorld.vue'
 </script>
 
 <template>
-  <div>
+  <div class="y-col-xs-2 y-col-lg-4 y-col-offset-12 y-col-xs-hide ">
     <a href="https://vitejs.dev" target="_blank">
 
     </a>
     <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
+      <img src="./assets/vue.svg" class="logo vue ad ads" alt="Vue logo" />
     </a>
   </div>
   <HelloWorld msg="Vite + Vue" />
