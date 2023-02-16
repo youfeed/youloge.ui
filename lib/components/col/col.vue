@@ -10,9 +10,9 @@ export default { name:'yCol'}
 const props = defineProps({
   span:{
     type:String,
-    default:24
+    default:'24'
   },
-  offset:String,
+  offset:String, 
   pull:String,
   push:String,
   xs:String,
@@ -21,23 +21,25 @@ const props = defineProps({
   lg:String,
   xl:String,
 })
-
 console.log(props)
 const cls = computed(()=>{
   let kind = ['y-col'];
   ['xs','sm','md','lg','xl'].forEach(size=>{
-    props[size] && kind.push(`y-${size}-${props[size]}`)
+    props[size] && kind.push(`y-col-${size}-${props[size]}`)
   })
+  // ['offset','pull','push'].forEach(is=>{
+  //   props[is] && kind.push(`y-col-${is}`)
+  // })
+  // console.log(1,kind)
   return kind
 })
-const width = ref(props.span<=24?props.span%1==0?(100/24)*props.span+'%':'':'')
-const offset = ref(props.offset<=24?props.offset%1==0?(100/24)*props.offset+'%':'':'')
+console.log(cls)
+// const width = ref(props.span<=24?props.span%1==0?(100/24)*props.span+'%':'':'')
+// const offset = ref(props.offset<=24?props.offset%1==0?(100/24)*props.offset+'%':'':'')
 </script>
 <style lang="scss">
 .y-col{
   display: flex;
-  width:v-bind(width);
   float: left;
-  margin-left:v-bind(offset)
 }
 </style>

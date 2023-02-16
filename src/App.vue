@@ -3,14 +3,14 @@ import HelloWorld from './components/HelloWorld.vue'
 </script>
 
 <template>
-  <div class="y-col-xs-2 y-col-lg-4 y-col-offset-12 y-col-xs-hide ">
-    <a href="https://vitejs.dev" target="_blank">
-
-    </a>
+  <y-col sm="12" md="3" offset="2">
+    <y-button type="primary">
+      <a href="https://vitejs.dev" target="_blank">button</a>
+    </y-button>
     <a href="https://vuejs.org/" target="_blank">
       <img src="./assets/vue.svg" class="logo vue ad ads" alt="Vue logo" />
     </a>
-  </div>
+  </y-col>
   <HelloWorld msg="Vite + Vue" />
 </template>
 

@@ -1,25 +1,13 @@
 <template>
-  <button
-    :class="inclass"
-    :disabled="isdisabled"
-  >
-    <span><slot></slot></span>
-    <span>I</span>
-  </button>
+  <button :class="cls"><span><slot></slot></span><span>I</span></button>
 </template>
 <script>export default{name: "yButton"}</script>
 <script setup>
   import {computed} from 'vue' 
   // type、plain、round 和 circle
   const props = defineProps({
-    type:{
-      type:String,
-      default:'default'
-    },
-    size:{
-      type:String,
-      default:''
-    },
+    type:String,
+    size:String,
     icon:String,
     text:Boolean,
     link:Boolean,
@@ -29,16 +17,12 @@
     disabled:Boolean,
     loading:Boolean
   })
-  console.log(props)
-  const inclass = computed(()=>{
-    return [
-      'y-button',
-      `y-button-${props.type}`,
-      {'y-button-text':props.text},
-    ]
-  })
-  const isdisabled = computed(()=>{
-    return props.disabled
+  const cls = computed(()=>{
+    let kind = ['y-button'];
+    ['type','size','plain','round','circle','disabled','loading'].forEach(is=>{
+      props[is] && kind.push(`y-button-${props[is]}`)
+    })
+    return kind
   })
 </script>
 <style lang="scss">
