@@ -2,16 +2,13 @@
   <div :class="cls" ><slot></slot></div>
 </template>
 <script>
-import { computed, ref } from 'vue'
+import { computed, inject, ref } from 'vue'
 export default { name:'yCol'}
 </script>
 <script setup>
 // 'xs', 'sm', 'md', 'lg', 'xl' 'span', 'offset', 'pull', 'push'
 const props = defineProps({
-  span:{
-    type:String,
-    default:'24'
-  },
+  span:String,
   offset:String, 
   pull:String,
   push:String,
@@ -21,7 +18,6 @@ const props = defineProps({
   lg:String,
   xl:String,
 })
-console.log(props)
 const cls = computed(()=>{
   let kind = ['y-col'];
   ['xs','sm','md','lg','xl'].forEach(size=>{
@@ -33,7 +29,9 @@ const cls = computed(()=>{
   // console.log(1,kind)
   return kind
 })
-console.log(cls)
+
+const gutteer = inject('useGutter')
+console.log('gutteer',gutteer);
 // const width = ref(props.span<=24?props.span%1==0?(100/24)*props.span+'%':'':'')
 // const offset = ref(props.offset<=24?props.offset%1==0?(100/24)*props.offset+'%':'':'')
 </script>

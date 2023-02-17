@@ -2,13 +2,13 @@
   <div class="y-row" :style="style"><slot></slot></div>
 </template>
 <script>
-import { computed } from 'vue'
+import { computed, provide } from 'vue'
 export default { name:'yRow' }
 </script>
 <script setup>
 const props = defineProps({
   gutter:{
-    type:Number,
+    type:[Number,String],
     default:0
   }
 })
@@ -20,6 +20,7 @@ const style = computed(()=>{
     }
   ]
 })
+provide('useGutter',props.gutter)
 </script>
 <style>
 .y-row{

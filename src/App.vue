@@ -1,11 +1,20 @@
 
 <template>
-  <y-col span="24">
-    <y-form :model="draft">
-      <y-input>email</y-input>
-      biaodan
-    </y-form>
-  </y-col>
+  <y-row gutter="10">
+    <y-col span="24">
+      <y-form size="large">
+        <y-form-item label="邮箱">
+          <y-input placeholder="请输入邮箱">email</y-input>
+        </y-form-item>
+        <y-form-item label="密码">
+          <y-input type="password"></y-input>
+        </y-form-item>
+        <y-button aria-type="submit">登陆·注册</y-button>
+      </y-form>
+    </y-col>
+  </y-row>
+
+
   <y-col sm="12" md="3" offset="2">
     <y-button type="primary" size="medium">
       button
@@ -18,11 +27,16 @@
   <HelloWorld msg="Vite + Vue" />
 </template>
 <script setup>
-import { ref } from 'vue'
+import { ref, toRefs } from 'vue'
 import HelloWorld from './components/HelloWorld.vue'
-const draft = ref({x:123})
+const props = defineProps({
+  draft:{
+    x:123
+  }
+})
+const {draft} = toRefs(props)
 </script>
 
-<style scoped>
+<style lang="scss">
 </style>
  
