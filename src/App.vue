@@ -1,10 +1,8 @@
-<script setup>
-import HelloWorld from './components/HelloWorld.vue'
-</script>
 
 <template>
   <y-col span="24">
-    <y-form>
+    <y-form :model="draft">
+      <y-input>email</y-input>
       biaodan
     </y-form>
   </y-col>
@@ -19,6 +17,11 @@ import HelloWorld from './components/HelloWorld.vue'
 
   <HelloWorld msg="Vite + Vue" />
 </template>
+<script setup>
+import { ref } from 'vue'
+import HelloWorld from './components/HelloWorld.vue'
+const draft = ref({x:123})
+</script>
 
 <style scoped>
 </style>

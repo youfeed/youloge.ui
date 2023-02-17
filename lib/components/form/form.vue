@@ -6,7 +6,7 @@
 export default { name:'yForm' }
 </script>
 <script setup>
-import { provide, reactive, toRefs } from 'vue'
+import { provide, reactive, ref, toRefs } from 'vue'
 const props = defineProps({
   model:Object,
   position:String,
@@ -16,7 +16,8 @@ const props = defineProps({
 const onReset = ()=>{
   console.log('onReset')
 }
-provide('useFrom',reactive(...toRefs(props)))
+provide('useFrom',ref(onReset))
+// provide('useFrom',reactive(toRefs(...props)))
 defineExpose(onReset)
 </script>
 <style>
