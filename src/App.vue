@@ -3,28 +3,23 @@ import HelloWorld from './components/HelloWorld.vue'
 </script>
 
 <template>
-  <y-col sm="12" md="3" offset="2">
-    <y-button type="primary">
-      <a href="https://vitejs.dev" target="_blank">button</a>
-    </y-button>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue ad ads" alt="Vue logo" />
-    </a>
+  <y-col span="24">
+    <y-form>
+      biaodan
+    </y-form>
   </y-col>
+  <y-col sm="12" md="3" offset="2">
+    <y-button type="primary" size="medium">
+      button
+    </y-button>
+    <y-link href="https://vuejs.org/" target="_blank" type="primary">
+      <img src="./assets/vue.svg" class="logo vue ad ads" alt="Vue logo" />
+    </y-link>
+  </y-col>
+
   <HelloWorld msg="Vite + Vue" />
 </template>
 
 <style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
-}
 </style>
+ 
