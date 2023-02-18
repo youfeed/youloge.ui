@@ -1,5 +1,5 @@
 <template>
-  <div class="y-row" :style="style"><slot></slot></div>
+  <div :class="cls" :style="sty"><slot></slot></div>
 </template>
 <script>
 import { computed, provide } from 'vue'
@@ -7,26 +7,23 @@ export default { name:'yRow' }
 </script>
 <script setup>
 const props = defineProps({
-  gutter:{
-    type:[Number,String],
-    default:0
-  }
+  gutter:{ type:String,default:'0'},
+  justify:String
 })
-const style = computed(()=>{
+const {gutter,justify} = props
+const cls = computed(()=>{
+  return ['y-row',justify && `y-row-${justify}`]
+})
+const sty = computed(()=>{
   return [
     {
-      'margin-left':props.gutter>0?`-${props.gutter / 2}px`:false,
-      'margin-right':props.gutter?`-${props.gutter / 2}px`:false,
+      'margin-left':! gutter || `-${gutter / 2}px`,
+      'margin-right':! gutter || `-${gutter / 2}px`,
     }
   ]
 })
-provide('useGutter',props.gutter)
+!!gutter && provide('useGutter',props.gutter);
 </script>
 <style>
-.y-row{
-  width:100%;
-  height:auto;
-  box-sizing: border-box;
-  overflow: hidden;
-}
+
 </style>

@@ -1,7 +1,7 @@
 
 <template>
-  <y-row gutter="10">
-    <y-col span="24">
+  <y-row gutter="20" justify="end">
+    <y-col span="12">
       <y-form size="large">
         <y-form-item label="邮箱">
           <y-input placeholder="请输入邮箱">email</y-input>
@@ -12,17 +12,21 @@
         <y-button aria-type="submit">登陆·注册</y-button>
       </y-form>
     </y-col>
+    <y-col span="12" >
+      1222
+    </y-col>
   </y-row>
 
-
-  <y-col sm="12" md="3" offset="2">
-    <y-button type="primary" size="medium">
-      button
-    </y-button>
-    <y-link href="https://vuejs.org/" target="_blank" type="primary">
-      <img src="./assets/vue.svg" class="logo vue ad ads" alt="Vue logo" />
-    </y-link>
-  </y-col>
+  <y-row >
+    <y-col sm="12" md="3" offset="2">
+      <y-button type="primary" size="medium">
+        button
+      </y-button>
+      <y-link href="https://vuejs.org/" target="_blank" type="primary">
+        <img src="./assets/vue.svg" class="logo vue like likes ads" alt="Vue logo" />
+      </y-link>
+    </y-col>
+  </y-row>
 
   <HelloWorld msg="Vite + Vue" />
 </template>
