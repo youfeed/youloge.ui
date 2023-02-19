@@ -14,6 +14,9 @@
     </y-col>
     <y-col span="12" >
       1222
+      <y-icon class="y-icon y-icon-redo" type="plus" color="red" size="16"></y-icon>
+      <y-icon class="y-icon y-icon-redo" type="search" color="blue" size="32"></y-icon>
+      <y-icon class="y-icon y-icon-redo" type="redo" color="red" size="16"></y-icon>
     </y-col>
   </y-row>
 
