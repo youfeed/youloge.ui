@@ -11,16 +11,22 @@
 </template>
 
 <script>
-import { toRefs } from 'vue'
 export default { name:'yLoading' }
 </script>
 <script setup>
+import { toRefs } from 'vue'
 const props = defineProps({
-  obj:{
-    type:Object
-  }
+  show:Boolean,
+  text:String,
+  obj:Object
 })
-// const {} = toRefs()
+const {show} = props
+const toggle = ()=>{
+  console.log('toggle')
+  show = !show
+}
+console.log(5,props)
+defineExpose({toggle})
 </script>
 <style lang="scss">
 .y-loading {

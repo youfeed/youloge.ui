@@ -37,13 +37,10 @@
 <script setup>
 import { inject, ref, toRefs } from 'vue'
 const useLoading = inject('useLoading')
-const useLogin = inject('useLogin')
-const useMessage = inject('useMessage')
-console.log(useMessage)
 
 const load = ()=>{
-  console.log('load')
-
+  
+  console.log('load',useLoading)
   useLoading.show()
 }
 const props = defineProps({
