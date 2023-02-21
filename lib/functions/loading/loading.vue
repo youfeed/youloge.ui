@@ -1,7 +1,7 @@
 <template>
   <transition name="fade-pupop">
-    <div class="mzl-loading" v-if="obj.show" :style="{'position':obj.position,'background-color':obj.bgColor}">
-      <div :style="{color:obj.textColor}" class="mzl-loading-center">
+    <div class="y-loading" v-if="obj.show" :style="{'position':obj.position,'background-color':obj.bgColor}">
+      <div :style="{color:obj.textColor}" class="y-loading-center">
         <i :class="['loading-icon',obj.icon]" v-if="obj.showIcon&&obj.img==''"></i>
         <img :src="obj.img" alt="" v-if="obj.img!=''" class="loading-img">
         <span v-if="obj.text!=''">{{obj.text}}</span>
@@ -11,6 +11,7 @@
 </template>
 
 <script>
+import { toRefs } from 'vue'
 export default { name:'yLoading' }
 </script>
 <script setup>
@@ -19,9 +20,10 @@ const props = defineProps({
     type:Object
   }
 })
+// const {} = toRefs()
 </script>
 <style lang="scss">
-.mzl-loading {
+.y-loading {
   width: 100%;
   height: 100%;
   top: 0;
@@ -31,7 +33,7 @@ const props = defineProps({
   justify-content: center;
   align-items: center;
   z-index: 99999;
-  .mzl-loading-center {
+  .y-loading-center {
     color: #fff;
     padding: 6px 15px;
     text-align: center;

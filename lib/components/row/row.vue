@@ -17,8 +17,8 @@ const cls = computed(()=>{
 const sty = computed(()=>{
   return [
     {
-      'margin-left':! gutter || `-${gutter / 2}px`,
-      'margin-right':! gutter || `-${gutter / 2}px`,
+      // 'margin-left':! gutter || `-${gutter / 2}px`,
+      // 'margin-right':! gutter || `-${gutter / 2}px`,
     }
   ]
 })

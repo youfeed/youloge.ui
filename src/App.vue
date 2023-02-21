@@ -1,5 +1,6 @@
 
 <template>
+  <y-header aria="网盘"></y-header>
   <y-row gutter="20" justify="end">
     <y-col span="12">
       <y-form size="large">
@@ -9,7 +10,7 @@
         <y-form-item label="密码">
           <y-input type="password"></y-input>
         </y-form-item>
-        <y-button aria-type="submit">登陆·注册</y-button>
+        <y-button aria-type="submit" >登陆·注册</y-button>
       </y-form>
     </y-col>
     <y-col span="12" >
@@ -22,7 +23,7 @@
 
   <y-row >
     <y-col sm="12" md="3" offset="2">
-      <y-button type="primary" size="medium">
+      <y-button type="primary" size="medium" @click="load">
         button
       </y-button>
       <y-link href="https://vuejs.org/" target="_blank" type="primary">
@@ -31,11 +32,20 @@
     </y-col>
   </y-row>
 
-  <HelloWorld msg="Vite + Vue" />
+
 </template>
 <script setup>
-import { ref, toRefs } from 'vue'
-import HelloWorld from './components/HelloWorld.vue'
+import { inject, ref, toRefs } from 'vue'
+const useLoading = inject('useLoading')
+const useLogin = inject('useLogin')
+const useMessage = inject('useMessage')
+console.log(useMessage)
+
+const load = ()=>{
+  console.log('load')
+
+  useLoading.show()
+}
 const props = defineProps({
   draft:{
     x:123

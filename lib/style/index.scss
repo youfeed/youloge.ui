@@ -18,9 +18,6 @@ body {
   font-variant: tabular-nums;
   background-color: #fff;
   font-feature-settings: "tnum";
-  margin: 0;
-  padding: 0;
-  height: 100vh;
 }
 hr {
   box-sizing: content-box;
@@ -82,41 +79,6 @@ pre > code {
   opacity: 0;
 }
 
-.color-itembox {
-  width: 100%;
-  height: 100px;
-  li {
-    list-style: none;
-    width: 240px;
-    height: 100%;
-    left: none;
-    float: left;
-    margin-right: 0.5vw;
-    border-radius: 4px;
-    color: #fff;
-    text-align: center;
-    span {
-      width: 100%;
-      display: inline-block;
-      line-height: 24px;
-      font-size: 14px;
-    }
-    span:first-child {
-      margin-top: 12px;
-    }
-  }
-  span.outherColor {
-    width: 90px;
-    height: 100%;
-    display: inline-block;
-    margin-right: 0.5vw;
-    border-radius: 4px;
-    text-align: center;
-    line-height: 100px;
-    color: #fff;
-    font-size: 14px;
-  }
-}
 .componetnsBox {
   padding: 30px 15px;
   border: 1px solid #f0f0f0;
@@ -127,7 +89,6 @@ pre > code {
 pre > code > span {
   font-size: 14px;
 }
-
 
 // sm
 @media (min-width: 640px) {  }
