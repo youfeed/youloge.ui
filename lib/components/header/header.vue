@@ -1,8 +1,7 @@
 <template>
   <header class="y-header">
     <div class="y-logo">
-      <div>&#8801;  Youloge</div>
-      <small>{{aria}}</small>
+      <p>&#8801;  Youloge<sup>{{aria}}</sup></p>
     </div>
     <div class="y-search">
       <form action="/search">
@@ -104,9 +103,13 @@ const {aria,profile} = toRefs(data)
     font-size: 18px;
     font-weight: bold;
     color: #333;
-    height: 50px;
+    height: 100%;
     line-height: 50px;
     cursor: pointer;
+    sup{
+      font-size: 10px;
+      color: #999;
+    }
   }
   .y-search{
     border: 1px solid #999;
