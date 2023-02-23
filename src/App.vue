@@ -1,7 +1,16 @@
 
 <template>
+<div>
   <y-header aria="网盘"></y-header>
-  <y-row gutter="20" justify="end">
+  <div>
+    <y-video uuid="m2333"></y-video>
+  </div>
+<!-- 
+  <br>
+  <br>
+  <br>
+  <br> -->
+  <!-- <y-row gutter="20" justify="end">
     <y-col span="12">
       <y-form size="large">
         <y-form-item label="邮箱">
@@ -21,7 +30,7 @@
     </y-col>
   </y-row>
 
-  <y-row >
+  <y-row>
     <y-col sm="12" md="3" offset="2">
       <y-button type="primary" size="medium" @click="load">
         button
@@ -30,9 +39,8 @@
         <img src="./assets/vue.svg" class="logo vue like likes ads" alt="Vue logo" />
       </y-link>
     </y-col>
-  </y-row>
-
-
+  </y-row> -->
+</div>
 </template>
 <script setup>
 import { inject, ref, toRefs } from 'vue'
