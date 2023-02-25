@@ -122,7 +122,7 @@ const {pass,word,sign,msg} = toRefs(data)
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #ffffff94;
+  background: #0c0c0c6e;
   .y-login-flex{
     margin-top: -20%;
     min-width: 280px;
