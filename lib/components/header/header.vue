@@ -12,27 +12,27 @@
     <div class="y-profile">
       <slot></slot>
       <div class="userinfo" v-login="onProfile">
-        <img :src="profile.avatar+'!0'" class="y-profile-avatar"/>
+        <img :src="'//img.youloge.com/'+profile.avatar+'!0'" class="y-profile-avatar"/>
       </div>
       <div :class="dropdown">
-        <a class="y-profile-li" href="/uuid.profile">
-          <img :src="profile.avatar+'!0'" class="y-profile-avatar"/>
+        <a class="y-profile-li" href="//www.youloge.com/#/profile">
+          <img :src="'//img.youloge.com/'+profile.avatar+'!0'" class="y-profile-avatar"/>
           <div class="y-profile-li-r">
-            <span>{{data.profile.name}}</span>
-            <small>@{{data.profile.nick}}</small>
+            <p>{{profile.name}}</p>
+            <small>@{{profile.nick}}</small>
           </div>
         </a>
-        <a class="y-profile-li" href="/uuid.wallet">
-          <span>+</span>
+        <a class="y-profile-li" href="//www.youloge.com/#/wallet">
+          <span>·</span>
           <div class="y-profile-li-r">我的钱包</div>
         </a>
-        <a class="y-profile-li" href="/uuid.setting">
-          <span>+</span>
-          <div class="y-profile-li-r">设置</div>
+        <a class="y-profile-li" href="//www.youloge.com/#/wallet">
+          <span>·</span>
+          <div class="y-profile-li-r">开放平台</div>
         </a>
-        <a class="y-profile-li" href="/uuid.toggle">
-          <span>+</span>
-          <div class="y-profile-li-r">切换账号</div>
+        <a class="y-profile-li" @click="onExit">
+          <span>·</span>
+          <div class="y-profile-li-r">退出登录</div>
         </a>
       </div>
     </div>
@@ -50,7 +50,7 @@ const props = defineProps({
     default:'.com'
   }
 })
-const data = reactive({
+const state = reactive({
   ref:null,
   dropdown:false,
   aria:props.aria,
@@ -58,33 +58,39 @@ const data = reactive({
     uuid:'',
     nick:'Micateam',
     name:'You_游客',
-    avatar:'https://img.youloge.com/FjjHFE7RwJqfjiwM9aqL4G53kPv3'
+    avatar:'FjjHFE7RwJqfjiwM9aqL4G53kPv3'
   },
 })
 
-
 const dropdown = computed(()=>[
-  'y-dropdown',{'show':data.dropdown}
+  'y-dropdown',{'show':state.dropdown}
 ])
 
 onMounted(()=>{
-  localStorage.getItem('profile')
+  let {profile} = state
+  let local =  localStorage.getItem('profile') || '{}'
+  console.log(local)
+  let xx = Object.assign(profile,JSON.parse(local)) 
   // location.href
   // console.log('233',location.href)
 })
+// 退出登录
+const onExit = ()=>{
+  localStorage.clear()
+}
 // 登录状态才触发
 const onProfile = (el)=>{
-  data.dropdown = true
+  state.dropdown = true
   // console.log('233333',el,data.ref)
   setTimeout(()=>{
     document.addEventListener('click',(e)=>{
-      data.dropdown = false
+      state.dropdown = false
     },{once:true})
   },200)
 }
 
 
-const {aria,profile} = toRefs(data)
+const {aria,profile} = toRefs(state)
 </script>
 <style lang="scss">
 .y-header{

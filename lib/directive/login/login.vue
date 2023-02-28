@@ -28,6 +28,7 @@ onMounted(()=>{
     if(origin.includes(src)){
       emit === 'success' ? [
         props.onSuccess(data),
+        localStorage.setItem('profile',JSON.stringify(data.data)),
         Object.entries(data.data).forEach(([key,val])=>{
           localStorage.setItem(key,val)
         })

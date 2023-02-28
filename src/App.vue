@@ -43,10 +43,9 @@
 </div>
 </template>
 <script setup>
-import { getCurrentInstance, inject, ref, toRefs } from 'vue'
-const proxy = getCurrentInstance();
+import { inject, ref, toRefs } from 'vue'
 
-console.log(999,proxy)
+
 const useLoading = inject('useLoading')
 
 const load = ()=>{
