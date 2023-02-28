@@ -3,7 +3,7 @@
 <div>
   <y-header aria="网盘"></y-header>
   <div>
-    <y-video uuid="m2333"></y-video>
+    <!-- <y-video uuid="m2333"></y-video> -->
   </div>
 <!-- 
   <br>
@@ -43,7 +43,10 @@
 </div>
 </template>
 <script setup>
-import { inject, ref, toRefs } from 'vue'
+import { getCurrentInstance, inject, ref, toRefs } from 'vue'
+const proxy = getCurrentInstance();
+
+console.log(999,proxy)
 const useLoading = inject('useLoading')
 
 const load = ()=>{

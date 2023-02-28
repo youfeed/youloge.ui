@@ -40,14 +40,10 @@
 </template>
 
 <script>
-import { onMounted,inject, toRefs, reactive, computed } from 'vue'
-import button from '../button/button.vue'
-export default {
-  components: { button }, name:'yHeader' 
-}
+export default { name:'yHeader' }
 </script>
 <script setup>
-const useFetch = inject('useFetch')
+import { onMounted, toRefs, reactive, computed } from 'vue'
 const props = defineProps({
   aria:{
     type:String,
@@ -67,9 +63,9 @@ const data = reactive({
 })
 
 
-const dropdown = computed(()=>{
-  return ['y-dropdown',{'show':data.dropdown}]
-})
+const dropdown = computed(()=>[
+  'y-dropdown',{'show':data.dropdown}
+])
 
 onMounted(()=>{
   localStorage.getItem('profile')
@@ -118,6 +114,12 @@ const {aria,profile} = toRefs(data)
     input{
       border: 0;
       outline: 0;
+    }
+    button{
+      outline: 0;
+      background: transparent;
+      border: 0;
+      color: #233;
     }
   }
   .y-profile-avatar{

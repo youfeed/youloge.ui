@@ -12,7 +12,7 @@ export default defineConfig({
       name: 'youloge',
       fileName: (format) => `youloge.${format}.js`,
     },
-    rollupOptions: {
+    rollupOptions: { 
       external: ['vue'],
       output: {
         globals: {
