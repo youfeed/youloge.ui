@@ -11,7 +11,6 @@ export default { name:'yLogin' }
 </script>
 <script setup>
 import { computed, onMounted, reactive, toRefs } from 'vue'
-import Youloge from '../..';
 const props = defineProps({ onClose:Function,onSuccess:Function })
 const state = reactive({
   src:'//sso.youloge.com',
