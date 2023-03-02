@@ -15,18 +15,18 @@
         <img :src="'//img.youloge.com/'+profile.avatar+'!0'" class="y-profile-avatar"/>
       </div>
       <div :class="dropdown">
-        <a class="y-profile-li" href="//www.youloge.com/#/profile">
+        <a class="y-profile-li" href="//www.youloge.com/#/profile/">
           <img :src="'//img.youloge.com/'+profile.avatar+'!0'" class="y-profile-avatar"/>
           <div class="y-profile-li-r">
             <p>{{profile.name}}</p>
             <small>@{{profile.nick}}</small>
           </div>
         </a>
-        <a class="y-profile-li" href="//www.youloge.com/#/wallet">
+        <a class="y-profile-li" href="//www.youloge.com/#/wallet/">
           <span>·</span>
           <div class="y-profile-li-r">我的钱包</div>
         </a>
-        <a class="y-profile-li" href="//www.youloge.com/#/wallet">
+        <a class="y-profile-li" href="//www.youloge.com/#/wallet/">
           <span>·</span>
           <div class="y-profile-li-r">开放平台</div>
         </a>
@@ -69,7 +69,7 @@ const dropdown = computed(()=>[
 onMounted(()=>{
   let {profile} = state
   let local =  localStorage.getItem('profile') || '{}'
-  console.log(local)
+  // console.log(local)
   let xx = Object.assign(profile,JSON.parse(local)) 
   // location.href
   // console.log('233',location.href)

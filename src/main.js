@@ -7,7 +7,7 @@ import youloge from '../lib/index.js'
 const app = createApp(App)
 app.use(youloge,{
   'ak':'123456',
-  'font-size':'12px'
+  'font-size':'12px',
+  'APIURL':'https://api.youloge.com/',
+  'VIPURL':'https://vip.youloge.com/',
 }).mount('#app')
-
-app.config.globalProperties.$config = {config:'config'};

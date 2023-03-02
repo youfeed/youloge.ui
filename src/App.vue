@@ -2,7 +2,8 @@
 <template>
 <div>
   <y-header aria="网盘"></y-header>
-  <div>
+  <div @click="load">
+    加载load
     <!-- <y-video uuid="m2333"></y-video> -->
   </div>
 <!-- 
@@ -46,12 +47,23 @@
 import { inject, ref, toRefs } from 'vue'
 
 
-const useLoading = inject('useLoading')
+const useFetch = inject('useFetch')
+const useMessage = inject('useMessage')
 
+const fet = useFetch();
+
+// useMessage().success()
+
+fet.api('test',{}).then(res=>{
+  console.log(res)
+}).catch(e=>{
+  console.log(e)
+})
 const load = ()=>{
-  
-  console.log('load',useLoading)
-  useLoading.show()
+  useLoading().show()
+  useLoading().show()
+
+  console.log('useMessage',useMessage)
 }
 const props = defineProps({
   draft:{

@@ -1,11 +1,12 @@
 <template>
   <transition name="fade-pupop">
-    <div class="y-loading" v-if="obj.show" :style="{'position':obj.position,'background-color':obj.bgColor}">
-      <div :style="{color:obj.textColor}" class="y-loading-center">
-        <i :class="['loading-icon',obj.icon]" v-if="obj.showIcon&&obj.img==''"></i>
-        <img :src="obj.img" alt="" v-if="obj.img!=''" class="loading-img">
-        <span v-if="obj.text!=''">{{obj.text}}</span>
-      </div>
+    <div class="y-loading" v-show="show" style="">
+      2333
+      <!-- <div :style="{color:props.textColor}" class="y-loading-center">
+        <i :class="['loading-icon',props.icon]" v-if="props.showIcon&&props.img==''"></i>
+        <img :src="props.img" alt="" v-if="props.img!=''" class="loading-img">
+        <span v-if="props.text!=''">{{props.text}}</span>
+      </div> -->
     </div>
   </transition>
 </template>
@@ -14,19 +15,22 @@
 export default { name:'yLoading' }
 </script>
 <script setup>
-import { toRefs } from 'vue'
+import { reactive, toRefs } from 'vue'
 const props = defineProps({
-  show:Boolean,
   text:String,
-  obj:Object
+  duration:Number
 })
-const {show} = props
+const state = reactive({
+  show:false,
+})
+console.log('props',props)
+
 const toggle = ()=>{
   console.log('toggle')
-  show = !show
+  state.show = !state.show
 }
-console.log(5,props)
 defineExpose({toggle})
+const {show} = toRefs(state)
 </script>
 <style lang="scss">
 .y-loading {

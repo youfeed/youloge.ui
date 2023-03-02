@@ -56,3 +56,6 @@ project
 - [Vant 有赞UI库*](https://vant3.uihtm.com/#/zh-CN)
 
 
+### 更新日志
+
+- 0.2.5 优化provide 重新封装fetch等函数式组件
