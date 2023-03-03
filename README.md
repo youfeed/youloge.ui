@@ -1,7 +1,13 @@
 # 这是一个Youloge.com 自用项目 欢迎PR [副仓库]
 
+### 更新日志
 
-今天找vue admin 时候看到 [ArcoDesign 今日头条](https://arco.design/) 觉得很不错，所以将之前用`vue-cli` 搭建学习的ui组件库，转移到`vite`来，折腾了一整天，刚开始我在哪里狂整`rollup.config.js` 各种缺失报错，其实 `vite build lib`直接可以用的，`scss` 以及 `css 变量`，整通了就发现哇这弯路走的，干～
+- 0.2.7 新增`v-copy`指令,支持`函数`,`字符串`,`HTML` 暂不支持图片
+- 0.2.6 新增`useDialog`组件 支持`alert`,`confirm`,`prompt` 三种模式
+- 0.2.5 优化provide 重新封装`fetch`等函数式组件
+
+
+在找vue admin 时候看到 [ArcoDesign 今日头条](https://arco.design/) 觉得很不错，所以将之前用`vue-cli` 搭建学习的ui组件库，转移到`vite`来，折腾了一整天，刚开始我在哪里狂整`rollup.config.js` 各种缺失报错，其实 `vite build lib`直接可以用的，`scss` 以及 `css 变量`，整通了就发现哇这弯路走的，干～
 
 ### 项目结构
 
@@ -56,7 +62,3 @@ project
 - [Vant 有赞UI库*](https://vant3.uihtm.com/#/zh-CN)
 
 
-### 更新日志
-
-- 0.2.6 新增`useDialog`组件 支持`alert`,`confirm`,`prompt` 三种模式
-- 0.2.5 优化provide 重新封装`fetch`等函数式组件

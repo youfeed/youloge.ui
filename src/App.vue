@@ -6,6 +6,11 @@
     加载load
     <!-- <y-video uuid="m2333"></y-video> -->
   </div>
+
+
+  <div v-copy="copy">
+    <p>复制内容</p>
+  </div>
 <!-- 
   <br>
   <br>
@@ -50,7 +55,10 @@ import { inject, ref, toRefs } from 'vue'
 const useLoading = inject('useLoading')
 const useMessage = inject('useMessage')
 const useDialog = inject('useDialog')
-
+const copy = ()=>{
+  let x = document.createElement('div')
+  return x
+}
 const load = ()=>{
   let log = useDialog({content:'提示内容拉'})
   

@@ -23,12 +23,10 @@
 </template>
 
 <script>
-export default {
-  components: { input }, name:'yDialog'}
+export default { name:'yDialog'}
 </script>
 <script setup>
 import { onMounted, reactive, toRefs } from 'vue';
-import input from '../../components/input/input.vue';
 const props = defineProps({
   method:String,
   type:String,
