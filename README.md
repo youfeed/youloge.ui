@@ -58,4 +58,5 @@ project
 
 ### 更新日志
 
-- 0.2.5 优化provide 重新封装fetch等函数式组件
+- 0.2.6 新增`useDialog`组件 支持`alert`,`confirm`,`prompt` 三种模式
+- 0.2.5 优化provide 重新封装`fetch`等函数式组件

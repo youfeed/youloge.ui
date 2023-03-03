@@ -47,23 +47,19 @@
 import { inject, ref, toRefs } from 'vue'
 
 
-const useFetch = inject('useFetch')
+const useLoading = inject('useLoading')
 const useMessage = inject('useMessage')
+const useDialog = inject('useDialog')
 
-const fet = useFetch();
-
-// useMessage().success()
-
-fet.api('test',{}).then(res=>{
-  console.log(res)
-}).catch(e=>{
-  console.log(e)
-})
 const load = ()=>{
-  useLoading().show()
-  useLoading().show()
-
-  console.log('useMessage',useMessage)
+  let log = useDialog({content:'提示内容拉'})
+  
+  log.prompt({type:'password'}).then(res=>{
+    console.log(1,res)
+  }).catch(e=>{
+    console.log(2,e)
+  })
+  // console.log('useMessage',useMessage().success('999'))
 }
 const props = defineProps({
   draft:{
