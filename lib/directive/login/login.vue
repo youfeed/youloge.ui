@@ -13,18 +13,18 @@ export default { name:'yLogin' }
 import { computed, onMounted, reactive, toRefs } from 'vue'
 const props = defineProps({ onClose:Function,onSuccess:Function })
 const state = reactive({
-  src:'//sso.youloge.com',
+  src:'//open.youloge.com/sso',
   iframe:'',
   show:false
 })
 onMounted(()=>{
-  const {ak} = JSON.parse(sessionStorage.getItem('youloge'));state.show = true;
-  const {src,iframe} = state;
-  iframe.onload = ()=>iframe.contentWindow.postMessage({ak:ak,name:'youloge.sso'}, "*");
+  const {ukey} = JSON.parse(sessionStorage.getItem('youloge'));state.show = true;
+  const {iframe} = state;
+  iframe.onload = ()=>iframe.contentWindow.postMessage({ukey:ukey,name:'youloge.sso'}, "*");
 
   window.addEventListener('message',event=>{
     let {origin,data} = event,{emit} = data;
-    if(origin.includes(src)){
+    if(origin.includes('open.youloge.com')){
       emit === 'success' ? [
         props.onSuccess(data),
         localStorage.setItem('profile',JSON.stringify(data.data)),

@@ -7,54 +7,34 @@
     <!-- <y-video uuid="m2333"></y-video> -->
   </div>
 
-
   <div v-copy="copy">
     <p>复制内容</p>
   </div>
-<!-- 
-  <br>
-  <br>
-  <br>
-  <br> -->
-  <!-- <y-row gutter="20" justify="end">
-    <y-col span="12">
-      <y-form size="large">
-        <y-form-item label="邮箱">
-          <y-input placeholder="请输入邮箱">email</y-input>
-        </y-form-item>
-        <y-form-item label="密码">
-          <y-input type="password"></y-input>
-        </y-form-item>
-        <y-button aria-type="submit" >登陆·注册</y-button>
-      </y-form>
-    </y-col>
-    <y-col span="12" >
-      1222
-      <y-icon class="y-icon y-icon-redo" type="plus" color="red" size="16"></y-icon>
-      <y-icon class="y-icon y-icon-redo" type="search" color="blue" size="32"></y-icon>
-      <y-icon class="y-icon y-icon-redo" type="redo" color="red" size="16"></y-icon>
-    </y-col>
-  </y-row>
 
-  <y-row>
-    <y-col sm="12" md="3" offset="2">
-      <y-button type="primary" size="medium" @click="load">
-        button
-      </y-button>
-      <y-link href="https://vuejs.org/" target="_blank" type="primary">
-        <img src="./assets/vue.svg" class="logo vue like likes ads" alt="Vue logo" />
-      </y-link>
-    </y-col>
-  </y-row> -->
+  <div @click="onPayment">
+    <p>发起付款</p>
+  </div>
+
 </div>
 </template>
 <script setup>
 import { inject, ref, toRefs } from 'vue'
 
-
-const useLoading = inject('useLoading')
-const useMessage = inject('useMessage')
+const usePayment = inject('usePayment')
 const useDialog = inject('useDialog')
+const onPayment = ()=>{
+  usePayment({
+    ak:'123456ak',
+    order:{
+      seller:'1234156'
+    }
+  }).pay().then(res=>{
+    console.log(res)
+  }).catch(e=>{
+    console.log(e)
+  })
+  console.log('usePayment',usePayment())
+}
 const copy = ()=>{
   let x = document.createElement('div')
   return x
