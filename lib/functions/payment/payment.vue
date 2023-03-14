@@ -1,7 +1,7 @@
 <template>
   <transition>
     <div class="y-payment" v-show="show">
-      <iframe src="http://127.0.0.1:5174/payment.html" ref="iframe"></iframe>
+      <iframe src="https://open.youloge.com/payment" ref="iframe"></iframe>
     </div>
   </transition>
 </template>
@@ -10,14 +10,14 @@ export default { name:'yPayment',inheritAttrs:false}
 </script>
 <script setup>
 import { onMounted, reactive,toRefs } from 'vue'
-const props = defineProps({ ak:String,order:Object,close:Boolean,onCallback:Function })
+const props = defineProps({ ukey:String,local:String,money:Number,close:Boolean,onCallback:Function })
 console.log('props',props)
 const state = reactive({
   src:'//open.youloge.com',iframe:null,show:false
 })
 onMounted(()=>{
-  const {ak,close,order} = props,{src,iframe} = state;state.show = true;
-  iframe.onload = ()=>iframe.contentWindow.postMessage({ak:ak,name:'youloge.payment',close:close,order:order}, "*");
+  const {ukey,close,local,money} = props,{src,iframe} = state;state.show = true;
+  iframe.onload = ()=>iframe.contentWindow.postMessage({ukey:ukey,name:'youloge.payment',close:close,local:local,money:money}, "*");
   window.addEventListener('message',event=>{
     let {origin,data} = event,{emit} = data;
     console.log(event);

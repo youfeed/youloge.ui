@@ -2,6 +2,8 @@
 
 ### 更新日志
 
+- 1.0.0 增加`usePayment`组件，用于支付请求
+- 0.2.9 增加`v-cloak` 匹配vue渲染
 - 0.2.8 更新配置参数`ukey`,使其与`youloge.sso`,`youloge.payment`等组件联动
 - 0.2.7 新增`v-copy`指令,支持`函数`,`字符串`,`HTML` 暂不支持图片
 - 0.2.6 新增`useDialog`组件 支持`alert`,`confirm`,`prompt` 三种模式

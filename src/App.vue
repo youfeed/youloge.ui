@@ -24,10 +24,9 @@ const usePayment = inject('usePayment')
 const useDialog = inject('useDialog')
 const onPayment = ()=>{
   usePayment({
-    ak:'123456ak',
-    order:{
-      seller:'1234156'
-    }
+    ukey:'TKoLtLJatVyqbbNWQFb_yMdoFzoWx40b9I7JzUYwRORqiHB7MxNdfqpN8hnSsx3hdbThUbauq0M60DNkZQZDrQ==',
+    local:'888974',
+    money:0.01
   }).pay().then(res=>{
     console.log(res)
   }).catch(e=>{

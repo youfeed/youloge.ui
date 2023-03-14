@@ -6,7 +6,7 @@ import App from './App.vue'
 import youloge from '../lib/index.js'
 const app = createApp(App)
 app.use(youloge,{
-  'ak':'123456',
+  'ukey':'ukey...',
   'font-size':'12px',
   'APIURL':'https://api.youloge.com/',
   'VIPURL':'https://vip.youloge.com/',
