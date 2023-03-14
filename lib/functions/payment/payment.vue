@@ -20,9 +20,7 @@ onMounted(()=>{
   iframe.onload = ()=>iframe.contentWindow.postMessage({ukey:ukey,name:'youloge.payment',close:close,local:local,money:money}, "*");
   window.addEventListener('message',event=>{
     let {origin,data} = event,{emit} = data;
-    console.log(event);
-    // origin.includes(src) && 
-    props.onCallback({emit:emit,data:data.data})
+    origin.includes(src) && props.onCallback({emit:emit,data:data.data})
   });
 })
 const {iframe,show,src} = toRefs(state)
