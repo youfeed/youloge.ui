@@ -39,7 +39,12 @@ const onMessage = ()=>{
   
 }
 const onFetch = ()=>{
-  useFetch({mask:true}).api()
+  console.log('onFetch')
+  useFetch({mask:true}).api().then(res=>{
+    console.log('res',res)
+  }).catch(err=>{
+    console.log('err',err)
+  })
 }
 const onPayment = ()=>{
   usePayment({

@@ -17,6 +17,7 @@ createApp(App).use(youloge,{
 
 ### 更新日志
 
+- 1.2.0 优化`useFetch` 增加`api,vip,json,text,blob,buffer`并纳入鉴权与`ukey`配置项
 - 1.1.7 增加`useFetch`返回值为`err == -1`登录过期处理
 - 1.1.4 优化`postmessage` 通信的通过性
 - 1.0.7 优化`useMessage` 和对应style
