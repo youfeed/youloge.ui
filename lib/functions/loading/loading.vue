@@ -20,7 +20,6 @@ const state = reactive({
   show:false,
 })
 const toggle = ()=>{
-  console.log('toggle')
   state.show = !state.show
 }
 defineExpose({toggle})
@@ -39,6 +38,7 @@ const {show} = toRefs(state)
   z-index: 99999;
   flex-direction: column;
   background: #ededed30;
+  user-select: none;
 }
 .loading {
   width: 30px;
@@ -47,6 +47,7 @@ const {show} = toRefs(state)
   border-top-color: transparent;
   border-radius: 100%;
   animation: circle infinite 0.75s linear;
+  margin-top: -20vh;
 }
 @keyframes circle {
   0% {

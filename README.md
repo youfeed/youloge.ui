@@ -1,7 +1,26 @@
 # 这是一个Youloge.com 自用项目 欢迎PR [主仓库]
 
+### [💡 ⚡️ 🛠️ 📦 🔩 🔑](https://youfeed.github.io/sso) - 开放文档
+
+> 建议直接引入CDN 即可使用 `32.96 kB │ gzip: 11.52 kB`
+
+> `https://unpkg.com/youloge`或者`https://cdn.jsdelivr.net/npm/youloge`
+
+``` js
+createApp(App).use(youloge,{
+  ukey:'', // 建议填写 可以让`v-login` `usePayment` 权限指令自动注入免初始化
+  APIURL:'',
+  VIPURL:'',
+  fontsize:'12px'
+}).mount('#app')
+```
+
 ### 更新日志
 
+- 1.1.7 增加`useFetch`返回值为`err == -1`登录过期处理
+- 1.1.4 优化`postmessage` 通信的通过性
+- 1.0.7 优化`useMessage` 和对应style
+- 1.0.4 优化`localStorage`与`sessionStorage`的作用名
 - 1.0.0 增加`usePayment`组件，用于支付请求
 - 0.2.9 增加`v-cloak` 匹配vue渲染
 - 0.2.8 更新配置参数`ukey`,使其与`youloge.sso`,`youloge.payment`等组件联动

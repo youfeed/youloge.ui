@@ -67,29 +67,21 @@ const dropdown = computed(()=>[
 ])
 
 onMounted(()=>{
-  let {profile} = state
-  let local =  localStorage.getItem('profile') || '{}'
-  // console.log(local)
-  let xx = Object.assign(profile,JSON.parse(local)) 
-  // location.href
-  // console.log('233',location.href)
+  state.profile = Object.assign(state.profile,JSON.parse(localStorage.getItem('youloge') || '{}')) 
 })
 // 退出登录
 const onExit = ()=>{
-  localStorage.clear()
+  localStorage.removeItem('youloge')
 }
 // 登录状态才触发
 const onProfile = (el)=>{
   state.dropdown = true
-  // console.log('233333',el,data.ref)
   setTimeout(()=>{
     document.addEventListener('click',(e)=>{
       state.dropdown = false
     },{once:true})
   },200)
 }
-
-
 const {aria,profile} = toRefs(state)
 </script>
 <style lang="scss">

@@ -1,7 +1,7 @@
 <template>
   <transition>
     <div class="y-payment" v-show="show">
-      <iframe src="https://open.youloge.com/payment" ref="iframe"></iframe>
+      <iframe :src="src+'/payment'+hash" ref="iframe"></iframe>
     </div>
   </transition>
 </template>
@@ -13,17 +13,23 @@ import { onMounted, reactive,toRefs } from 'vue'
 const props = defineProps({ ukey:String,local:String,money:Number,close:Boolean,onCallback:Function })
 console.log('props',props)
 const state = reactive({
-  src:'//open.youloge.com',iframe:null,show:false
+  hash:`#${Math.random().toString(32)}`,
+  src:'https://open.youloge.com',
+  name:'youloge.payment',
+  iframe:null,
+  show:false
 })
 onMounted(()=>{
-  const {ukey,close,local,money} = props,{src,iframe} = state;state.show = true;
-  iframe.onload = ()=>iframe.contentWindow.postMessage({ukey:ukey,name:'youloge.payment',close:close,local:local,money:money}, "*");
-  window.addEventListener('message',event=>{
-    let {origin,data} = event,{emit} = data;
-    origin.includes(src) && props.onCallback({emit:emit,data:data.data})
-  });
+  const {ukey,close,local,money} = props;state.show = true;
+  state.iframe.onload = ()=>state.iframe.contentWindow.postMessage({ukey:ukey,name:state.name,hash:state.hash,close:close,local:local,money:money}, state.src);
+  window.onmessage = event=>{
+    let {origin,data} = event,{emit,name,hash} = data;
+    if(origin == state.src && hash == state.hash && name == state.name){
+      props.onCallback({emit:emit,data:data.data})
+    }
+  }
 })
-const {iframe,show,src} = toRefs(state)
+const {src,hash,show,iframe} = toRefs(state)
 </script>
 <style lang="scss">
 .y-payment{

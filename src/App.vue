@@ -15,6 +15,13 @@
     <p>发起付款</p>
   </div>
 
+  <div @click="onFetch">
+    <p>api请求 带mask</p>
+  </div>
+  <div @click="onMessage">
+    <p>useMessage 弹窗</p>
+  </div>
+  
 </div>
 </template>
 <script setup>
@@ -22,15 +29,27 @@ import { inject, ref, toRefs } from 'vue'
 
 const usePayment = inject('usePayment')
 const useDialog = inject('useDialog')
+const useFetch = inject('useFetch')
+const useMessage = inject('useMessage')
+
+const onMessage = ()=>{
+  console.log(666,useMessage())
+  useMessage().success(6545646)
+  useMessage().warning('warning')
+  
+}
+const onFetch = ()=>{
+  useFetch({mask:true}).api()
+}
 const onPayment = ()=>{
   usePayment({
     ukey:'TKoLtLJatVyqbbNWQFb_yMdoFzoWx40b9I7JzUYwRORqiHB7MxNdfqpN8hnSsx3hdbThUbauq0M60DNkZQZDrQ==',
     local:'888974',
     money:0.01
   }).pay().then(res=>{
-    console.log(res)
+    console.log(0,res)
   }).catch(e=>{
-    console.log(e)
+    console.log(1,e)
   })
   console.log('usePayment',usePayment())
 }

@@ -1,8 +1,8 @@
 <template>
-  <TransitionGroup :duration="300" tag="div">
-    <div v-for="(item,index) in list" :key="index" class="y-message">
-      <div :class="[`y-message-${item.type}`]">
-        {{ item.content }}
+  <TransitionGroup duration="300" tag="div">
+    <div v-for="(item,index) in list" :key="index" :class="['y-message',`y-message-${item.type}`]" @click="onClose(item)">
+      <div>
+        {{ item.text }}
       </div>
     </div>
   </TransitionGroup>
@@ -12,35 +12,51 @@ export default { name:'yMessage'}
 </script>
 <script setup>
 import { reactive, toRefs } from 'vue'
-const props = defineProps({
-  type:{type:String,default:'success'},
-  duration:{type:Number,default:3000},
-})
 const state = reactive({
   list:[]
 })
-console.log(props)
-const onPush = (config)=>{
-  let uuid = Math.random().toString(32);config.uuid = uuid;
-  state.list.unshift(config)
-  console.log(1,config)
-  setTimeout(()=>{
-    let index = state.list.findIndex(item=>item.uuid==uuid)
-    state.list.splice(index,1)
-  },config.duration) 
+const onClose = (item)=>{
+  let {timer,uuid} = item;clearTimeout(timer);
+  let index = state.list.findIndex(item=>item.uuid==uuid)
+  state.list.splice(index,1)
 }
-const {list} = toRefs(state)
-defineExpose({onPush})
+const onPush = (config)=>{
+  config.uuid = Math.random().toString(32);
+  config.timer = setTimeout(()=>{
+    let index = state.list.findIndex(item=>item.uuid==config.uuid)
+    state.list.splice(index,1)
+  },config.duration)
+  state.list.unshift(config)
+}
+const {list} = toRefs(state);
+defineExpose({onPush});
 </script>
 <style lang="scss">
 .y-message-container{
-  position: sticky;
-  top: 0;
-  right: 0;
-  margin: 0 auto;
-  text-align: center;
-  max-width: 360px;
+  user-select: none;
+  position: fixed;
+  right: 10px;
+  top: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  min-width: 80px;
+  .y-message{
+    cursor: pointer;
+    width: 100%;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 5px;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 0 2px 1px #e1e1e1;
+  }
 }
+
+
 .v-enter-active,
 .v-leave-active {
   transition: all 0.5s ease;
@@ -50,5 +66,4 @@ defineExpose({onPush})
   opacity: 0;
   transform: translateX(30px);
 }
-
 </style>

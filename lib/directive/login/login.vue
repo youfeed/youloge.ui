@@ -1,7 +1,7 @@
 <template>
   <transition>
     <div class="y-login" v-show="show">
-      <iframe :src="src" ref="iframe"></iframe>
+      <iframe :src="src+'/sso'+hash" ref="iframe"></iframe>
     </div>
   </transition>
 </template>
@@ -11,32 +11,29 @@ export default { name:'yLogin' }
 </script>
 <script setup>
 import { computed, onMounted, reactive, toRefs } from 'vue'
-const props = defineProps({ onClose:Function,onSuccess:Function })
+const props = defineProps({ onCallback:Function })
 const state = reactive({
-  src:'//open.youloge.com/sso',
+  hash:`#${Math.random().toString(32)}`,
+  src:'https://open.youloge.com',
+  name:'youloge.sso',
   iframe:'',
-  show:false
+  show:false,
 })
 onMounted(()=>{
-  const {ukey} = JSON.parse(sessionStorage.getItem('youloge'));state.show = true;
-  const {iframe} = state;
-  iframe.onload = ()=>iframe.contentWindow.postMessage({ukey:ukey,name:'youloge.sso'}, "*");
+  state.show = true;
+  const {ukey} = JSON.parse(sessionStorage.getItem('youloge'));
+  state.iframe.onload = ()=>state.iframe.contentWindow.postMessage({ukey:ukey,name:state.name,hash:state.hash,close:true}, state.src);
 
-  window.addEventListener('message',event=>{
-    let {origin,data} = event,{emit} = data;
-    if(origin.includes('open.youloge.com')){
-      emit === 'success' ? [
-        props.onSuccess(data),
-        localStorage.setItem('profile',JSON.stringify(data.data)),
-        Object.entries(data.data).forEach(([key,val])=>{
-          localStorage.setItem(key,val)
-        })
-      ] : props.onClose(data);
+  window.onmessage = (event)=>{
+    let {origin,data} = event,{emit,name,hash} = data;
+    console.log('login',event)
+    if(origin == state.src && hash==state.hash && name == state.name){
+      props.onCallback(emit);
+      emit == 'success' && localStorage.setItem('youloge',JSON.stringify(data.data));
     }
-  });
+  }
 });
-
-const {iframe,show,src} = toRefs(state)
+const {src,hash,show,iframe} = toRefs(state)
 </script>
 <style lang="scss">
 .y-login{
@@ -51,14 +48,16 @@ const {iframe,show,src} = toRefs(state)
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #0c0c0c6e;
+  background: #0c0c0c8f;
+  
   iframe{
     outline: 0;
     background: #fff;
-    width: 360px;
-    height: 350px;
+    width: 350px;
+    height: 380px;
     border-radius: 5px;
     border: 0;
+    margin-top: -30vh;
   }
 }
 </style>
