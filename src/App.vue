@@ -2,26 +2,20 @@
 <template>
 <div>
   <y-header aria="网盘"></y-header>
-  <div @click="load">
-    加载load
-    <!-- <y-video uuid="m2333"></y-video> -->
+
+  <div class="test">
+    <div><button v-login="onLogin">触发登录</button></div>
+    <div><button @click="load">加载load</button></div>
+    <div><button v-copy="copy">复制内容</button></div>
+    <div><button @click="onPayment">发起付款</button></div>
+
+    <div>
+      <button @click="onFetch('api')">网络请求 - api</button>
+      <button @click="onFetch('vip')">网络请求 - vip</button>
+    </div>
+    <div><button @click="onMessage">useMessage 弹窗</button></div>
   </div>
 
-  <div v-copy="copy">
-    <p>复制内容</p>
-  </div>
-
-  <div @click="onPayment">
-    <p>发起付款</p>
-  </div>
-
-  <div @click="onFetch">
-    <p>api请求 带mask</p>
-  </div>
-  <div @click="onMessage">
-    <p>useMessage 弹窗</p>
-  </div>
-  
 </div>
 </template>
 <script setup>
@@ -38,13 +32,29 @@ const onMessage = ()=>{
   useMessage().warning('warning')
   
 }
-const onFetch = ()=>{
-  console.log('onFetch')
-  useFetch({mask:true}).api().then(res=>{
-    console.log('res',res)
-  }).catch(err=>{
-    console.log('err',err)
-  })
+const onLogin = ()=>{
+  useMessage().success('登录成功')
+}
+
+const onFetch = (type)=>{
+  switch (type) {
+    case 'api':
+      useFetch({mask:true}).api().then(res=>{
+        console.log('api res',res)
+      }).catch(err=>{
+        console.log('api err',err)
+      })
+      break;
+    case 'vip':
+      useFetch({mask:true}).vip().then(res=>{
+        console.log('vip res',res)
+      }).catch(err=>{
+        console.log('vip err',err)
+      })
+      break;
+    default:
+      break;
+  }
 }
 const onPayment = ()=>{
   usePayment({
@@ -81,5 +91,12 @@ const {draft} = toRefs(props)
 </script>
 
 <style lang="scss">
+.test{
+  display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 10px;
+}
 </style>
  

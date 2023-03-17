@@ -1,7 +1,7 @@
 <template>
   <transition>
     <div class="y-payment" v-show="show">
-      <iframe :src="src+'/payment'+hash" ref="iframe"></iframe>
+      <iframe :src="target+'/payment'+hash" ref="iframe"></iframe>
     </div>
   </transition>
 </template>
@@ -14,22 +14,26 @@ const props = defineProps({ ukey:String,local:String,money:Number,close:Boolean,
 console.log('props',props)
 const state = reactive({
   hash:`#${Math.random().toString(32)}`,
-  src:'https://open.youloge.com',
+  target:'https://open.youloge.com',
   name:'youloge.payment',
   iframe:null,
   show:false
 })
 onMounted(()=>{
-  const {ukey,close,local,money} = props;state.show = true;
-  state.iframe.onload = ()=>state.iframe.contentWindow.postMessage({ukey:ukey,name:state.name,hash:state.hash,close:close,local:local,money:money}, state.src);
-  window.onmessage = event=>{
-    let {origin,data} = event,{emit,name,hash} = data;
-    if(origin == state.src && hash == state.hash && name == state.name){
-      props.onCallback({emit:emit,data:data.data})
+  const {ukey,close,local,money} = props;
+  const {hash,target,name} = state;
+  window.onmessage = ({origin,data,source})=>{
+    let {method,params} = data[hash];
+    console.log('login.vue',origin,data,method,params)
+    if(origin == target && method){
+      let work = {
+        'ready':()=>(state.show = true,source.postMessage({[hash]:{method:'init',params:{ukey:ukey,name:name,close:close,local:local,money:money}}},target)),
+      };
+      work[method] ? work[method]() : props.onCallback(method,params)
     }
-  }
+  };
 })
-const {src,hash,show,iframe} = toRefs(state)
+const {target,hash,show,iframe} = toRefs(state)
 </script>
 <style lang="scss">
 .y-payment{

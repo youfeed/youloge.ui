@@ -1,7 +1,7 @@
 <template>
   <transition>
     <div class="y-login" v-show="show">
-      <iframe :src="src+'/sso'+hash" ref="iframe"></iframe>
+      <iframe :src="target+'/sso.html'+hash" ref="iframe"></iframe>
     </div>
   </transition>
 </template>
@@ -10,30 +10,35 @@
 export default { name:'yLogin' }
 </script>
 <script setup>
-import { computed, onMounted, reactive, toRefs } from 'vue'
-const props = defineProps({ onCallback:Function })
+import { onMounted, reactive, toRefs } from 'vue'
+const props = defineProps({ ukey:String,close:Boolean,onCallback:Function })
 const state = reactive({
   hash:`#${Math.random().toString(32)}`,
-  src:'https://open.youloge.com',
+  target:'https://open.youloge.com',
+  // target:'http://127.0.0.1:5173',
   name:'youloge.sso',
   iframe:'',
   show:false,
 })
-onMounted(()=>{
-  state.show = true;
-  const {ukey} = JSON.parse(sessionStorage.getItem('youloge'));
-  state.iframe.onload = ()=>state.iframe.contentWindow.postMessage({ukey:ukey,name:state.name,hash:state.hash,close:true}, state.src);
 
-  window.onmessage = (event)=>{
-    let {origin,data} = event,{emit,name,hash} = data;
-    console.log('login',event)
-    if(origin == state.src && hash==state.hash && name == state.name){
-      props.onCallback(emit);
-      emit == 'success' && localStorage.setItem('youloge',JSON.stringify(data.data));
+onMounted(()=>{
+  const {ukey,close} = props,{iframe,target,hash,name} = state
+  window.onmessage = ({origin,data,source})=>{
+    let {method,params} = data[hash];
+    console.log('login.vue',origin,data,method,params)
+    if(origin == target && method){
+      let work = {
+        'ready':()=>(state.show = true,source.postMessage({[hash]:{method:'init',params:{ukey:ukey,name:name,close:close}}},target)),
+        'success':()=>{
+          localStorage.setItem('youloge',JSON.stringify(params));
+          props.onCallback(method);
+        }
+      };
+      work[method] ? work[method]() : props.onCallback(method)
     }
   }
 });
-const {src,hash,show,iframe} = toRefs(state)
+const {target,hash,show,iframe} = toRefs(state)
 </script>
 <style lang="scss">
 .y-login{
