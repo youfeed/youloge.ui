@@ -1,13 +1,15 @@
 <template>
-  <component :is="Component"><slot/></component>
+  <div class="container">描述：这是一个嵌套的Vue实例/组件。其中包含了一个嵌</div>
+  <KeepAlive>
+    <component :is="Component"><slot/></component>
+  </KeepAlive>
 </template>
 
 <script>
-import { computed, provide, shallowRef } from 'vue'
-import { render } from 'vue';
 export default { name:'rView'}
 </script>
 <script setup>
+import { computed, provide, shallowRef } from 'vue'
 const props = defineProps({
   name:{
     type:String,

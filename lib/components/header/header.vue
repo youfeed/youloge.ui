@@ -92,6 +92,13 @@ const {aria,profile} = toRefs(state)
   display: flex;
   align-items: center;
   justify-content: space-between;
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 9999;
+  backdrop-filter: saturate(50%) blur(4px);
+  background-image: radial-gradient(transparent 1px,#fff 1px);
+  background-size: 4px 4px;
   .y-logo{
     display: flex;
     font-size: 18px;
@@ -109,9 +116,11 @@ const {aria,profile} = toRefs(state)
     border: 1px solid #999;
     padding: 4px;
     border-radius: 2px;
+    margin: 0 10px;
     input{
       border: 0;
       outline: 0;
+      background: transparent;
     }
     button{
       outline: 0;

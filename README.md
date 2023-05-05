@@ -17,6 +17,7 @@ createApp(App).use(youloge,{
 
 ### 更新日志
 
+- 1.2.2 修复关于`open.youloge.com`的小bug
 - 1.2.1 更新`v-login`,`usePayment` 减少与独立库`js umd`差异
 - 1.2.0 优化`useFetch` 增加`api,vip,json,text,blob,buffer`并纳入鉴权与`ukey`配置项
 - 1.1.7 增加`useFetch`返回值为`err == -1`登录过期处理
@@ -88,6 +89,6 @@ project
 - [前端小野森森-1](https://space.bilibili.com/378372969)
 - [MZL 轻量级Vue3组件库](https://mzlui.codeym.com/#/)
 - [ArcoDesign 今日头条](https://arco.design/)
-- [Vant 有赞UI库*](https://vant3.uihtm.com/#/zh-CN)
+- [Vant 有赞UI库*](https://youzan.github.io/vant-weapp/#/home)
 
 在找vue admin 时候看到 [ArcoDesign 今日头条](https://arco.design/) 觉得很不错，所以将之前用`vue-cli` 搭建学习的ui组件库，转移到`vite`来，折腾了一整天，刚开始我在哪里狂整`rollup.config.js` 各种缺失报错，其实 `vite build lib`直接可以用的，`scss` 以及 `css 变量`。

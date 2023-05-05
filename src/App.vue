@@ -3,6 +3,8 @@
 <div>
   <y-header aria="网盘"></y-header>
 
+  <r-view></r-view>
+  <r-link>2333</r-link>
   <div class="test">
     <div><button v-login="onLogin">触发登录</button></div>
     <div><button @click="load">加载load</button></div>
@@ -14,6 +16,7 @@
       <button @click="onFetch('vip')">网络请求 - vip</button>
     </div>
     <div><button @click="onMessage">useMessage 弹窗</button></div>
+    <div><button @click="onPlus">usePlus sso 弹窗</button></div>
   </div>
 
 </div>
@@ -25,7 +28,11 @@ const usePayment = inject('usePayment')
 const useDialog = inject('useDialog')
 const useFetch = inject('useFetch')
 const useMessage = inject('useMessage')
-
+const usePlus = inject('usePlus')
+const onPlus = ()=>{
+  console.log(0,usePlus())
+  usePlus().sso()
+}
 const onMessage = ()=>{
   console.log(666,useMessage())
   useMessage().success(6545646)

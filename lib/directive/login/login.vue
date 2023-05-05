@@ -1,7 +1,7 @@
 <template>
   <transition>
     <div class="y-login" v-show="show">
-      <iframe :src="target+'/sso.html'+hash" ref="iframe"></iframe>
+      <iframe :src="target+'/sso'+hash" ref="iframe"></iframe>
     </div>
   </transition>
 </template>
@@ -53,16 +53,16 @@ const {target,hash,show,iframe} = toRefs(state)
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #0c0c0c8f;
-  
+  background: #00000073;
+  backdrop-filter: blur(10px);
   iframe{
     outline: 0;
-    background: #fff;
+    // background: #fff;
     width: 350px;
     height: 380px;
     border-radius: 5px;
     border: 0;
-    margin-top: -30vh;
+    margin-top: -20vh;
   }
 }
 </style>

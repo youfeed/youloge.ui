@@ -1,7 +1,7 @@
 {
   "name": "youloge",
   "private": false,
-  "version": "1.2.1",
+  "version": "1.2.4",
   "author": "Youfeed",
   "license": "MIT",
   "homepage": "https://youfeed.github.com",
@@ -40,8 +40,8 @@
     "vue": "^3.2.45"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^4.0.0",
-    "vite": "^4.1.0",
-    "sass": "^1.56.1"
+    "@vitejs/plugin-vue": "^4.1.0",
+    "sass": "^1.59.3",
+    "vite": "^4.2.0"
   }
 }
