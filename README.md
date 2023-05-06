@@ -17,6 +17,7 @@ createApp(App).use(youloge,{
 
 ### 更新日志
 
+- 1.2.5 去除`usePayment useSso`等方法改为`usePlus`*
 - 1.2.2 修复关于`open.youloge.com`的小bug
 - 1.2.1 更新`v-login`,`usePayment` 减少与独立库`js umd`差异
 - 1.2.0 优化`useFetch` 增加`api,vip,json,text,blob,buffer`并纳入鉴权与`ukey`配置项

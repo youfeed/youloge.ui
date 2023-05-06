@@ -31,7 +31,16 @@ const useMessage = inject('useMessage')
 const usePlus = inject('usePlus')
 const onPlus = ()=>{
   console.log(0,usePlus())
-  usePlus().sso()
+  let sso = usePlus().sso({
+    close:true
+  }).listener(data=>{
+    console.log(3,data)
+  }).then(res=>{
+    console.log(1,res)
+  }).catch(err=>{
+    console.log(2,err)
+  })
+  console.log(sso)
 }
 const onMessage = ()=>{
   console.log(666,useMessage())
