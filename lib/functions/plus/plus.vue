@@ -1,7 +1,7 @@
 <template>
   <transition>
     <div class="y-plus" v-show="show">
-      <iframe :src="'https://open.youloge.com/'+props.path+props.hash"></iframe>
+      <iframe :src="'https://open.youloge.com/'+props.path+props.hash" :style="props?.style"></iframe>
     </div>
   </transition>
 </template>
@@ -10,7 +10,7 @@ export default { name:'yPlus',inheritAttrs:false}
 </script>
 <script setup>
 import { onMounted, reactive,toRefs } from 'vue'
-const props = defineProps({ hash:String,path:String,width:String,height:String })
+const props = defineProps({ hash:String,path:String,style:String })
 console.log('props',props)
 const state = reactive({
   show:false
@@ -33,15 +33,16 @@ const {show} = toRefs(state)
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #00000073;
+  background: #00000021;
   backdrop-filter: blur(10px);
+  pointer-events: unset;
   iframe{
     outline: 0;
     width: 360px;
     height: 350px;
     border-radius: 5px;
     border: 0;
-    margin-top: -20vh;
+    margin-top: -20%;
   }
 }
 </style>

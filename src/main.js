@@ -6,8 +6,8 @@ import App from './App.vue'
 import youloge from '../lib/index.js'
 const app = createApp(App)
 app.use(youloge,{
-  'ukey':'TKoLtLJatVyqbbNWQFb_yMdoFzoWx40b9I7JzUYwRORqiHB7MxNdfqpN8hnSsx3hdbThUbauq0M60DNkZQZDrQ==',
+  'ukey':'PEc8/t7+w5yfcl2lRr7N5GSQ/1seZLYR1tRU2iSoWJclRNPJbpRsz/YCwYEE5WqrPaCav7UzH4tCurwoMFlvyaFP9f2p7eBgmm748WShzzGooQGTxwl7Eb7TkJrg/Ujf',
   'font-size':'12px',
-  'APIURL':'https://api.youloge.com/',
-  'VIPURL':'https://vip.youloge.com/',
+  'APIURL':'https://api.youloge.com',
+  'VIPURL':'https://vip.youloge.com',
 }).mount('#app')

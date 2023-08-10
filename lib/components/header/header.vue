@@ -117,17 +117,30 @@ const {aria,profile} = toRefs(state)
     padding: 4px;
     border-radius: 2px;
     margin: 0 10px;
+    color: #222;
+    &:focus-within{
+      border: 1px solid #6a8fe0;
+      border-radius: 4px;
+      button{
+        color: #6a8fe0;
+      }
+    }
     input{
       border: 0;
       outline: 0;
+      width: calc(100% - 26px);
       background: transparent;
     }
+
     button{
       outline: 0;
       background: transparent;
       border: 0;
       color: #233;
     }
+  }
+  input[type="search"]::-webkit-search-cancel-button {
+    -webkit-appearance: none !important;
   }
   .y-profile-avatar{
     width: 40px;

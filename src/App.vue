@@ -3,8 +3,21 @@
 <div>
   <y-header aria="网盘"></y-header>
 
-  <r-view></r-view>
-  <r-link>2333</r-link>
+  <div>-----------rgba-----------</div>
+  <div><y-rgba value="12.85"></y-rgba></div>
+  <div>-----------tag-----------</div>
+  <div>
+    <y-tag type="success" size="small" label="新闻（New）"></y-tag>
+  </div>
+  <div>-----------label-----------</div>
+  <y-label :data="label_data" @onChange="label_change">v</y-label>
+  <div>-----------disscus-----------</div>
+  <y-discuss uuid="uuid"></y-discuss>
+  <div>-----------rich-----------</div>
+  <y-rich :data="rich_data"></y-rich>
+  <div>-----------tag-----------</div>
+  <r-view>886</r-view>
+  <XView>2333</XView>
   <div class="test">
     <div><button v-login="onLogin">触发登录</button></div>
     <div><button @click="load">加载load</button></div>
@@ -17,18 +30,32 @@
     </div>
     <div><button @click="onMessage">useMessage 弹窗</button></div>
     <div><button @click="onPlus">usePlus sso 弹窗</button></div>
+    <div><button @click="onLabel">换一组label的data</button></div>
   </div>
 
 </div>
 </template>
 <script setup>
-import { inject, ref, toRefs } from 'vue'
+import { inject, reactive, ref, toRefs } from 'vue'
 
 const usePayment = inject('usePayment')
 const useDialog = inject('useDialog')
 const useFetch = inject('useFetch')
 const useMessage = inject('useMessage')
 const usePlus = inject('usePlus')
+// ----------
+const state = reactive({
+  label_data:['潇洒','a安抚','个','是德国','啊是服务'],
+  rich_data:[{"type":"paragraph","children":[{"text":""}]},{"type":"list-item","children":[{"text":"saf"}],"ordered":true},{"type":"list-item","ordered":true,"children":[{"text":"sag"}]},{"type":"list-item","ordered":true,"children":[{"text":"sg "}]},{"type":"list-item","ordered":true,"children":[{"text":"sag"}]}]
+})
+const label_change = (e)=>{
+  console.log('label_change',e)
+}
+const onLabel = ()=>{
+  state.label_data = Array.from({length:6},v=>Math.random().toString(32));
+}
+// ----------
+const {label_data,rich_data} = toRefs(state)
 const onPlus = ()=>{
   console.log(0,usePlus())
   let sso = usePlus().sso({

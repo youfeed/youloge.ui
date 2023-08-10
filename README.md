@@ -17,6 +17,11 @@ createApp(App).use(youloge,{
 
 ### 更新日志
 
+- 1.3.9 新增`y-rgba`组件，用于展示Youloge虚拟货币与实际货币的预计换算结果
+- 1.3.5 优化`v-login`指令，共享`usePlus`组件
+- 1.3.2 新增`y-discuss`组件，展示评论
+- 1.3.2 新增`y-label`组件，展示标签
+- 1.2.6 更改`useFetch`增加`path`属性
 - 1.2.5 去除`usePayment useSso`等方法改为`usePlus`*
 - 1.2.2 修复关于`open.youloge.com`的小bug
 - 1.2.1 更新`v-login`,`usePayment` 减少与独立库`js umd`差异
