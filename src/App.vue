@@ -18,19 +18,32 @@
   <div>-----------tag-----------</div>
   <r-view>886</r-view>
   <XView>2333</XView>
+  <div>-----------dialog-----------</div>
+  <div>
+    <button @click="onDialog('alert')">dialog.alert</button>
+    <button @click="onDialog('confirm')">dialog.confirm</button>
+    <button @click="onDialog('prompt')">dialog.prompt</button>
+    <button @click="onDialog('password')">dialog.password</button>
+  </div>
   <div class="test">
+    <div v-ripple>
+      <div style="width: 300px; height: 150px; display: flex; align-items: center; justify-content: center; background: #333; color: #fff;"> useRipple 水波纹按下效果 </div>
+    </div>
     <div><button v-login="onLogin">触发登录</button></div>
     <div><button @click="load">加载load</button></div>
     <div><button v-copy="copy">复制内容</button></div>
     <div><button @click="onPayment">发起付款</button></div>
-
     <div>
       <button @click="onFetch('api')">网络请求 - api</button>
       <button @click="onFetch('vip')">网络请求 - vip</button>
     </div>
-    <div><button @click="onMessage">useMessage 弹窗</button></div>
-    <div><button @click="onPlus">usePlus sso 弹窗</button></div>
-    <div><button @click="onLabel">换一组label的data</button></div>
+    <div>
+      <button @click="onMessage">useMessage 弹窗</button>
+      <button @click="onPlus">usePlus sso 弹窗</button>
+      <button @click="onLabel">换一组label的data</button>
+    </div>
+    <div></div>
+    <div></div>
   </div>
 
 </div>
@@ -54,6 +67,35 @@ const label_change = (e)=>{
 const onLabel = ()=>{
   state.label_data = Array.from({length:6},v=>Math.random().toString(32));
 }
+//
+const onDialog = (type)=>{
+  // console.log(useDialog().alert())
+  const action = {
+    'alert':()=>{
+      useDialog('alert',{
+        title:'标题',
+        content:'内容'
+      })
+    },
+    'password':()=>{
+      useDialog('password',{
+        title:'请输入支付码',
+        // content:'请查看邮件(<small>支付码本次有效</small>)',
+        // 特殊  pattern type size
+        random:'ccc',
+        // 特殊
+        submit:'确认支付',
+        cancel:'取消',
+        // confirm:'s66'
+      },false).then(res=>{
+        console.log(res)
+      }).catch(e=>{
+        console.log(e)
+      })
+    }
+  }
+  action[type] ? action[type]() : console.log(`${type} error`);
+}
 // ----------
 const {label_data,rich_data} = toRefs(state)
 const onPlus = ()=>{
@@ -70,7 +112,11 @@ const onPlus = ()=>{
   console.log(sso)
 }
 const onMessage = ()=>{
-  console.log(666,useMessage())
+  let meg = Math.random().toString(32);
+  useMessage().info(meg)
+  useMessage().error(meg)
+  useMessage().warning(meg)
+  useMessage().success(meg)
   useMessage().success(6545646)
   useMessage().warning('warning')
   

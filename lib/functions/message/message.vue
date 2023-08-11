@@ -1,5 +1,5 @@
 <template>
-  <TransitionGroup duration="300" tag="div">
+  <TransitionGroup tag="div" mode="out-in">
     <div v-for="(item,index) in list" :key="index" :class="['y-message',`y-message-${item.type}`]" @click="onClose(item)">
       <div>
         {{ item.text }}
@@ -35,14 +35,14 @@ defineExpose({onPush});
 .y-message-container{
   user-select: none;
   position: fixed;
-  right: 10px;
-  top: 60px;
+  top: 65px;
+  left: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  min-width: 80px;
   .y-message{
+    transform: translate(-50%);
     cursor: pointer;
     width: 100%;
     background: #fff;
@@ -51,7 +51,7 @@ defineExpose({onPush});
     justify-content: center;
     margin: 5px;
     padding: 10px;
-    border-radius: 5px;
+    // border-radius: 5px;
     box-shadow: 0 0 2px 1px #e1e1e1;
   }
 }
@@ -59,11 +59,11 @@ defineExpose({onPush});
 
 .v-enter-active,
 .v-leave-active {
-  transition: all 0.5s ease;
+  transition: all 0.2s ease;
 }
 .v-enter-from,
 .v-leave-to {
-  opacity: 0;
+  opacity: 0.1;
   transform: translateX(30px);
 }
 </style>
