@@ -1,10 +1,10 @@
 {
   "name": "youloge",
   "private": false,
-  "version": "1.4.1",
+  "version": "1.4.7",
   "author": "Youfeed",
   "license": "MIT",
-  "homepage": "https://youfeed.github.com",
+  "homepage": "https://youfeed.github.io",
   "description": "youloge.com website dedicated UI library",
   "main": "dist/youloge.umd.js",
   "module": "dist/youloge.es.js",

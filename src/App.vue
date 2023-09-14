@@ -2,9 +2,11 @@
 <template>
 <div>
   <y-header aria="网盘"></y-header>
-
+  <HashView></HashView>
+  <hash-link href="hello/word">hello/word</hash-link>
+  <hash-link href="word/hello">word/hello</hash-link>
   <div>-----------rgba-----------</div>
-  <div><y-rgba value="12.85"></y-rgba></div>
+  <div><y-rgba value="1285"></y-rgba></div>
   <div>-----------tag-----------</div>
   <div>
     <y-tag type="success" size="small" label="新闻（New）"></y-tag>
@@ -112,17 +114,18 @@ const onPlus = ()=>{
   console.log(sso)
 }
 const onMessage = ()=>{
-  let meg = Math.random().toString(32);
-  useMessage().info(meg)
-  useMessage().error(meg)
-  useMessage().warning(meg)
-  useMessage().success(meg)
-  useMessage().success(6545646)
-  useMessage().warning('warning')
-  
+  let msg = Math.random().toString(32);
+
+  useMessage('success',`购物成功-${msg}=`)
+  // useMessage('info',{})
+  // useMessage('error',{})
+  // useMessage('warning',{})
+  // useMessage('warning',{})
+  // useMessage('notice',{})
+
 }
 const onLogin = ()=>{
-  useMessage().success('登录成功')
+  useMessage('success',{text:'登录成功'})
 }
 
 const onFetch = (type)=>{

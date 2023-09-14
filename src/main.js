@@ -10,4 +10,10 @@ app.use(youloge,{
   'font-size':'12px',
   'APIURL':'https://api.youloge.com',
   'VIPURL':'https://vip.youloge.com',
+  'route':{
+    route:[
+      'href':'hello/word',
+      'component':App
+    ]
+  }
 }).mount('#app')

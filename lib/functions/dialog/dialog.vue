@@ -2,7 +2,7 @@
   <transition>
     <div class="y-mask-flex" v-show="show" @click="onClose">
       <div class="y-dialog" ref="ref">
-        <form @submit.prevent="onSubmit">
+        <form @submit.prevent="onSubmit" @reset.prevent="onReset">
           <div class="y-dialog-head" v-if="props.params.title">
             <div class="y-dialog-title" v-html="props.params.title"></div>
           </div>
@@ -55,6 +55,9 @@ const state = reactive({
   show:false,
   value:''
 })
+const onReset = () =>{
+  console.log('onReset')
+}
 const onSubmit = ()=>{
   props.onCallback({emit:'success',data:{type:'submit',value:state.value}})
 }
