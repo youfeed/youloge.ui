@@ -16,7 +16,7 @@ createApp(App).use(youloge,{
 ```
 
 ### 更新日志
-
+- 1.4.8 新增`hashview`组件用于承接`hash文件路由功能`同于动态懒加载组件
 - 1.4.3 优化`useMessage`的调用方式，简化代码
 - 1.4.2 新增`v-ripple`水波纹组件，重构`useDialog`交互组件支持`password`验证码输入
 - 1.3.9 新增`y-rgba`组件，用于展示Youloge虚拟货币与实际货币的预计换算结果

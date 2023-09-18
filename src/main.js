@@ -3,17 +3,30 @@ import './style.css'
 import '../dist/index.css'
 import App from './App.vue'
 // import youloge from '../dist/youloge.es'
+import Layout from './components/Layout.vue'
 import youloge from '../lib/index.js'
 const app = createApp(App)
+// * 处理路由
+const modules = import.meta.glob(['/views/*.vue','/views/*/*.vue','/views/*/*/*.vue']);
+const routes = []
+for (const key in modules) {
+  const mod = await modules[key]();
+  const {name,icon} = mod.default;
+  routes.push({
+    name: name|| 'name',
+    path:key.replace(/^\/views|\.vue$/g, ''),
+    icon:icon || 'icon',
+    component:modules[key],
+  })
+}
+console.log('modules',modules,routes)
 app.use(youloge,{
+  'size':'12px',
   'ukey':'PEc8/t7+w5yfcl2lRr7N5GSQ/1seZLYR1tRU2iSoWJclRNPJbpRsz/YCwYEE5WqrPaCav7UzH4tCurwoMFlvyaFP9f2p7eBgmm748WShzzGooQGTxwl7Eb7TkJrg/Ujf',
-  'font-size':'12px',
   'APIURL':'https://api.youloge.com',
-  'VIPURL':'https://vip.youloge.com',
+  'VIPURL':'https://www.youloge.com',
   'route':{
-    route:[
-      'href':'hello/word',
-      'component':App
-    ]
+    layout:Layout,
+    routes:routes
   }
 }).mount('#app')

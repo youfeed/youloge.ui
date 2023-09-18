@@ -2,9 +2,11 @@
 <template>
 <div>
   <y-header aria="网盘"></y-header>
-  <HashView></HashView>
+  <hash-view></hash-view>
+
   <hash-link href="hello/word">hello/word</hash-link>
-  <hash-link href="word/hello">word/hello</hash-link>
+  <hash-link href="/wallet/index">word/hello</hash-link>
+  <a href="#/hello">hellohellohellohelloo</a>
   <div>-----------rgba-----------</div>
   <div><y-rgba value="1285"></y-rgba></div>
   <div>-----------tag-----------</div>
