@@ -1,6 +1,6 @@
 import { createApp } from 'vue'
-import './style.css'
-import '../dist/index.css'
+
+// import '../dist/index.css'
 import App from './App.vue'
 // import youloge from '../dist/youloge.es'
 import Layout from './components/Layout.vue'

@@ -1,9 +1,9 @@
 <template>
-  <header class="y-header">
-    <div class="y-logo">
-      <p>&#8801;  Youloge<sup>{{aria}}</sup></p>
+  <header class="y-header" f-c-b h-15 shadow-sm z-9999  pr-1 pl-1 sticky top-0 text-nowrap>
+    <div class="y-logo" flex font-size-5 font-bold c-dark-1 cursor-pointer>
+      <p>&#8801;  Youloge<sup font-size-2 c-dark-3>{{aria}}</sup></p>
     </div>
-    <div class="y-search">
+    <div class="y-search" p-1 hover-border-dotted>
       <form action="/search">
         <input type="search" name="q"/>
         <button type="submit">搜索</button>
@@ -86,35 +86,12 @@ const {aria,profile} = toRefs(state)
 </script>
 <style lang="scss">
 .y-header{
-  height: 60px;
-  box-shadow: 2px 0px 1px #999;
-  padding: 0 5px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  white-space: nowrap;
-  position: sticky;
-  top: 0;
-  z-index: 9999;
   backdrop-filter: saturate(50%) blur(4px);
   background-image: radial-gradient(transparent 1px,#fff 1px);
   background-size: 4px 4px;
-  .y-logo{
-    display: flex;
-    font-size: 18px;
-    font-weight: bold;
-    color: #333;
-    height: 100%;
-    line-height: 50px;
-    cursor: pointer;
-    sup{
-      font-size: 10px;
-      color: #999;
-    }
-  }
+
   .y-search{
     border: 1px solid #999;
-    padding: 4px;
     border-radius: 2px;
     margin: 0 10px;
     color: #222;

@@ -13,7 +13,7 @@
     type:String,
     size:String,
     icon:String,
-    text:Boolean,
+    text:Boolean, 
     link:Boolean,
     plain:Boolean,
     round:Boolean,

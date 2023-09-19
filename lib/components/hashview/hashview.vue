@@ -69,17 +69,21 @@ const {compkey,opener} = toRefs(state)
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 9999;
-  background: rgba(255, 255, 255, 0.9);
+  z-index: 99999;
+  background: #f2f2f2f2;
   .y-hash-capsule{
     position: fixed;
-    top: 20px;
-    right: 20px;
+    top: 15px;
+    right: 15px;
     display: flex;
-    background: #ddd;
+    background: #ddddddb5;
     border-radius: 20px;
     overflow: hidden;
     cursor: pointer;
+    z-index: 9999999999;
+    color: #222;
+    font-weight: bold;
+    box-shadow: 1px 1px 3px #333;
     div{
       padding: 10px;
       border: 0;
