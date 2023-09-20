@@ -1,15 +1,19 @@
 
 <template>
 <div>
-  <y-header aria="网盘"></y-header>
+  <y-header aria="网盘" v-ripple></y-header>
   <hash-view></hash-view>
 
-  <hash-link href="hello/word">hello/word</hash-link>
-  <hash-link href="/wallet/index">word/hello</hash-link>
   <a href="#/hello">hellohellohellohelloo</a>
   <div class="bg-red">-----------rgba-----------</div>
   <div><y-rgba value="1285"></y-rgba></div>
-  <div>-----------tag-----------</div>
+  <div>-----------ads-----------</div>
+  <y-ad></y-ad>
+  <div>-----------discsss2-----------</div>
+  <y-discuss></y-discuss>
+  <div>-----------discsss-----------</div>
+  <div>-----------discsss-----------</div>
+  <div>-----------discsss-----------</div>
   <button 
       bg="blue-400 hover:blue-500 dark:blue-500 dark:hover:blue-600"
       text="sm white"
@@ -20,17 +24,13 @@
       Button
   </button>
   <div>
-    <y-tag type="success" size="small" label="新闻（New）"></y-tag>
   </div>
   <div>-----------label-----------</div>
-  <y-label :data="label_data" @onChange="label_change">v</y-label>
   <div>-----------disscus-----------</div>
   <y-discuss uuid="uuid"></y-discuss>
   <div>-----------rich-----------</div>
-  <y-rich :data="rich_data"></y-rich>
+  <y-rich @onEscape="onEscape"></y-rich>
   <div>-----------tag-----------</div>
-  <r-view>886</r-view>
-  <XView>2333</XView>
   <div>-----------dialog-----------</div>
   <div>
     <button @click="onDialog('alert')">dialog.alert</button>
@@ -70,6 +70,10 @@ const useFetch = inject('useFetch')
 const useMessage = inject('useMessage')
 const usePlus = inject('usePlus')
 // ----------
+const onEscape = (e)=>{
+  // e.src = 'https://juejin.cn/post/7046940339621330974'
+  console.log('onEscape',onEscape,e)
+}
 const state = reactive({
   label_data:['潇洒','a安抚','个','是德国','啊是服务'],
   rich_data:[{"type":"paragraph","children":[{"text":""}]},{"type":"list-item","children":[{"text":"saf"}],"ordered":true},{"type":"list-item","ordered":true,"children":[{"text":"sag"}]},{"type":"list-item","ordered":true,"children":[{"text":"sg "}]},{"type":"list-item","ordered":true,"children":[{"text":"sag"}]}]
