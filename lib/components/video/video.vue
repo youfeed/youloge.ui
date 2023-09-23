@@ -1,28 +1,6 @@
 <template>
-  <div class="player">
-    <div class="played">
-      <div class="video" @click="play">
-        <video ref="vRef" src="https://media.w3.org/2010/05/sintel/trailer.mp4"></video>
-      </div>
-      <div class="panel">
-        <div class="progress">
-          <div class="buffer"></div>
-          <div class="isplay"></div>
-          <div class="swatch"></div>
-        </div>
-        <div class="controls">
-          <div class="left">
-            <div class="play" @click="play">&#x25BA;</div>
-            <div class="time">12:00/60:30</div>
-            <div class="time">&#x266A;</div>
-          </div>
-          <div class="right">
-            <div class="setting">&#x2742;</div>
-            <div class="fullscreen">&#x26F6;</div>
-          </div>
-        </div>
-      </div>
-    </div>
+  <div class="y-video">
+    <iframe ref="ref" :src="src" allowfullscreen></iframe>
   </div>
 </template>
 
@@ -30,17 +8,17 @@
 export default { name:'yVideo'}
 </script>
 <script setup>
-import { onMounted, ref } from "vue";
-const props = defineProps({
-  uuid:String
+import { onMounted, reactive, toRefs } from "vue";
+const emit = defineEmits(['play']);
+const props = defineProps({ uuid:String });
+const state = reactive({ref:null,src:null});
+onMounted(()=>{
+  state.src = `https://open.youloge.com/video#hash`;
 })
-const vRef = ref(null)
 const play = ()=>{
-  vRef.value.paused ? vRef.value.play() : vRef.value.pause()
-  console.log(vRef)
+  
 }
-console.log(props)
-
+const {ref,src} = toRefs(state)
 </script>
 <style lang="scss">
 .player{

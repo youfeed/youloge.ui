@@ -1,6 +1,6 @@
 <template>
-  <div class="y-advertise" hover:border-coolGray>
-    <iframe ref="ref" src="https://open.youloge.com/advertise#2333" border-none></iframe>
+  <div class="y-ad" hover:border-coolGray>
+    <iframe ref="ref" src="https://open.youloge.com/ad#2333" border-none></iframe>
   </div>
 </template>
 

@@ -1,64 +1,55 @@
 
 <template>
 <div>
-  <y-header aria="网盘" v-ripple></y-header>
   <hash-view></hash-view>
-
-  <a href="#/hello">hellohellohellohelloo</a>
-  <div class="bg-red">-----------rgba-----------</div>
-  <div><y-rgba value="1285"></y-rgba></div>
-  <div>-----------ads-----------</div>
-  <y-ad></y-ad>
-  <div>-----------discsss2-----------</div>
-  <y-discuss></y-discuss>
-  <div>-----------discsss-----------</div>
-  <div>-----------discsss-----------</div>
-  <div>-----------discsss-----------</div>
-  <button 
-      bg="blue-400 hover:blue-500 dark:blue-500 dark:hover:blue-600"
-      text="sm white"
-      font="mono light"
-      p="y-2 x-4"
-      border="2 rounded blue-200"
-    >
-      Button
-  </button>
-  <div>
-  </div>
-  <div>-----------label-----------</div>
-  <div>-----------disscus-----------</div>
-  <y-discuss uuid="uuid"></y-discuss>
-  <div>-----------rich-----------</div>
-  <y-rich @onEscape="onEscape"></y-rich>
-  <div>-----------tag-----------</div>
-  <div>-----------dialog-----------</div>
-  <div>
-    <button @click="onDialog('alert')">dialog.alert</button>
-    <button @click="onDialog('confirm')">dialog.confirm</button>
-    <button @click="onDialog('prompt')">dialog.prompt</button>
-    <button @click="onDialog('password')">dialog.password</button>
-  </div>
-  <div class="test">
-    <div v-ripple>
-      <div style="width: 300px; height: 150px; display: flex; align-items: center; justify-content: center; background: #333; color: #fff;"> useRipple 水波纹按下效果 </div>
-    </div>
-    <div><button v-login="onLogin">触发登录</button></div>
-    <div><button @click="load">加载load</button></div>
-    <div><button v-copy="copy">复制内容</button></div>
-    <div><button @click="onPayment">发起付款</button></div>
+  
+  <main w-200 mx-a>
+    <div>-----------ylogin-----------</div>
+    <y-login @success="login_success" @error="login_success" @progress="login_success"></y-login>
+    <div class="bg-red">-----------rgba-----------</div>
+    <div><y-rgba value="1285"></y-rgba></div>
+    <div>-----------ads-----------</div>
+    <y-ad style="width: 300px;margin: 0 auto;background: #666;"></y-ad>
+    <div>-----------discuss-----------</div>
+    <y-discuss uuid="Muuid"></y-discuss>
+    <div>-----------video-----------</div>
+    <y-video uuid="video"></y-video>
+    <div>-----------header-----------</div>
+    <y-header aria="网盘" v-ripple></y-header>
+    <div>-----------label-----------</div>
+    <div>-----------disscus-----------</div>
+    <y-discuss uuid="uuid"></y-discuss>
+    <div>-----------rich-----------</div>
+    <y-rich @onEscape="onEscape"></y-rich>
+    <div>-----------tag-----------</div>
+    <div>-----------dialog-----------</div>
     <div>
-      <button @click="onFetch('api')">网络请求 - api</button>
-      <button @click="onFetch('vip')">网络请求 - vip</button>
+      <button @click="onDialog('alert')">dialog.alert</button>
+      <button @click="onDialog('confirm')">dialog.confirm</button>
+      <button @click="onDialog('prompt')">dialog.prompt</button>
+      <button @click="onDialog('password')">dialog.password</button>
     </div>
-    <div>
-      <button @click="onMessage">useMessage 弹窗</button>
-      <button @click="onPlus">usePlus sso 弹窗</button>
-      <button @click="onLabel">换一组label的data</button>
+    <div class="test" v-ripple>
+      <div >
+        <div style="width: 300px; height: 150px; display: flex; align-items: center; justify-content: center; background: #333; color: #fff;"> useRipple 水波纹按下效果 </div>
+      </div>
+      <div><button v-login="onLogin">触发登录</button></div>
+      <div><button @click="load">加载load</button></div>
+      <div><button v-copy="copy">复制内容</button></div>
+      <div><button @click="onPayment">发起付款</button></div>
+      <div>
+        <button @click="onFetch('api')">网络请求 - api</button>
+        <button @click="onFetch('vip')">网络请求 - vip</button>
+      </div>
+      <div>
+        <button @click="onMessage">useMessage 弹窗</button>
+        <button @click="onPlus">usePlus sso 弹窗</button>
+        <button @click="onLabel">换一组label的data</button>
+      </div>
+      <div></div>
+      <div></div>
     </div>
-    <div></div>
-    <div></div>
-  </div>
-
+  </main>
 </div>
 </template>
 <script setup>
@@ -66,13 +57,22 @@ import { inject, reactive, ref, toRefs } from 'vue'
 
 const usePayment = inject('usePayment')
 const useDialog = inject('useDialog')
+const useLogin = inject('useLogin')
 const useFetch = inject('useFetch')
 const useMessage = inject('useMessage')
 const usePlus = inject('usePlus')
 // ----------
+useLogin().then(res=>{
+  console.log('useLogin.then',res)
+}).catch(err=>{
+  console.log('useLogin.err',err)
+})
+
+const login_success = (res)=>{
+  console.log('login_success',res)
+}
 const onEscape = (e)=>{
-  // e.src = 'https://juejin.cn/post/7046940339621330974'
-  console.log('onEscape',onEscape,e)
+  console.log('onEscape',e)
 }
 const state = reactive({
   label_data:['潇洒','a安抚','个','是德国','啊是服务'],
