@@ -10,6 +10,7 @@
     <div><y-rgba value="1285"></y-rgba></div>
     <div>-----------ads-----------</div>
     <y-ad style="width: 300px;margin: 0 auto;background: #666;"></y-ad>
+    <yAd style="width: 300px;margin: 0 auto;background: #666;"></yAd>
     <div>-----------discuss-----------</div>
     <y-discuss uuid="Muuid"></y-discuss>
     <div>-----------video-----------</div>
@@ -45,6 +46,7 @@
         <button @click="onMessage">useMessage 弹窗</button>
         <button @click="onPlus">usePlus sso 弹窗</button>
         <button @click="onLabel">换一组label的data</button>
+        <button v-login="onligon">登录指令</button>
       </div>
       <div></div>
       <div></div>
@@ -55,19 +57,23 @@
 <script setup>
 import { inject, reactive, ref, toRefs } from 'vue'
 
-const usePayment = inject('usePayment')
-const useDialog = inject('useDialog')
-const useLogin = inject('useLogin')
 const useFetch = inject('useFetch')
-const useMessage = inject('useMessage')
-const usePlus = inject('usePlus')
+console.log('useFetch', useFetch)
+// const usePayment = inject('usePayment')
+// const useDialog = inject('useDialog')
+// const useLogin = inject('useLogin')
+// const useMessage = inject('useMessage')
+// const usePlus = inject('usePlus')
 // ----------
-useLogin().then(res=>{
-  console.log('useLogin.then',res)
-}).catch(err=>{
-  console.log('useLogin.err',err)
-})
+// useLogin().then(res=>{
+//   console.log('useLogin.then',res)
+// }).catch(err=>{
+//   console.log('useLogin.err',err)
+// })
 
+const onligon = (res)=>{
+  console.log('onligon',res)
+}
 const login_success = (res)=>{
   console.log('login_success',res)
 }

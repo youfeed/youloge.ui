@@ -73,8 +73,8 @@ const {compkey,opener} = toRefs(state)
   background: #f2f2f2f2;
   .y-hash-capsule{
     position: fixed;
-    top: 15px;
-    right: 15px;
+    top: 10px;
+    right: 10px;
     display: flex;
     background: #ddddddb5;
     border-radius: 20px;
