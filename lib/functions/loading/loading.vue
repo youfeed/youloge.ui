@@ -27,17 +27,17 @@ const {show} = toRefs(state)
 </script>
 <style lang="scss">
 .y-loading {
-  width: 100%;
-  height: 100%;
+  position: fixed;
   top: 0;
   left: 0;
-  position: absolute;
+  width: 100%;
+  height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 99999;
   flex-direction: column;
-  background: #ededed30;
+  background: transparent;
   user-select: none;
 }
 .loading {

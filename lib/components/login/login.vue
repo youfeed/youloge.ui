@@ -16,7 +16,6 @@ const props = defineProps(['uuid','mail','money','close','fullscreen','onCall','
 const confog = {...{ukey:ukey,mail:props.mail,close:props.close},...(props?.data || {})};
 onMounted(()=>{
   onMessage('progress',{'msg':'onMounted'});
-  state.src = `http://localhost:5174/login.html${hash}`;
   window.addEventListener('message',({origin,source,data})=>{
     let {method,params} = data[hash] || {};
     if(state.src.startsWith(origin) && method){

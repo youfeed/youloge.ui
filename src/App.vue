@@ -62,8 +62,9 @@
 <script setup>
 import { inject, reactive, ref, toRefs } from 'vue'
 
+const useStorage = inject('useStorage')
 const useFetch = inject('useFetch')
-console.log('useFetch', useFetch)
+console.log('useStorage', useStorage('_grecaptcha'))
 // const usePayment = inject('usePayment')
 // const useDialog = inject('useDialog')
 // const useLogin = inject('useLogin')

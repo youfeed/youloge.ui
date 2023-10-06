@@ -39,11 +39,11 @@
   </header>
 </template>
 
-<script>
-export default { name:'yHeader' }
-</script>
 <script setup>
 import { onMounted, toRefs, reactive, computed } from 'vue'
+import useStorage from "../../functions/storage";
+// import {getHashtag,useConfig} from '../../utils'
+defineOptions({ name: 'y-payment',inheritAttrs:false });
 const props = defineProps({
   aria:{
     type:String,
@@ -67,7 +67,7 @@ const dropdown = computed(()=>[
 ])
 
 onMounted(()=>{
-  state.profile = Object.assign(state.profile,JSON.parse(localStorage.getItem('youloge') || '{}')) 
+  state.profile = useStorage('youloge')
 })
 // 退出登录
 const onExit = ()=>{

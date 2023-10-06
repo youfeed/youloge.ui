@@ -5,14 +5,13 @@
 </template>
 
 <script setup>
-import {getHashtag,getConfig,useConfig} from '../../utils'
+import {getHashtag,useConfig} from '../../utils'
 import { onMounted, reactive, toRefs } from "vue";
 defineOptions({ name: 'y-payment',inheritAttrs:false });
 const hash = getHashtag(),{ukey,OPENURL} = useConfig(),state = reactive({ref:null,src:`${OPENURL}/payment${hash}`});
 const props = defineProps(['uuid','mail','money','close','local','notify','fullscreen','onCall','data']),emit = defineEmits(['success','error','progress']);
 const confog = {...{ukey:ukey,mail:props.mail,money:props.money,close:props.close,local:props.local,notify:props.notify},...(props?.data || {})};
 onMounted(()=>{
-  // state.src = `http://localhost:5174/payment.html${hash}`
   window.addEventListener('message',({origin,source,data})=>{
     let {method,params} = data[hash] || {};
     if(state.src.startsWith(origin) && method){
