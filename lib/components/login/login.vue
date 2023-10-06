@@ -1,33 +1,28 @@
 <template>
-  <div :class="
-  props.onCall ? 
-    'w-full h-full fixed top-0 left-0 z-99999' 
-    : 
-    'my-4 rounded shadow-2xl w-4xl hover:border-blue hover:border-1'" 
-    class="y-login">
+  <div class="y-login" :class="props.fullscreen ? 'w-full h-full fixed top-0 left-0 z-99999' :  'my-4 rounded shadow-2xl w-4xl hover:border-blue hover:border-1'">
     <iframe v-if="src" ref="ref" :src="src" w-full h-full backdrop-blur-lg></iframe>
   </div>
 </template>
 
 <script>
 export default { name:'yLogin'}
-import {getHashtag,getConfig} from '../../utils'
-import { onMounted, reactive, toRefs } from "vue";
+import {getHashtag,useConfig} from '../../utils'
+import { onMounted, reactive, toRefs,inject } from "vue";
 </script>
 <script setup>
-const ukey = getConfig('ukey'),IFRAME  = getConfig('IFRAME'),hash = getHashtag(),emit = defineEmits(['success','error','progress']);
-const props = defineProps({ uuid:String,close:Boolean,onCall:Function }),state = reactive({ref:null,src:null});
+defineOptions({ name: 'y-login',inheritAttrs:false });
+const hash = getHashtag(),{ukey,OPENURL} = useConfig(),state = reactive({ref:null,src:`${OPENURL}/login${hash}`});
+const props = defineProps(['uuid','mail','money','close','fullscreen','onCall','data']),emit = defineEmits(['success','error','progress']);
+const confog = {...{ukey:ukey,mail:props.mail,close:props.close},...(props?.data || {})};
 onMounted(()=>{
-  onMessage('progress',{'msg':'onMounted',ukey,IFRAME});
-  state.src = `${IFRAME}/login${hash}`;
+  onMessage('progress',{'msg':'onMounted'});
+  state.src = `http://localhost:5174/login.html${hash}`;
   window.addEventListener('message',({origin,source,data})=>{
     let {method,params} = data[hash] || {};
-    console.log('origin',data[hash],data);
-    if(origin==IFRAME && method){
+    if(state.src.startsWith(origin) && method){
       let work = {
         'ready':()=>{
-          onMessage('progress',params);
-          source.postMessage({[state.hash]:{method:'ready',params:{ukey:ukey,close:props.close}}},IFRAME);
+          source.postMessage({[hash]:{method:'init',params:confog}},origin);
           onMessage('progress',{msg:'配置初始化'});
         },
         'success':()=>{onMessage('success',params)},

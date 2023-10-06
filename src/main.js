@@ -23,7 +23,7 @@ for (const key in modules) {
 }
 // console.log('modules',modules,routes)
 app.use(youloge,{
-  'ukey':'PEc8/t7+w5yfcl2lRr7N5GSQ/1seZLYR1tRU2iSoWJclRNPJbpRsz/YCwYEE5WqrPaCav7UzH4tCurwoMFlvyaFP9f2p7eBgmm748WShzzGooQGTxwl7Eb7TkJrg/Ujf',
+  'ukey':'qRjE+HMLB8WcnAvdcon5Lx2BSGid7OdQUd5ozRV8QHj4sgP91+Y6xMfhrHZbONGpLErJGMZFZ8GAcEwINSE4VjwdEvna0DwHUJ3zzQNFlQg8s8nhqo4/I3y00q31eYi4',
   'APIURL':'https://api.youloge.com',
   'VIPURL':'https://www.youloge.com',
   'route':{

@@ -4,13 +4,17 @@
   <hash-view></hash-view>
   
   <main w-200 mx-a>
-    <div>-----------ylogin-----------</div>
+    <div>-----------yPayment- <button bg-blend-color-dodge bg-blue @click="onPayment">usePayment</button> ----------</div>
+    <div id="payment"></div>
+    <div><y-payment data="{}" @success="onSuccess" ></y-payment></div>
+    <div>-----------ylogin-<button bg-blend-color-dodge bg-blue @click="onuseLogin">useLogin</button>----------</div>
+    <button v-login="onLogin" class="bg-blend-color-dodge bg-blue" >v-login</button>
+    <div id="login"></div>
     <y-login @success="login_success" @error="login_success" @progress="login_success"></y-login>
-    <div class="bg-red">-----------rgba-----------</div>
-    <div><y-rgba value="1285"></y-rgba></div>
+    <div class="bg-red">-----------rgb-----------</div>
+    <div><y-rgb value="100">x</y-rgb></div>
     <div>-----------ads-----------</div>
-    <y-ad style="width: 300px;margin: 0 auto;background: #666;"></y-ad>
-    <yAd style="width: 300px;margin: 0 auto;background: #666;"></yAd>
+    <y-ad style="width: 300px;margin: 0 auto;background: #888;"></y-ad>
     <div>-----------discuss-----------</div>
     <y-discuss uuid="Muuid"></y-discuss>
     <div>-----------video-----------</div>
@@ -46,7 +50,8 @@
         <button @click="onMessage">useMessage 弹窗</button>
         <button @click="onPlus">usePlus sso 弹窗</button>
         <button @click="onLabel">换一组label的data</button>
-        <button v-login="onligon">登录指令</button>
+        <br/>
+        <button v-login="onLogin">登录指令</button>
       </div>
       <div></div>
       <div></div>
@@ -62,7 +67,7 @@ console.log('useFetch', useFetch)
 // const usePayment = inject('usePayment')
 // const useDialog = inject('useDialog')
 // const useLogin = inject('useLogin')
-// const useMessage = inject('useMessage')
+const useMessage = inject('useMessage')
 // const usePlus = inject('usePlus')
 // ----------
 // useLogin().then(res=>{
@@ -70,10 +75,33 @@ console.log('useFetch', useFetch)
 // }).catch(err=>{
 //   console.log('useLogin.err',err)
 // })
-
-const onligon = (res)=>{
-  console.log('onligon',res)
+let usePayment = inject('usePayment');
+const onPayment = ()=>{
+  usePayment({
+    selector:'#paymentc',
+    mail:'11247005@qq.com', 
+    local:'888974',
+    notify:'https://www.youloge.com/notify',
+    money:1
+  }).then(res=>{
+    console.log('usePayment then',res)
+  }).catch(err=>{
+    console.log('usePayment catch',err)
+  })
 }
+let useLogin = inject('useLogin');
+const onuseLogin = ()=>{
+  console.log('onuseLogin')
+  useLogin({
+    selector:'#logins',
+    close:false
+  }).then(res=>{
+    console.log('useLogin then',res)
+  }).catch(err=>{
+    console.log('useLogin catch',err)
+  })
+}
+
 const login_success = (res)=>{
   console.log('login_success',res)
 }
@@ -143,10 +171,9 @@ const onMessage = ()=>{
   // useMessage('warning',{})
   // useMessage('warning',{})
   // useMessage('notice',{})
-
 }
 const onLogin = ()=>{
-  useMessage('success',{text:'登录成功'})
+  useMessage('success','登录成功')
 }
 
 const onFetch = (type)=>{
@@ -168,18 +195,6 @@ const onFetch = (type)=>{
     default:
       break;
   }
-}
-const onPayment = ()=>{
-  usePayment({
-    ukey:'TKoLtLJatVyqbbNWQFb_yMdoFzoWx40b9I7JzUYwRORqiHB7MxNdfqpN8hnSsx3hdbThUbauq0M60DNkZQZDrQ==',
-    local:'888974',
-    money:0.01
-  }).pay().then(res=>{
-    console.log(0,res)
-  }).catch(e=>{
-    console.log(1,e)
-  })
-  console.log('usePayment',usePayment())
 }
 const copy = ()=>{
   let x = document.createElement('div')
