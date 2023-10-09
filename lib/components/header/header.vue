@@ -1,59 +1,51 @@
 <template>
-  <header class="y-header" f-c-b h-15 shadow-sm z-9999  pr-1 pl-1 sticky top-0 text-nowrap>
-    <div class="y-logo" flex font-size-5 font-bold c-dark-1 cursor-pointer>
-      <p>&#8801;  Youloge<sup font-size-2 c-dark-3>{{aria}}</sup></p>
-    </div>
-    <div class="y-search" p-1 hover-border-dotted>
-      <form action="/search">
-        <input type="search" name="q"/>
-        <button type="submit">搜索</button>
-      </form>
-    </div>
-    <div class="y-profile">
-      <slot></slot>
-      <div class="userinfo" v-login="onProfile">
-        <img :src="'//img.youloge.com/'+profile.avatar+'!0'" class="y-profile-avatar"/>
+  <div class="y-header">
+    <header>
+      <div class="y-logo" @click="onLogo">
+        <p>&#8801;  {{props.logo}}<sup font-size-2 c-dark-3>{{aria}}</sup></p>
       </div>
-      <div :class="dropdown">
-        <a class="y-profile-li" href="//www.youloge.com/#/profile/">
+      <div class="placeholder" v-search="onSearch" >
+        <div>🔍 搜索一下</div>
+      </div>
+
+      <slot name="right"></slot>
+    </header>
+    <aside class="y-aside" v-show="aside">
+      <div class="y-routes">
+        <li>routes</li>
+      </div>
+      <div class="y-profile">
+        <div class="avatar">
           <img :src="'//img.youloge.com/'+profile.avatar+'!0'" class="y-profile-avatar"/>
-          <div class="y-profile-li-r">
-            <p>{{profile.name}}</p>
-            <small>@{{profile.nick}}</small>
-          </div>
-        </a>
-        <a class="y-profile-li" href="//www.youloge.com/#/wallet/">
-          <span>·</span>
-          <div class="y-profile-li-r">我的钱包</div>
-        </a>
-        <a class="y-profile-li" href="//www.youloge.com/#/wallet/">
-          <span>·</span>
-          <div class="y-profile-li-r">开放平台</div>
-        </a>
-        <a class="y-profile-li" @click="onExit">
-          <span>·</span>
-          <div class="y-profile-li-r">退出登录</div>
-        </a>
+        </div>
+        <div class="y-profile-info">
+          <div>name:name</div>
+          <div>mail:1124705@</div>
+        </div>
       </div>
-    </div>
-  </header>
+    </aside>
+  </div>
 </template>
 
 <script setup>
-import { onMounted, toRefs, reactive, computed } from 'vue'
-import useStorage from "../../functions/storage";
-// import {getHashtag,useConfig} from '../../utils'
 defineOptions({ name: 'y-payment',inheritAttrs:false });
+import { onMounted, toRefs, reactive, computed, inject } from 'vue'
+import useStorage from "../../functions/storage";
+import {useConfig} from '../../utils'
+const useFetch = inject('useFetch')
 const props = defineProps({
   aria:{
     type:String,
     default:'.com'
-  }
+  },
+  logo:String
 })
 const state = reactive({
+  timer:null,
   ref:null,
   dropdown:false,
   aria:props.aria,
+  aside:null,
   profile:{
     uuid:'',
     nick:'Micateam',
@@ -68,7 +60,16 @@ const dropdown = computed(()=>[
 
 onMounted(()=>{
   state.profile = useStorage('youloge')
+  console.log('onMounted',useConfig(),useFetch)
 })
+// 菜单点击
+const onLogo = ()=>{
+  state.aside = !state.aside
+}
+// 搜索点击
+const onSearch = (item)=>{
+  console.log('onSearch',item)
+}
 // 退出登录
 const onExit = ()=>{
   localStorage.removeItem('youloge')
@@ -82,83 +83,87 @@ const onProfile = (el)=>{
     },{once:true})
   },200)
 }
-const {aria,profile} = toRefs(state)
+const {aria,profile,aside} = toRefs(state)
 </script>
 <style lang="scss">
 .y-header{
+  position: sticky;
+  top: 0;
+  z-index: 999999;
   backdrop-filter: saturate(50%) blur(4px);
   background-image: radial-gradient(transparent 1px,#fff 1px);
   background-size: 4px 4px;
-
-  .y-search{
-    border: 1px solid #999;
-    border-radius: 2px;
-    margin: 0 10px;
-    color: #222;
-    &:focus-within{
-      border: 1px solid #6a8fe0;
-      border-radius: 4px;
-      button{
-        color: #6a8fe0;
-      }
-    }
-    input{
-      border: 0;
-      outline: 0;
-      width: calc(100% - 26px);
-      background: transparent;
-    }
-
-    button{
-      outline: 0;
-      background: transparent;
-      border: 0;
-      color: #233;
-    }
-  }
-  input[type="search"]::-webkit-search-cancel-button {
-    -webkit-appearance: none !important;
-  }
-  .y-profile-avatar{
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: 1px solid #999;
-  }
-  .y-profile{
+  border-bottom: 1px solid #eee;
+  user-select: none;
+  header{
+    height: 60px;
+    padding: 0 10px;
     display: flex;
-    align-items: center;
+    align-items: baseline;
     justify-content: space-between;
-    position: relative;
-    .y-dropdown{
-      position: absolute;
-      display: none;
-      top: 60px;
-      right: 10px;
-      min-width: 180px;
-      box-shadow: 1px 2px 3px 1px #d1d1d1;
-      border-radius: 5px;
-      .y-profile-li{
-        color: #222;
-        text-decoration: none;
-        display: flex;
-        align-items: center;
-        padding: 10px;
-        cursor: pointer;
-        background: #fff;
-        &:hover{
-          opacity: .7;
-          background: #eee;
-        }
-      }
-      .y-profile-li-r{
-        margin-left: 10px;
+    gap: 50px;
+    transition: all 0.3s;
+    &:focus-within{
+      padding-top: 20px;
+      .y-logo{
+        visibility: hidden;
+        display: none;
       }
     }
-    .show{
-      display: block;
+    .y-logo{
+      font-size: 24px;
+      align-items: center;
+      display: flex;
+      height: 100%;
+      cursor: pointer;
     }
 
+  }
+  aside{
+    position: absolute;
+    width: 100%;
+    border-right: 1px solid #eee;
+    background: transparent;
+    height: calc(100vh - 60px);
+    // top: 60px;
+    display: flex;
+    flex-direction: column;
+    .y-routes,.y-profile{
+      width: 240px;
+      background: #fff;
+    }
+    .y-routes{
+      height: 100%;
+      overflow-y: scroll;
+    }
+    ::-webkit-scrollbar{
+      width: 5px;
+    }
+    ::-webkit-scrollbar-thumb{
+      background: #bfbfbf;
+      border-radius:10px;
+    }
+    ::-webkit-scrollbar-track{
+      background: rgb(239, 239, 239);
+      border-radius:2px;
+    }
+    ::-webkit-scrollbar-corner{
+      background: #179a16;
+    }
+    ::-webkit-scrollbar-thumb:hover{
+      background: #333;
+    }
+    .y-profile{
+      height: 60px;
+      display: flex;
+      padding: 5px;
+      border: 1px solid #eee;
+      img{
+        width: 40px;
+        height: 40px;
+      }
+    }
   }
 }
+
 </style>

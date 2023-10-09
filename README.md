@@ -20,6 +20,7 @@ createApp(App).use(youloge,{
 ```
 
 ### 更新日志
+- 1.8.4 新增`v-search`搜索指令，可以在div上绑定弹窗搜索页面
 - 1.8.0 优化`useLoading useFetch` 互相嵌套逻辑`useFetch 默认mask:true`
 - 1.7.3 新增`useStorage`函数组件 仅支持对象读(对象)写(对象覆盖),均返回最新对象
 - 1.7.1 优化项目结构：组件支持尽量多方式调用

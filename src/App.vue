@@ -1,9 +1,13 @@
 
 <template>
+  <y-header aria="网盘" logo="Youloge"></y-header>
+  
 <div>
   <hash-view></hash-view>
+
   
   <main w-200 mx-a>
+    
     <div>-----------yPayment- <button bg-blend-color-dodge bg-blue @click="onPayment">usePayment</button> ----------</div>
     <div id="payment"></div>
     <div><y-payment data="{}" @success="onSuccess" ></y-payment></div>
@@ -20,7 +24,7 @@
     <div>-----------video-----------</div>
     <y-video uuid="video"></y-video>
     <div>-----------header-----------</div>
-    <y-header aria="网盘" v-ripple></y-header>
+    
     <div>-----------label-----------</div>
     <div>-----------disscus-----------</div>
     <y-discuss uuid="uuid"></y-discuss>
@@ -81,7 +85,7 @@ const onPayment = ()=>{
   usePayment({
     selector:'#paymentc',
     mail:'11247005@qq.com', 
-    local:'888974',
+    local:'YREqVnGW8euuNvVxrH2kVyFMS3LLP', // drive YREqVnGW8euuNvVxrH2kVyFMS3LLP
     notify:'https://www.youloge.com/notify',
     money:1
   }).then(res=>{
