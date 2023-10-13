@@ -12,15 +12,15 @@
     </header>
     <aside class="y-aside" v-show="aside">
       <div class="y-routes">
-        <li>routes</li>
+        <li></li>
       </div>
       <div class="y-profile">
         <div class="avatar">
           <img :src="'//img.youloge.com/'+profile.avatar+'!0'" class="y-profile-avatar"/>
         </div>
         <div class="y-profile-info">
-          <div>name:name</div>
-          <div>mail:1124705@</div>
+          <div></div>
+          <div></div>
         </div>
       </div>
     </aside>
