@@ -1,24 +1,61 @@
 <template>
   <div class="y-rich">
-    <iframe ref="ref" :src="src"></iframe>
+    <RichLoop :list="content"></RichLoop>
   </div>
 </template>
-<script>
-export default {name:'yRich'}
-</script>
 <script setup>
+defineOptions({ name: 'y-rich',inheritAttrs:false });
+import RichLoop from './loop.vue'
 import { computed, onMounted, reactive, toRefs } from 'vue';
 const emit = defineEmits(['onEscape'])
-const props = defineProps({
-  uuid:String,
-  onEscape:Function 
+const props = defineProps({ uuid:String })
+const state = reactive({
+  ref:null,
+  content:[]
 })
-const state = reactive({ref:null,src:null})
 onMounted(()=>{
-  state.src = `https://open.youloge.com/rich`
-  emit('onEscape',state);
+  fetch(`https://cdn.youloge.com/${props.uuid}?9`).then(r=>r.json()).then(content=>{
+    console.log(content)
+    state.content=content
+  })
 })
-const {ref,src} = toRefs(state)
+
+const {ref,src,tag,content} = toRefs(state)
 </script>
 <style lang="scss">
+.y-rich{
+  padding: 10px;
+  max-width: 680px; 
+  margin: 0 auto;
+  .title{
+    margin: 0 0 1.3rem;
+    font-size: 1.667rem;
+    font-weight: 600;
+    line-height: 1.31;
+    color: #222
+  }
+  p{
+    line-height: inherit;
+    margin: 22px 0;
+    letter-spacing: 2px;
+    font-size: 14px;
+    word-spacing: 2px;
+  }
+  a{
+    color: #4dd0e1;
+    border-bottom: 1px solid #4dd0e1;
+    font-weight: 400;
+    text-decoration: none;
+    margin: 0 4px;
+  }
+  pre{
+    box-shadow: 1px 2px 4px 2px #dfdfdf;
+    padding: 10px;
+  }
+  iframe{
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+  }
+}
 </style>

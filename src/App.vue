@@ -4,10 +4,19 @@
   
 <div>
   <hash-view></hash-view>
-
-  
   <main w-200 mx-a>
-    
+    <div>-----------video-----------</div>
+    <y-video 
+    uuids="8ZhtcE2n7wkp4Ho12RorUeYWytAtY" 
+    mp4s="https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_30mb.mp4" 
+    poster="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/byted-player-videos/1.0.0/poster.jpg"
+    m3u8s="//sf1-cdn-tos.huoshanstatic.com/obj/media-fe/xgplayer_doc_video/hls/xgplayer-demo.m3u8"
+    dash="//sf1-cdn-tos.huoshanstatic.com/obj/media-fe/xgplayer_doc_video/dash/xgplayer-demo-dash.mpd"
+    ></y-video>
+    <!-- <div>-----------rich-----------</div>
+    <y-rich uuid="YjT7vRkQsCD8Po6gRg8p5C3z1m5Dj"></y-rich>
+
+
     <div>-----------yPayment- <button bg-blend-color-dodge bg-blue @click="onPayment">usePayment</button> ----------</div>
     <div id="payment"></div>
     <div><y-payment data="{}" @success="onSuccess" ></y-payment></div>
@@ -21,15 +30,13 @@
     <y-ad style="width: 300px;margin: 0 auto;background: #888;"></y-ad>
     <div>-----------discuss-----------</div>
     <y-discuss uuid="Muuid"></y-discuss>
-    <div>-----------video-----------</div>
-    <y-video uuid="video"></y-video>
+
     <div>-----------header-----------</div>
     
     <div>-----------label-----------</div>
     <div>-----------disscus-----------</div>
     <y-discuss uuid="uuid"></y-discuss>
-    <div>-----------rich-----------</div>
-    <y-rich @onEscape="onEscape"></y-rich>
+    
     <div>-----------tag-----------</div>
     <div>-----------dialog-----------</div>
     <div>
@@ -59,7 +66,7 @@
       </div>
       <div></div>
       <div></div>
-    </div>
+    </div> -->
   </main>
 </div>
 </template>

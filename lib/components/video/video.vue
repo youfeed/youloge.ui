@@ -3,110 +3,48 @@
     <iframe ref="ref" :src="src" allowfullscreen></iframe>
   </div>
 </template>
-
-<script>
-export default { name:'yVideo'}
-</script>
 <script setup>
+defineOptions({ name: 'y-video',inheritAttrs:false });
+import {getHashtag,useConfig} from '../../utils'
 import { onMounted, reactive, toRefs } from "vue";
-const emit = defineEmits(['play']);
-const props = defineProps({ uuid:String });
-const state = reactive({ref:null,src:null});
+const hash = getHashtag(),{ukey,OPENURL} = useConfig(),state = reactive({ref:null,src:`${OPENURL}/video${hash}`});
+const emit = defineEmits(['success','error','progress']);
+const props = defineProps({ poster:String,uuid:String,dash:String,m3u8:String,flv:String,mp4:String });
+const confog = {...{ukey:ukey,poster:props.poster,uuid:props.uuid,dash:props.dash,m3u8:props.m3u8,flv:props.flv,mp4:props.mp4},...(props?.data || {})};
 onMounted(()=>{
-  state.src = `https://open.youloge.com/video#hash`;
+  // state.src = `http://localhost:5173/video.html${hash}`
+  window.addEventListener('message',({origin,source,data})=>{
+    let {method,params} = data[hash] || {};
+    if(state.src.startsWith(origin) && method){
+      let action = {
+        'ready':()=>{
+          source.postMessage({[hash]:{method:'init',params:confog}},origin);
+        },
+        'success':()=>{postMessage('success',params)},
+        'error':()=>{postMessage('error',params)},
+      };
+      action[method] ? action[method]() : (postMessage('progress',params));
+    }
+  })
 })
-const play = ()=>{
-  
-}
+const postMessage = (method,params)=>{
+  emit(method,params) || props.onCall && props.onCall(method,params);
+};
 const {ref,src} = toRefs(state)
 </script>
 <style lang="scss">
-.player{
-  height: 0;
-  width: 100%; 
-  position: relative;
-  padding-top: 56.2%;
-}
-.played{
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  .video{
-    position: relative;
-    z-index: 1;
-    video{
-      width: 100%;
-      height: 100%;
-    }
-  }
-  .panel{
-    bottom: 0;
-    position: absolute;
-    color: #fff;
+.y-video{
+  // height: 0;
+  // width: 100%; 
+  // position: relative;
+  // padding-top: 56.2%;
+  aspect-ratio: 16 / 9;
+  background: #333;
+  border-radius: 10px;
+  iframe{
     width: 100%;
-    height: 60px;
-    padding: 0 5px;
-    background: #ffffff29;
-    z-index: 2;
-    .progress{
-      position: relative;
-      background: #686868;
-      height: 5px;
-      border-radius: 5px;
-      .isplay{
-        position: absolute;
-        width: 50%;
-        height: 5px;
-        background: #f00;
-        border-radius: 5px;
-      }
-      .buffer{
-        position: absolute;
-      width: 60%;
-      height: 5px;
-      background: #ff0;
-      border-radius: 5px;
-      }
-      .swatch{
-
-      }
-    }
-  }
-  .controls{
-    height: 55px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    .left{
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: start;
-      .play{
-        width: 45px;
-        height: 45px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 25px;
-        cursor: pointer;
-      }
-    }
-    .right{
-      display: flex;
-      align-items: center;
-      .setting,.fullscreen{
-        width: 45px;
-        height: 45px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 25px;
-        cursor: pointer;
-      }
-    }
+    height: 100%;
+    border-radius: 10px;
   }
 }
 
