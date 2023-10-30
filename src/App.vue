@@ -4,15 +4,20 @@
   
 <div>
   <hash-view></hash-view>
-  <main w-200 mx-a>
+  <main max-w-200 mx-a>
+
+    <div>-----------<a @click="onGoods">点击加载 useGoods</a>-----------</div>
     <div>-----------video-----------</div>
-    <y-video 
-    uuids="8ZhtcE2n7wkp4Ho12RorUeYWytAtY" 
+    
+    <y-gallery :list="gallery_list"></y-gallery>
+    
+    <!-- <y-video 
+    uuid="8ZhtcE2n7wkp4Ho12RorUeYWytAtY" 
     mp4s="https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_30mb.mp4" 
     poster="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/byted-player-videos/1.0.0/poster.jpg"
     m3u8s="//sf1-cdn-tos.huoshanstatic.com/obj/media-fe/xgplayer_doc_video/hls/xgplayer-demo.m3u8"
     dash="//sf1-cdn-tos.huoshanstatic.com/obj/media-fe/xgplayer_doc_video/dash/xgplayer-demo-dash.mpd"
-    ></y-video>
+    ></y-video> -->
     <!-- <div>-----------rich-----------</div>
     <y-rich uuid="YjT7vRkQsCD8Po6gRg8p5C3z1m5Dj"></y-rich>
 
@@ -87,6 +92,25 @@ const useMessage = inject('useMessage')
 // }).catch(err=>{
 //   console.log('useLogin.err',err)
 // })
+let useShopcart = inject('useShopcart')
+const onGoods = ()=>{
+  useShopcart({
+    uuid:'YREqVnGW8euuNvVxrH2kVyFMS3LLP',
+    mail:'11247005@qq.com', 
+    selector:'#goods',
+    notify:'https://www.youloge.com/notify'
+  }).then(res=>{
+    if(res.local){
+      usePayment({
+        local:res.local,
+        money:3520
+      })
+    }
+    console.log('useGoods.then',res)
+  }).catch(err=>{
+    console.log('useGoods.err',err)
+  })
+}
 let usePayment = inject('usePayment');
 const onPayment = ()=>{
   usePayment({
@@ -121,6 +145,15 @@ const onEscape = (e)=>{
   console.log('onEscape',e)
 }
 const state = reactive({
+  gallery_list:[
+    'https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/byted-player-videos/1.0.0/poster.jpg',
+    'https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/byted-player-videos/1.0.0/poster.jpg',
+    'https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/byted-player-videos/1.0.0/poster.jpg',
+    'https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/byted-player-videos/1.0.0/poster.jpg',
+    'https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/byted-player-videos/1.0.0/poster.jpg',
+    'https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/byted-player-videos/1.0.0/poster.jpg',
+    'https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/byted-player-videos/1.0.0/poster.jpg',
+  ],
   label_data:['潇洒','a安抚','个','是德国','啊是服务'],
   rich_data:[{"type":"paragraph","children":[{"text":""}]},{"type":"list-item","children":[{"text":"saf"}],"ordered":true},{"type":"list-item","ordered":true,"children":[{"text":"sag"}]},{"type":"list-item","ordered":true,"children":[{"text":"sg "}]},{"type":"list-item","ordered":true,"children":[{"text":"sag"}]}]
 })
@@ -160,7 +193,7 @@ const onDialog = (type)=>{
   action[type] ? action[type]() : console.log(`${type} error`);
 }
 // ----------
-const {label_data,rich_data} = toRefs(state)
+const {label_data,rich_data,gallery_list} = toRefs(state)
 const onPlus = ()=>{
   console.log(0,usePlus())
   let sso = usePlus().sso({

@@ -1,4 +1,4 @@
-# 这是一个Youloge.com 自用项目 欢迎PR [主仓库]
+# 这是一个Youloge.com 配套项目 欢迎PR [主仓库] - beta版本
 
 ### [💡 ⚡️ 🛠️ 📦 🔩 🔑](https://docs.youloge.com/ui/) - 开放文档
 
@@ -8,7 +8,7 @@
 
 ``` js
 createApp(App).use(youloge,{
-  ukey:'', // 建议填写 可以让`v-login` `usePayment` 权限指令自动注入免初始化
+  ukey:'', // *填写 可以让`v-login` `usePayment` 权限指令自动注入初始化
   APIURL:'',
   VIPURL:'',
   // 可选文件路由 参考文档 hashview
@@ -20,6 +20,7 @@ createApp(App).use(youloge,{
 ```
 
 ### 更新日志
+- 1.8.9 新增`useShopcart`套餐下单组件，作为商品购物的前置条件(配合`usePayment`食用)
 - 1.8.4 新增`v-search`搜索指令，可以在div上绑定弹窗搜索页面
 - 1.8.0 优化`useLoading useFetch` 互相嵌套逻辑`useFetch 默认mask:true`
 - 1.7.3 新增`useStorage`函数组件 仅支持对象读(对象)写(对象覆盖),均返回最新对象

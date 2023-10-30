@@ -60,7 +60,7 @@ const dropdown = computed(()=>[
 
 onMounted(()=>{
   state.profile = useStorage('youloge')
-  console.log('onMounted',useConfig(),useFetch)
+  // console.log('onMounted',useConfig(),useFetch)
 })
 // 菜单点击
 const onLogo = ()=>{
