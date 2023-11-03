@@ -1,6 +1,6 @@
 
 <template>
-  <y-header aria="网盘" logo="Youloge"></y-header>
+  <y-header aria="网盘" logo="Youloge" @search="onSearch"></y-header>
   
 <div>
   <hash-view></hash-view>
@@ -9,7 +9,7 @@
     <div>-----------<a @click="onGoods">点击加载 useGoods</a>-----------</div>
     <div>-----------video-----------</div>
     
-    <y-gallery :list="gallery_list"></y-gallery>
+    <y-discuss uuid="123456"></y-discuss>
     
     <!-- <y-video 
     uuid="8ZhtcE2n7wkp4Ho12RorUeYWytAtY" 
@@ -85,13 +85,9 @@ console.log('useStorage', useStorage('_grecaptcha'))
 // const useDialog = inject('useDialog')
 // const useLogin = inject('useLogin')
 const useMessage = inject('useMessage')
-// const usePlus = inject('usePlus')
-// ----------
-// useLogin().then(res=>{
-//   console.log('useLogin.then',res)
-// }).catch(err=>{
-//   console.log('useLogin.err',err)
-// })
+const onSearch = (data)=>{
+  console.log('onSearch', data)
+}
 let useShopcart = inject('useShopcart')
 const onGoods = ()=>{
   useShopcart({

@@ -4,23 +4,35 @@
       <div class="y-logo" @click="onLogo">
         <p>&#8801;  {{props.logo}}<sup font-size-2 c-dark-3>{{aria}}</sup></p>
       </div>
-      <div class="placeholder" v-search="onSearch" >
+      <div class="placeholder" v-search="onSearch">
         <div>🔍 搜索一下</div>
       </div>
 
       <slot name="right"></slot>
     </header>
     <aside class="y-aside" v-show="aside">
-      <div class="y-routes">
-        <li></li>
+      <div class="head">
+        <ul>
+          <li>首页</li>
+        </ul>
       </div>
-      <div class="y-profile">
-        <div class="avatar">
-          <img :src="'//img.youloge.com/'+profile.avatar+'!0'" class="y-profile-avatar"/>
-        </div>
-        <div class="y-profile-info">
-          <div></div>
-          <div></div>
+      <div class="body">
+        <div>订阅内容</div>
+        <ul>
+          <li>头像 首页</li>
+          <li>头像 首页</li>
+        </ul>
+      </div>
+      <div class="foot">
+        <div>@Youloge.UI</div>
+        <div class="y-profile">
+          <div class="avatar">
+            <img :src="'//img.youloge.com/'+profile.avatar+'!0'" class="y-profile-avatar"/>
+          </div>
+          <div class="y-profile-info">
+            <div></div>
+            <div></div>
+          </div>
         </div>
       </div>
     </aside>
@@ -28,8 +40,9 @@
 </template>
 
 <script setup>
-defineOptions({ name: 'y-payment',inheritAttrs:false });
+defineOptions({ name: 'y-header',inheritAttrs:false });
 import { onMounted, toRefs, reactive, computed, inject } from 'vue'
+const emit = defineEmits('search');
 import useStorage from "../../functions/storage";
 import {useConfig} from '../../utils'
 const useFetch = inject('useFetch')
@@ -53,23 +66,16 @@ const state = reactive({
     avatar:'FjjHFE7RwJqfjiwM9aqL4G53kPv3'
   },
 })
-
-const dropdown = computed(()=>[
-  'y-dropdown',{'show':state.dropdown}
-])
-
 onMounted(()=>{
   state.profile = useStorage('youloge')
   // console.log('onMounted',useConfig(),useFetch)
 })
 // 菜单点击
 const onLogo = ()=>{
-  state.aside = !state.aside
+  // state.aside = !state.aside
 }
 // 搜索点击
-const onSearch = (item)=>{
-  console.log('onSearch',item)
-}
+const onSearch = (data)=>emit('search',data)
 // 退出登录
 const onExit = ()=>{
   localStorage.removeItem('youloge')
@@ -123,16 +129,17 @@ const {aria,profile,aside} = toRefs(state)
     position: absolute;
     width: 100%;
     border-right: 1px solid #eee;
-    background: transparent;
+    background: #00000036;
     height: calc(100vh - 60px);
     // top: 60px;
     display: flex;
     flex-direction: column;
-    .y-routes,.y-profile{
-      width: 240px;
+    .head,.body,.foot{
       background: #fff;
+      width: 240px;
+
     }
-    .y-routes{
+    .body{
       height: 100%;
       overflow-y: scroll;
     }

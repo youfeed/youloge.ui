@@ -5,7 +5,14 @@
         <div class="input">
           <input type="search" name="q" @input="onSearch" placeholder="搜索" v-model="query"/>
         </div>
-        <div class="status"> {{ count }} 条记录</div>
+        <div class="navbar">
+          <div class="menus" style=" display: flex; gap: 10px;">
+            <template v-for="item in navbar" :key="item.method">
+              <div :class="{active:item.method == method}" @click="onMethod(item.method)">{{item.name}}</div>
+            </template>
+          </div>
+          <div class="status"> {{ count }} 条记录</div>
+        </div>
         <ul class="list">
           <li v-for="(item,index) in list" :key="index" @click="props?.onCall(item)">
             <div class="thum">
@@ -14,7 +21,7 @@
             <div class="content">
               <div class="title">{{ item.title }}</div>
               <div class="intro">{{ item.intro }}</div>
-              <div class="tags"></div>
+              <div class="label"></div>
             </div>
           </li>
         </ul>
@@ -24,35 +31,54 @@
 </template>
 
 <script setup>
-import { inject, reactive, toRefs } from "vue";import {apiFetch} from '../../utils'
+import { inject, onMounted, reactive, toRefs } from "vue";import {apiFetch} from '../../utils'
 defineOptions({ name: 'y-search',inheritAttrs:false });const props = defineProps(['onCall','onClose']);
 const state = reactive({
   ref:null,
   query:'',
   count:0,
+  method:'welcome',
+  navbar:[
+    {name:'全部',method:'welcome'},
+    {name:'视频',method:'video'},
+    {name:'文章',method:'article'},
+    {name:'购物',method:'goods'},
+    {name:'文件',method:'drive'},
+  ],
   list:[],
   show:false,
   timer:null
 })
+onMounted(()=>{
+  callSearch()
+})
+// 更换栏目
+const onMethod = (value)=>{
+  state.method = value;callSearch();
+}
 const onSearch = (e)=>{
   clearTimeout(state.timer);state.timer = setTimeout(()=>{
-    let {query} = state
-    apiFetch('search','drive',{q:query}).then(res=>{
-      if(res.err == 200){
-        state.count = res.data.count
-        state.list = res.data.list
-      }
-      console.log(res)
-    }).catch(err=>{
-
-    })
+    callSearch()
   },300)
+}
+// 发起查询
+const callSearch = ()=>{
+  let {query,method} = state
+  apiFetch('search',method,{q:query}).then(res=>{
+    if(res.err == 200){
+      state.count = res.data.count
+      state.list = res.data.list
+    }
+    console.log(res)
+  }).catch(err=>{
+
+  })
 }
 const onClose = (e)=>{
   let {ref} = state;
   ref?.contains(e.target) || props?.onClose();
 }
-const {ref,show,query,count,list} = toRefs(state)
+const {ref,show,method,navbar,query,count,list} = toRefs(state)
 </script>
 
 <style lang="scss">
@@ -89,6 +115,23 @@ const {ref,show,query,count,list} = toRefs(state)
           padding: 5px;
           border: 1px solid #eee;
           border-radius: 10px;
+        }
+        .navbar{
+          display: flex; 
+          align-items: center; 
+          justify-content: space-between; 
+          margin-bottom: 10px;
+          border-bottom: 1px solid #e3e3e3;
+          .menus{
+            display: flex; 
+            gap: 10px;
+            cursor: pointer;
+            .active{
+              color: #2196F3;
+              font-weight: bold;
+              border-bottom: 1px solid #2196F3;
+            }
+          }
         }
         .status{
           text-align: right;
