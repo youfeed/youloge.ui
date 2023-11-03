@@ -15,6 +15,7 @@ const hash = getHashtag(),{ukey,OPENURL} = useConfig(),state = reactive({ref:nul
 const props = defineProps(['uuid','mail','money','close','fullscreen','onCall','data']),emit = defineEmits(['success','error','progress']);
 const confog = {...{ukey:ukey,mail:props.mail,close:props.close},...(props?.data || {})};
 onMounted(()=>{
+  
   onMessage('progress',{'msg':'onMounted'});
   window.addEventListener('message',({origin,source,data})=>{
     let {method,params} = data[hash] || {};

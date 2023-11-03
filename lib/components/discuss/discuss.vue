@@ -1,15 +1,15 @@
 <template>
   <div class="y-discuss">
-    <div>0 条评论 · 0 条精选  </div>
+    <div class="format">评论 0  </div>
     <div class="judge">
       <div class="avatar">
         <img :src="`https://img.youloge.com/${profile.avatar}!80`" />
       </div>  
       <div class="textarea">
-        <div class="editor" contenteditable="plaintext-only" ref="ref" v-html="richtext" @blur="onChange"></div>
-        <div class="emoji" tabindex="0">
-          <img class="icon" src="https://open.youloge.com/sticker/default/default!0">
-          <div class="sticker">
+        <div class="editor" contenteditable="plaintext-only" :data-placeholder="placeholder" ref="ref" v-html="richtext" @blur="onChange"></div>
+        <div class="emoji">
+          <img class="icon" tabindex="0" src="https://open.youloge.com/sticker/default/default!0">
+          <div class="sticker" tabindex="0">
             <div class="name">{{  sticker[emoji]?.msg || '' }}</div>
             <div class="icons">
               <template v-for="item in sticker[emoji]?.data" :key="item.uuid">
@@ -24,10 +24,10 @@
               </ul>
             </div>
           </div>
-          <div class="submit" tabindex="-1" v-login="onSubmit">评论</div>
         </div>
+        <div class="submit" tabindex="0" v-login="onSubmit">评论</div>
       </div>
-      <!-- <div>善人结善语 恶语伤人心</div> -->
+      <!-- <div>善人结人心 恶语伤人心</div> -->
     </div>
     <div class="comment">
       <template v-for="(item,index) in review" :key="index">
@@ -36,11 +36,20 @@
             <img :src="`https://img.youloge.com/${item.profile.avatar}!80`" />
           </div>
           <div class="comment">
-            <div class="title"><div class="name">@{{item.profile.name}} </div><div class="onReport">x</div></div>
-            <div class="content">{{item.content}}</div>
+            <div class="title"><div class="name">@{{item.profile.name}} </div><div class="onReport"></div></div>
+            <div class="content">
+              <template v-for="temp in item.content" :key="temp.uuid">
+                <template v-if="temp.type == 'text'">
+                  {{temp.data}}
+                </template>
+                <template v-if="temp.type == 'sticker'">
+                  <img :src="`https://img.youloge.com/sticker/${temp.emoji}/${temp.uuid}!emoji`">
+                </template>
+              </template>
+            </div>
             <div class="mutual">
-              <div>回复</div>
-              <div>{{item.created}}</div>
+              <!-- <div>回复</div> -->
+              <div class="created">{{item.created}}</div>
               <div v-if="item.reply">查看{{item.reply}}条回复</div>
             </div>
             <div class="reply" v-if="item.replys">
@@ -51,7 +60,7 @@
                 <div class="comment">
                   <div class="title">
                     <div class="name">@{{items.profile.name}} 回复 @{{ items.quote.name }}</div>
-                    <div>x</div>
+                    <div></div>
                   </div>
                   <div class="content">{{items.content}}</div>
                 </div>
@@ -66,7 +75,7 @@
 </template>
 <script setup>
 defineOptions({ name: 'y-discuss',inheritAttrs:false });
-import { computed, onMounted, reactive, toRefs } from 'vue';import {apiFetch,vipFetch} from "../../utils";
+import { computed, onMounted, reactive, toRefs } from 'vue';import {apiFetch,vipFetch,useStorage} from "../../utils";
 const props = defineProps({ uuid:String })
 const state = reactive({ 
   uuid:null,
@@ -77,6 +86,9 @@ const state = reactive({
   count:0,
   limit:10,
   offset:0,
+  // placeholder:'善人结人心 恶语伤人心',
+  // placeholder:'只能发表一次评论~',
+  placeholder:'回复 惺惺惜惺惺@25489654',
   profile:{
     uuid:'',
     avatar:'FjjHFE7RwJqfjiwM9aqL4G53kPv3'
@@ -134,11 +146,22 @@ const state = reactive({
 onMounted(()=>{
   state.uuid = props.uuid
   state.src = `https://open.youloge.com/discuss`;
-  onReview();onMainfest();onSticker()
+  onReview();onMainfest();onSticker();
+
+  onProfile()
+  window.addEventListener("storage", (e) => onProfile());
 })
+// 处理登录
+const onProfile = ()=>{
+  let {uuid,avatar} = useStorage();
+  state.profile.uuid = uuid
+  state.profile.avatar = avatar
+  console.log('onProfile',)
+}
 const onReview = ()=>{
   let {uuid,limit,offset} = state
   apiFetch('discuss','review',{uuid:uuid,limit:limit,offset:offset}).then(res=>{
+    state.review = res.data;
     console.log(res)
   })
 }
@@ -160,8 +183,8 @@ const onReport = (item)=>{
 }
 // 提交评论 
 const onSubmit = (e)=>{
+  console.log('html');
   let {uuid,ref} = state;let html = [];
-  const list = ref.childNodes;
   ref.childNodes.forEach((is)=>{
     let type = is.nodeName.replace('#','').toLowerCase();
     let action = {
@@ -180,9 +203,11 @@ const onSubmit = (e)=>{
   // replys 不为null 表示回复xxx评论 
   vipFetch('discuss','submit',{uuid:uuid,html:html}).then(res=>{
     console.log(res)
+    onReview()
   }).catch(err=>{
     console.log(err)
   })
+  ref.innerHTML = ''
   console.log(html);
 }
 // 加载表情包
@@ -220,12 +245,16 @@ const addEmoji = (item) =>{
   range.insertNode(fragment.lastChild)
   range.setStart(ref,range.endOffset);
 }
-const {ref,src,richtext,profile,review,emoji,mainfest,sticker} = toRefs(state)
+const {ref,src,richtext,placeholder,profile,review,emoji,mainfest,sticker} = toRefs(state)
 </script>
 <style lang="scss">
 .y-discuss{
   border: 1px solid #eee;
   border-radius: 5px;
+  .format{
+    font-size: 20px;
+    padding: 5px;
+  }
   .judge{
     padding: 10px;
     display: flex;
@@ -244,9 +273,10 @@ const {ref,src,richtext,profile,review,emoji,mainfest,sticker} = toRefs(state)
       padding: 5px;
       border-radius: 5px;
       &:focus-within{
+        min-height: 120px;
         box-shadow: 1px 1px 4px #acacac;
       }
-      &:focus-within .emoji{
+      &:focus-within .emoji,&:focus-within .submit{
         display: block;
       }
       .editor{
@@ -254,6 +284,10 @@ const {ref,src,richtext,profile,review,emoji,mainfest,sticker} = toRefs(state)
         width: 100%;
         outline: 0;
         padding-bottom: 20px;
+        &:empty:before {
+          content: attr(data-placeholder);
+          color: #acacac;
+        }
         img{
           display: inline;
         }
@@ -274,16 +308,6 @@ const {ref,src,richtext,profile,review,emoji,mainfest,sticker} = toRefs(state)
           height: 18px;
           width: 18px;
         }
-        .submit{
-          position: absolute;
-          bottom: 0;
-          right: 0;
-          cursor: pointer;
-          color: #eee;
-          background: #4CAF50;
-          border-radius: 5px;
-          padding: 5px 10px;
-        }
         .sticker{
           display: none;
           position: absolute;
@@ -293,7 +317,7 @@ const {ref,src,richtext,profile,review,emoji,mainfest,sticker} = toRefs(state)
           left: -5px;
           border-radius: 5px;
           width: 320px;
-          
+         
           .name{
             color: #333;
             font-size: 14px;
@@ -319,6 +343,17 @@ const {ref,src,richtext,profile,review,emoji,mainfest,sticker} = toRefs(state)
           }
         }
       }
+      .submit{
+        display: none;
+        position: absolute;
+        bottom: 5px;
+        right: 5px;
+        cursor: pointer;
+        color: #eee;
+        background: #2196F3;
+        border-radius: 5px;
+        padding: 2px 10px;
+      }
     }
   }
   .review{
@@ -329,23 +364,34 @@ const {ref,src,richtext,profile,review,emoji,mainfest,sticker} = toRefs(state)
       background: #f2f2f2;
     }
     .comment{
-      flex: auto;
+      flex: 1;
+      white-space: pre-line;
+      .title{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .content{
+        padding: 10px 0;
+        img{
+          display: inline;
+        }
+      }
     }
     .avatar{
       width: 60px;
       height: 60px;
       margin-right: 10px;
     }
-    .title{
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
     .mutual{
       display: flex;
       align-items: center;
-      // justify-content: space-between;
       gap: 10px;
+      .created{
+        font-size: 14px;
+        color: #999;
+      }
+      // justify-content: space-between;
     }
   }
   .reply{
