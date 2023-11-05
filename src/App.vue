@@ -7,9 +7,9 @@
   <main max-w-200 mx-a>
 
     <div>-----------<a @click="onGoods">点击加载 useGoods</a>-----------</div>
-    <div>-----------video-----------</div>
+    <div style="height: 100vh;">-----------video-----------</div>
     
-    <y-discuss uuid="123456"></y-discuss>
+    <y-discuss uuid="123456" @navigate="onNavigate"></y-discuss>
     
     <!-- <y-video 
     uuid="8ZhtcE2n7wkp4Ho12RorUeYWytAtY" 
@@ -87,6 +87,11 @@ console.log('useStorage', useStorage('_grecaptcha'))
 const useMessage = inject('useMessage')
 const onSearch = (data)=>{
   console.log('onSearch', data)
+}
+const onNavigate = (data)=>{
+  let {uuid} = data
+  window.open(`https://youloge.com/profile?u=${uuid}`,'profile')  
+  console.log('onNavigate', data)
 }
 let useShopcart = inject('useShopcart')
 const onGoods = ()=>{

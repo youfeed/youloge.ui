@@ -1,14 +1,24 @@
 <template>
-  <div class="y-discuss">
-    <div class="format">评论 0  </div>
+  <div class="y-discuss" ref="ref">
+    <div class="format">
+      <div>评论 {{count}}</div>
+      <div>
+        <select list="sort" value="最新评论">
+          <option value="最新评论">最新评论</option>
+          <option value="精选评论">精选评论</option>
+          <option value="拉黑评论">拉黑评论</option>
+          <option value="置顶评论">置顶评论</option>
+        </select>
+      </div>
+    </div>
     <div class="judge">
       <div class="avatar">
         <img :src="`https://img.youloge.com/${profile.avatar}!80`" />
-      </div>  
+      </div>
       <div class="textarea">
-        <div class="editor" contenteditable="plaintext-only" :data-placeholder="placeholder" ref="ref" v-html="richtext" @blur="onChange"></div>
+        <div class="editor" contenteditable="plaintext-only" :data-placeholder="placeholder" ref="editor" v-html="richtext" @blur="onChange"></div>
         <div class="emoji">
-          <img class="icon" tabindex="0" src="https://open.youloge.com/sticker/default/default!0">
+          <img class="icon" @click="onMainfest" tabindex="0" src="https://open.youloge.com/sticker/default/default!0">
           <div class="sticker" tabindex="0">
             <div class="name">{{  sticker[emoji]?.msg || '' }}</div>
             <div class="icons">
@@ -27,16 +37,15 @@
         </div>
         <div class="submit" tabindex="0" v-login="onSubmit">评论</div>
       </div>
-      <!-- <div>善人结人心 恶语伤人心</div> -->
     </div>
     <div class="comment">
       <template v-for="(item,index) in review" :key="index">
         <div class="review">
-          <div class="avatar">
+          <div class="avatar" @click="onNavigate(item.profile)">
             <img :src="`https://img.youloge.com/${item.profile.avatar}!80`" />
           </div>
           <div class="comment">
-            <div class="title"><div class="name">@{{item.profile.name}} </div><div class="onReport"></div></div>
+            <div class="title"><div class="name" @click="onNavigate(item.profile)">{{item.profile.name}} {{ item.profile.nick ? `@${item.profile.nick}` : '' }} </div><div class="onReport"></div></div>
             <div class="content">
               <template v-for="temp in item.content" :key="temp.uuid">
                 <template v-if="temp.type == 'text'">
@@ -76,63 +85,29 @@
 <script setup>
 defineOptions({ name: 'y-discuss',inheritAttrs:false });
 import { computed, onMounted, reactive, toRefs } from 'vue';import {apiFetch,vipFetch,useStorage} from "../../utils";
-const props = defineProps({ uuid:String })
+const props = defineProps({ uuid:String }),emit = defineEmits(['navigate']);
 const state = reactive({ 
   uuid:null,
   ref:null,
   src:null,
+  editor:null,
   range:null,
   richtext:'',
   count:0,
   limit:10,
   offset:0,
-  // placeholder:'善人结人心 恶语伤人心',
+  plaintext:null,
+  placeholder:'善人结人心 恶语伤人心',
   // placeholder:'只能发表一次评论~',
-  placeholder:'回复 惺惺惜惺惺@25489654',
+  // placeholder:'回复 惺惺惜惺惺@25489654',
   profile:{
     uuid:'',
     avatar:'FjjHFE7RwJqfjiwM9aqL4G53kPv3'
   },
-  review:[
-    {
-      uuid:'子评论UUID',
-      profile:{
-        name:'152',
-        avatar:'FjjHFE7RwJqfjiwM9aqL4G53kPv3'
-      },
-      like:2,
-      content:'233',
-      created:'2023-10-15 14:46:33'
-    },
-    {
-      uuid:'子评论UUID',
-      profile:{
-        name:'152',
-        avatar:'FjjHFE7RwJqfjiwM9aqL4G53kPv3'
-      },
-      content:'233',
-      created:'2023-10-15 14:46:33',
-      reply:1,
-      replys:[
-        {
-          profile:{
-            name:'152',
-            avatar:'FjjHFE7RwJqfjiwM9aqL4G53kPv3'
-          },
-          quote:{
-            name:'594415',
-            avatar:'FjjHFE7RwJqfjiwM9aqL4G53kPv3'
-          },
-          content:'ssss',
-          like:0,
-          created:'2023-10-15 14:46:33'
-        }
-      ]
-    },
-  ],
+  review:[],
   emoji:'emoticon',
-  mainfest:{},
-  sticker:[]
+  mainfest:[],
+  sticker:{}
 })
 /**
  * 1. 根据UUID 获取评论数据
@@ -146,11 +121,23 @@ const state = reactive({
 onMounted(()=>{
   state.uuid = props.uuid
   state.src = `https://open.youloge.com/discuss`;
-  onReview();onMainfest();onSticker();
-
-  onProfile()
-  window.addEventListener("storage", (e) => onProfile());
+  let io = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        observer.unobserve(entry.target);
+        onReady()
+      }
+    });
+  });
+  io.observe(state.ref);
+  // onReview();onMainfest();onSticker();onProfile()
+  // window.addEventListener("storage", (e) => onProfile());
 })
+// 准备完成
+const onReady = ()=>{
+  onProfile();
+  onReview();
+}
 // 处理登录
 const onProfile = ()=>{
   let {uuid,avatar} = useStorage();
@@ -171,6 +158,10 @@ const onReplys = (item)=>{
     console.log(res)
   })
 }
+// 路由跳转
+const onNavigate = (profile)=>{
+  emit('navigate',profile)
+}
 // 保存光标
 const onChange = (e)=>{
   var selection = window.getSelection()
@@ -183,9 +174,8 @@ const onReport = (item)=>{
 }
 // 提交评论 
 const onSubmit = (e)=>{
-  console.log('html');
-  let {uuid,ref} = state;let html = [];
-  ref.childNodes.forEach((is)=>{
+  let {uuid,editor} = state;let html = [];
+  editor.childNodes.forEach((is)=>{
     let type = is.nodeName.replace('#','').toLowerCase();
     let action = {
       'text':()=>{
@@ -198,23 +188,27 @@ const onSubmit = (e)=>{
     }
     action[type] && action[type]();
   });
+  if(html.length == 0){ return false }
   // uuid 必须
   // review 不为null 表示新评论
-  // replys 不为null 表示回复xxx评论 
+  // replys 不为null 表示回复xxx评论
   vipFetch('discuss','submit',{uuid:uuid,html:html}).then(res=>{
     console.log(res)
     onReview()
   }).catch(err=>{
     console.log(err)
   })
-  ref.innerHTML = ''
-  console.log(html);
+  editor.innerHTML = ''
 }
 // 加载表情包
 const onMainfest = ()=>{
-  fetch('https://open.youloge.com/sticker/mainfest.json').then(r=>r.json()).then(res=>{
-    state.mainfest = res.data;
-  })
+  let [frist] = state.mainfest;
+  if(frist == undefined){
+    fetch('https://open.youloge.com/sticker/mainfest.json').then(r=>r.json()).then(res=>{
+      state.mainfest = res.data;
+      onSticker()
+    })
+  }
 }
 // 表情包详情
 const onSticker = ()=>{
@@ -232,28 +226,29 @@ const tabMainfest= (item) =>{
 // 添加表情
 const addEmoji = (item) =>{
   let {uuid,text} = item
-  let {ref,emoji,range} = state;
-  // ref.focus();
-  console.log(item,range)
-  // 返回插入符号当前位置的selection对象
-  // var selection = window.getSelection()
-  // 获取包含当前节点的文档片段
-  // var range = selection.getRangeAt(0)
-  // 创建需追加到光标处节点的文档片段
+  let {emoji,range} = state;
   var fragment = range.createContextualFragment(`<img src="https://img.youloge.com/sticker/${emoji}/${uuid}!emoji" data-emoji="${emoji}" data-uuid="${uuid}">`)
-  // 将创建的文档片段插入到光标处
   range.insertNode(fragment.lastChild)
-  range.setStart(ref,range.endOffset);
+  range.setStart(range.startContainer,range.endOffset);
 }
-const {ref,src,richtext,placeholder,profile,review,emoji,mainfest,sticker} = toRefs(state)
+const {ref,editor,src,count,richtext,placeholder,profile,review,emoji,mainfest,sticker} = toRefs(state)
 </script>
 <style lang="scss">
 .y-discuss{
   border: 1px solid #eee;
   border-radius: 5px;
+  margin: 10px 0;
   .format{
     font-size: 20px;
-    padding: 5px;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    .dot-r{
+      height: 2px;
+      width: 2px;
+      background: #f00;
+    }
   }
   .judge{
     padding: 10px;
@@ -356,6 +351,10 @@ const {ref,src,richtext,placeholder,profile,review,emoji,mainfest,sticker} = toR
       }
     }
   }
+  .comment{
+    max-height: 400px;
+    overflow-y: auto;
+  }
   .review{
     padding: 10px;
     display: flex;
@@ -370,9 +369,12 @@ const {ref,src,richtext,placeholder,profile,review,emoji,mainfest,sticker} = toR
         display: flex;
         align-items: center;
         justify-content: space-between;
+        .name{
+          cursor: pointer;
+        }
       }
       .content{
-        padding: 10px 0;
+        padding: 5px 0;
         img{
           display: inline;
         }
@@ -382,6 +384,7 @@ const {ref,src,richtext,placeholder,profile,review,emoji,mainfest,sticker} = toR
       width: 60px;
       height: 60px;
       margin-right: 10px;
+      cursor: pointer;
     }
     .mutual{
       display: flex;

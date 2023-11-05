@@ -20,6 +20,7 @@ createApp(App).use(youloge,{
 ```
 
 ### 更新日志
+- 1.9.4 新增`y-discuss` 评论组件 跳转个人主页由开发者控制`@navigate 事件`
 - 1.8.9 新增`useShopcart`套餐下单组件，作为商品购物的前置条件(配合`usePayment`食用)
 - 1.8.4 新增`v-search`搜索指令，可以在div上绑定弹窗搜索页面
 - 1.8.0 优化`useLoading useFetch` 互相嵌套逻辑`useFetch 默认mask:true`
