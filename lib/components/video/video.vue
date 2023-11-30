@@ -7,10 +7,10 @@
 defineOptions({ name: 'y-video',inheritAttrs:false });
 import {getHashtag,useConfig} from '../../utils'
 import { onMounted, reactive, toRefs } from "vue";
-const hash = getHashtag(),{ukey,OPENURL} = useConfig(),state = reactive({ref:null,src:`${OPENURL}/video${hash}`});
+const hash = getHashtag(),{UKEY,OPENURL} = useConfig(),state = reactive({ref:null,src:`${OPENURL}/video${hash}`});
 const emit = defineEmits(['success','error','progress']);
 const props = defineProps({ poster:String,uuid:String,dash:String,m3u8:String,flv:String,mp4:String });
-const confog = {...{ukey:ukey,poster:props.poster,uuid:props.uuid,dash:props.dash,m3u8:props.m3u8,flv:props.flv,mp4:props.mp4},...(props?.data || {})};
+const confog = {...{ukey:UKEY,poster:props.poster,uuid:props.uuid,dash:props.dash,m3u8:props.m3u8,flv:props.flv,mp4:props.mp4},...(props?.data || {})};
 onMounted(()=>{
   // state.src = `http://localhost:5173/video.html${hash}`
   window.addEventListener('message',({origin,source,data})=>{

@@ -1,5 +1,6 @@
 <template>
     <div class="container">wallte/index{{ msg }}</div>
+    <a href="#hello">点击加载 HashView#hello</a>
 </template>
 
 <script>

@@ -3,10 +3,12 @@
   <y-header aria="网盘" logo="Youloge" @search="onSearch"></y-header>
   
 <div>
-  <hash-view></hash-view>
+  <!-- <hash-view></hash-view> -->
   <main max-w-200 mx-a>
 
     <div>-----------<a @click="onGoods">点击加载 useGoods</a>-----------</div>
+    <div>-----------<a href="#hello">点击加载 HashView#hello</a>-----------</div>
+    <div>-----------<a href="#wallet/index">点击加载 HashView#wallet/index</a>-----------</div>
     <div style="height: 100vh;">-----------video-----------</div>
     
     <y-discuss uuid="123456" @navigate="onNavigate"></y-discuss>

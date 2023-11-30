@@ -11,9 +11,9 @@ import { onMounted, reactive, toRefs,inject } from "vue";
 </script>
 <script setup>
 defineOptions({ name: 'y-login',inheritAttrs:false });
-const hash = getHashtag(),{ukey,OPENURL} = useConfig(),state = reactive({ref:null,src:`${OPENURL}/login${hash}`});
+const hash = getHashtag(),{UKEY,OPENURL} = useConfig(),state = reactive({ref:null,src:`${OPENURL}/login${hash}`});
 const props = defineProps(['uuid','mail','money','close','fullscreen','onCall','data']),emit = defineEmits(['success','error','progress']);
-const confog = {...{ukey:ukey,mail:props.mail,close:props.close},...(props?.data || {})};
+const config = {...{ukey:UKEY,mail:props.mail,close:props.close},...(props?.data || {})};
 onMounted(()=>{
   
   onMessage('progress',{'msg':'onMounted'});
@@ -22,7 +22,7 @@ onMounted(()=>{
     if(state.src.startsWith(origin) && method){
       let work = {
         'ready':()=>{
-          source.postMessage({[hash]:{method:'init',params:confog}},origin);
+          source.postMessage({[hash]:{method:'init',params:config}},origin);
           onMessage('progress',{msg:'配置初始化'});
         },
         'success':()=>{onMessage('success',params)},

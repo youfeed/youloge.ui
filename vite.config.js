@@ -1,9 +1,9 @@
 import { defineConfig } from 'vite'
+import {resolve} from 'path'
 import vue from '@vitejs/plugin-vue'
 import UnoCSS from 'unocss/vite'
 
 export default defineConfig({
-  plugins: [vue(),UnoCSS()],
   build:{
     sourcemap:false,
     lib: {
@@ -22,6 +22,12 @@ export default defineConfig({
       },
     }
   },
+  resolve:{
+    alias:{
+      '@lib':resolve(__dirname, './lib')
+    }
+  },
+  plugins: [vue(),UnoCSS()],
   css:{
     preprocessorOptions:{
       scss:{

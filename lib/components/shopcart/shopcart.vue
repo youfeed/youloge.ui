@@ -7,9 +7,9 @@
 defineOptions({ name: 'y-shopcart',inheritAttrs:false });
 import {getHashtag,useConfig} from '../../utils'
 import { onMounted, reactive, toRefs,markRaw } from "vue";
-const hash = getHashtag(),{ukey,OPENURL} = useConfig(),state = reactive({ref:null,src:`${OPENURL}/shopcart${hash}`});
+const hash = getHashtag(),{UKEY,OPENURL} = useConfig(),state = reactive({ref:null,src:`${OPENURL}/shopcart${hash}`});
 const props = defineProps(['uuid','mail','close','fullscreen','onCall','data']),emit = defineEmits(['success','error','progress']);
-const config = {...{uuid:props.uuid,mail:props.mail,close:props.close,fullscreen:props.fullscreen},...{ukey:ukey},...(props?.data || {})};
+const config = {...{uuid:props.uuid,mail:props.mail,close:props.close,fullscreen:props.fullscreen},...{ukey:UKEY},...(props?.data || {})};
 // {uuid:props.uuid,mail:props.mail,close:props.close,fullscreen:props.fullscreen}
 onMounted(()=>{
   // state.src = `http://localhost:5175/shopcart.html${hash}`

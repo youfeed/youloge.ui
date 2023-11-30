@@ -8,7 +8,7 @@
 export default { name:'yAd'}
 </script>
 <script setup>
-import { defineProps, reactive, onMounted,toRefs } from 'vue'
+import {  reactive, onMounted,toRefs } from 'vue'
 const props = defineProps({
   type: {
     type: String,
