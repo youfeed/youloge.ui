@@ -2,25 +2,24 @@
   <Teleport to="body" v-if="opener">
     <div class="y-hash-view">
       <div class="y-hash-capsule">
-        <div @click="Refresh">刷新</div>
+        <div @click="refresh">刷新</div>
         <div @click="onClose">关闭</div>
       </div>
-      <div class="y-hash-container">
-        <transition>
+      <transition name="fade" mode="out-in" appear>
+        <div class="y-hash-container">
           <component :is="reload" :key="compkey"></component>
-        </transition>
-      </div>
+        </div>
+      </transition>
     </div>
   </Teleport>
 </template>
-
 <script setup>
-defineOptions({name:'HashView'})
-import {onMounted,inject, computed, reactive,defineAsyncComponent, onBeforeMount, toRefs, onUnmounted } from 'vue'
-const useHash  = inject('useHash');
-console.log('useHash',useHash)
+import {useAuth} from '@lib/utils';
+import useLogin from '@lib/functions/login/login';
+import {onMounted, computed, reactive,defineAsyncComponent, onBeforeMount, toRefs, onUnmounted, inject } from 'vue'
+const routes = inject('useRoutes') || [];
 const state = reactive({
-  routes:useHash,
+  routes:routes,
   cursor:0,
 
   opener:false,
@@ -30,30 +29,32 @@ const reload = computed(()=>{
   let {routes,cursor} = state;
   let active = routes[cursor];
   return defineAsyncComponent({loader:active.component})
-}) 
+})
 onBeforeMount(()=>window.addEventListener("hashchange", onChange,false))
 onUnmounted(()=>window.removeEventListener("hashchange", onChange,false))
-onMounted(()=>{
-  onChange();
-})
+// 前置任务(此时无法)
+onMounted(()=>onChange())
+const onOpen = (cursor) =>{
+  document.body.style.overflow = 'hidden';
+  state.opener = true;
+  state.cursor = cursor;
+}
 // Todo: v-login 
 const onChange = () =>{
   let value = location.hash.slice(1);
   value.at(0) == '/' || (value = `/${value}`);
   value.at(-1) == '/' && (value = `${value}index`);
   let cursor = state.routes.findIndex(item=>item.path === value);
-  if(cursor != -1){
-    document.body.style.overflow = 'hidden';
-    state.opener = true;
-    state.cursor = cursor;
-  }
+  cursor > -1 && (useAuth() ? onOpen(cursor) : useLogin().then(res=>{
+    console.log(res);onOpen(cursor)
+  }));
 }
 const onClose = () =>{
   document.body.style.overflow = 'auto';
   location.hash = '';
   state.opener = false;
 }
-const Refresh = () =>{
+const refresh = () =>{
   state.compkey += 1
 }
 const {compkey,opener} = toRefs(state)
@@ -65,7 +66,7 @@ const {compkey,opener} = toRefs(state)
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 2147483647;
+  z-index: 2147483640;
   background: #f2f2f2f2;
   .y-hash-capsule{
     position: fixed;
@@ -76,7 +77,7 @@ const {compkey,opener} = toRefs(state)
     border-radius: 20px;
     overflow: hidden;
     cursor: pointer;
-    z-index: 9999999999;
+    z-index: 2147483641;
     color: #222;
     font-weight: bold;
     box-shadow: 1px 1px 3px #333;

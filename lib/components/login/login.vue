@@ -6,7 +6,7 @@
 
 <script>
 export default { name:'yLogin'}
-import {getHashtag,useConfig} from '../../utils'
+import {getHashtag,useConfig} from '@lib/utils'
 import { onMounted, reactive, toRefs,inject } from "vue";
 </script>
 <script setup>

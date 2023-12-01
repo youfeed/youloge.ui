@@ -1,9 +1,8 @@
 
 <template>
   <y-header aria="网盘" logo="Youloge" @search="onSearch"></y-header>
-  
 <div>
-  <!-- <hash-view></hash-view> -->
+  <hash-view></hash-view>
   <main max-w-200 mx-a>
 
     <div>-----------<a @click="onGoods">点击加载 useGoods</a>-----------</div>

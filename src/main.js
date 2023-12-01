@@ -6,7 +6,6 @@ import App from './App.vue'
 import Layout from './components/Layout.vue'
 // import youloge, {functions,version,useLoading,useMessage} from '../lib/index.js'
 import  youloge,{useLoading} from '../lib/index.js'
-console.log('app',youloge,useLoading)
 const app = createApp(App)
 // * 处理路由
 const modules = import.meta.glob(['/views/*.vue','/views/*/*.vue','/views/*/*/*.vue']);

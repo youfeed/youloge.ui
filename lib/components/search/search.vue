@@ -31,7 +31,7 @@
 </template>
 
 <script setup>
-import { inject, onMounted, reactive, toRefs } from "vue";import {apiFetch} from '../../utils'
+import { inject, onMounted, reactive, toRefs } from "vue";import {apiFetch} from '@lib/utils'
 defineOptions({ name: 'y-search',inheritAttrs:false });const props = defineProps(['onCall','onClose']);
 const state = reactive({
   ref:null,

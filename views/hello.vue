@@ -6,12 +6,14 @@
 export default { name:'hello',icon:'icon'}
 </script>
 <script setup>
-import { onMounted, reactive, toRefs } from 'vue'
+import { inject, onMounted, reactive, toRefs } from 'vue'
+const useFetch = inject('useFetch')
 const state = reactive({
-    msg:'265165'
+  msg:'265165'
 })
 onMounted(() => {
-    state.msg = Math.random().toString(16).slice(2)
+  console.log(useFetch())
+  state.msg = Math.random().toString(16).slice(2)
 })
 const {msg} = toRefs(state)
 </script>
