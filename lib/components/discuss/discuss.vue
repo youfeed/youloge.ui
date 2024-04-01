@@ -130,8 +130,6 @@ onMounted(()=>{
     });
   });
   io.observe(state.ref);
-  // onReview();onMainfest();onSticker();onProfile()
-  // window.addEventListener("storage", (e) => onProfile());
 })
 // 准备完成
 const onReady = ()=>{
@@ -147,14 +145,14 @@ const onProfile = ()=>{
 }
 const onReview = ()=>{
   let {uuid,limit,offset} = state
-  apiFetch('discuss','review',{uuid:uuid,limit:limit,offset:offset}).then(res=>{
+  apiFetch('discuss/review',{uuid:uuid,limit:limit,offset:offset}).then(res=>{
     state.review = res.data;
     console.log(res)
   })
 }
 const onReplys = (item)=>{
   let {uuid,limit,offset} = item
-  apiFetch('discuss','replys',{uuid:uuid,limit:limit,offset:offset}).then(res=>{
+  apiFetch('discuss/replys',{uuid:uuid,limit:limit,offset:offset}).then(res=>{
     console.log(res)
   })
 }
@@ -192,7 +190,7 @@ const onSubmit = (e)=>{
   // uuid 必须
   // review 不为null 表示新评论
   // replys 不为null 表示回复xxx评论
-  vipFetch('discuss','submit',{uuid:uuid,html:html}).then(res=>{
+  vipFetch('discuss/submit',{uuid:uuid,html:html}).then(res=>{
     console.log(res)
     onReview()
   }).catch(err=>{

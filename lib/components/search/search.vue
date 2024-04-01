@@ -64,7 +64,7 @@ const onSearch = (e)=>{
 // 发起查询
 const callSearch = ()=>{
   let {query,method} = state
-  apiFetch('search',method,{q:query}).then(res=>{
+  apiFetch(`search/${method}`,{q:query}).then(res=>{
     if(res.err == 200){
       state.count = res.data.count
       state.list = res.data.list

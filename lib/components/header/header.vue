@@ -5,7 +5,7 @@
         <p>&#8801;  {{props.logo}}<sup font-size-2 c-dark-3>{{aria}}</sup></p>
       </div>
       <div class="placeholder" v-search="onSearch">
-        <div>🔍 搜索一下</div>
+        <div>🔍</div>
       </div>
 
       <slot name="right"></slot>
@@ -43,9 +43,7 @@
 defineOptions({ name: 'y-header',inheritAttrs:false });
 import { onMounted, toRefs, reactive, computed, inject } from 'vue'
 const emit = defineEmits('search');
-import useStorage from "../../functions/storage";
-import {useConfig} from '../../utils'
-const useFetch = inject('useFetch')
+import {useConfig,useStorage,apiFetch} from '@lib/utils'
 const props = defineProps({
   aria:{
     type:String,
@@ -68,7 +66,8 @@ const state = reactive({
 })
 onMounted(()=>{
   state.profile = useStorage('youloge')
-  // console.log('onMounted',useConfig(),useFetch)
+
+  console.log('onMounted',state.profile)
 })
 // 菜单点击
 const onLogo = ()=>{
