@@ -43,7 +43,7 @@
 defineOptions({ name: 'y-header',inheritAttrs:false });
 import { onMounted, toRefs, reactive, computed, inject } from 'vue'
 const emit = defineEmits('search');
-import {useConfig,useStorage,apiFetch} from '@lib/utils'
+import {useAuth,useConfig,useStorage,apiFetch} from '@lib/utils'
 const props = defineProps({
   aria:{
     type:String,
@@ -66,12 +66,12 @@ const state = reactive({
 })
 onMounted(()=>{
   state.profile = useStorage('youloge')
-
-  console.log('onMounted',state.profile)
+  // console.log('onMounted',state.profile)
+  useAuth() && onProfile();
 }) 
 // 菜单点击
 const onLogo = ()=>{
-  // state.aside = !state.aside
+  state.aside = !state.aside
 }
 // 搜索点击
 const onSearch = (data)=>emit('search',data)

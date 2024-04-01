@@ -1,26 +1,32 @@
 <template>
-  <div class="y-rich">
-    <RichLoop :list="content"></RichLoop>
+  <div class="y-rich" v-html="content">
   </div>
 </template>
 <script setup>
 defineOptions({ name: 'y-rich',inheritAttrs:false });
-import RichLoop from './loop.vue'
 import { computed, onMounted, reactive, toRefs } from 'vue';
+import {apiFetch,vipFetch,useStorage} from "@lib/utils";
 const emit = defineEmits(['onEscape'])
 const props = defineProps({ uuid:String })
 const state = reactive({
   ref:null,
+  metadata:{},
   content:[]
 })
 onMounted(()=>{
-  fetch(`https://cdn.youloge.com/${props.uuid}?9`).then(r=>r.json()).then(content=>{
+  // 提取文章元数据
+  apiFetch('article/info',{uuid:props.uuid}).then(({err,msg,data})=>{
+    err == 200 ? (state.metadata = res.data,onContent()) : console.log(msg)
+  })
+})
+// 提取文章富文本
+const onContent = ()=>{
+  fetch(`https://cdn.youloge.com/${props.uuid}?9`).then(r=>r.text()).then(content=>{
     console.log(content)
     state.content=content
   })
-})
-
-const {ref,src,tag,content} = toRefs(state)
+}
+const {ref,src,metadata,content} = toRefs(state)
 </script>
 <style lang="scss">
 .y-rich{
