@@ -68,7 +68,7 @@ onMounted(()=>{
   state.profile = useStorage('youloge')
 
   console.log('onMounted',state.profile)
-})
+}) 
 // 菜单点击
 const onLogo = ()=>{
   // state.aside = !state.aside
