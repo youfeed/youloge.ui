@@ -4,87 +4,58 @@
 <div>
   <hash-view></hash-view>
   <main max-w-200 mx-a>
+    <y-link type="primary" href="https://www.baidu.com">2333</y-link>
+    <div class="line">
+      <yButton>default</yButton>
+      <yButton type="primary">primary</yButton>
+      <yButton type="secondary">secondary</yButton>
+      <yButton type="accent">accent</yButton>
+      <yButton type="success">success</yButton>
+      <yButton type="info">info</yButton>
+      <yButton type="warning">warning</yButton>
+      <yButton type="error">error</yButton>
+      <yButton type="outline">outline</yButton>
+    </div>
+    <div class="line">
+      <yTable :columns="table_columns"  :data="table_data">
+        <yTableColumn label="姓名" prop="name"></yTableColumn>
+        <yTableColumn label="年龄" prop="age"></yTableColumn>
+        <yTableColumn label="性别" prop="sex"></yTableColumn>
+        <yTableColumn label="操作">
+          <template #default="{ row }">
+            <yButton type="primary" @click="onEdit(row)">编辑</yButton>
+            <yButton type="error" @click="onDelete(row)">删除</yButton>
+          </template>
+        </yTableColumn>
+      </yTable>
+    </div>
 
     <div>-----------<a @click="onGoods">点击加载 useGoods</a>-----------</div>
     <div>-----------<a href="#hello">点击加载 HashView#hello</a>-----------</div>
-    <div>-----------<a href="#wallet/index">点击加载 HashView#wallet/index</a>-----------</div>
-    <div style="height: 100vh;">-----------video-----------</div>
-    
-    <y-discuss uuid="123456" @navigate="onNavigate"></y-discuss>
-    
-    <!-- <y-video 
-    uuid="8ZhtcE2n7wkp4Ho12RorUeYWytAtY" 
-    mp4s="https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_30mb.mp4" 
-    poster="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/byted-player-videos/1.0.0/poster.jpg"
-    m3u8s="//sf1-cdn-tos.huoshanstatic.com/obj/media-fe/xgplayer_doc_video/hls/xgplayer-demo.m3u8"
-    dash="//sf1-cdn-tos.huoshanstatic.com/obj/media-fe/xgplayer_doc_video/dash/xgplayer-demo-dash.mpd"
-    ></y-video> -->
-    <!-- <div>-----------rich-----------</div>
-    <y-rich uuid="YjT7vRkQsCD8Po6gRg8p5C3z1m5Dj"></y-rich>
 
 
-    <div>-----------yPayment- <button bg-blend-color-dodge bg-blue @click="onPayment">usePayment</button> ----------</div>
-    <div id="payment"></div>
-    <div><y-payment data="{}" @success="onSuccess" ></y-payment></div>
-    <div>-----------ylogin-<button bg-blend-color-dodge bg-blue @click="onuseLogin">useLogin</button>----------</div>
-    <button v-login="onLogin" class="bg-blend-color-dodge bg-blue" >v-login</button>
-    <div id="login"></div>
-    <y-login @success="login_success" @error="login_success" @progress="login_success"></y-login>
-    <div class="bg-red">-----------rgb-----------</div>
-    <div><y-rgb value="100">x</y-rgb></div>
-    <div>-----------ads-----------</div>
-    <y-ad style="width: 300px;margin: 0 auto;background: #888;"></y-ad>
-    <div>-----------discuss-----------</div>
-    <y-discuss uuid="Muuid"></y-discuss>
 
-    <div>-----------header-----------</div>
-    
-    <div>-----------label-----------</div>
-    <div>-----------disscus-----------</div>
-    <y-discuss uuid="uuid"></y-discuss>
-    
-    <div>-----------tag-----------</div>
-    <div>-----------dialog-----------</div>
-    <div>
-      <button @click="onDialog('alert')">dialog.alert</button>
-      <button @click="onDialog('confirm')">dialog.confirm</button>
-      <button @click="onDialog('prompt')">dialog.prompt</button>
-      <button @click="onDialog('password')">dialog.password</button>
-    </div>
-    <div class="test" v-ripple>
-      <div >
-        <div style="width: 300px; height: 150px; display: flex; align-items: center; justify-content: center; background: #333; color: #fff;"> useRipple 水波纹按下效果 </div>
-      </div>
-      <div><button v-login="onLogin">触发登录</button></div>
-      <div><button @click="load">加载load</button></div>
-      <div><button v-copy="copy">复制内容</button></div>
-      <div><button @click="onPayment">发起付款</button></div>
-      <div>
-        <button @click="onFetch('api')">网络请求 - api</button>
-        <button @click="onFetch('vip')">网络请求 - vip</button>
-      </div>
-      <div>
-        <button @click="onMessage">useMessage 弹窗</button>
-        <button @click="onPlus">usePlus sso 弹窗</button>
-        <button @click="onLabel">换一组label的data</button>
-        <br/>
-        <button v-login="onLogin">登录指令</button>
-      </div>
-      <div></div>
-      <div></div>
-    </div> -->
   </main>
 </div>
 </template>
 <script setup>
 import { inject, reactive, ref, toRefs } from 'vue'
 
+const table_columns = [
+  { title: '姓名', key: 'name' },
+  { title: '年龄', key: 'age' },
+  { title: '性别', key: 'sex' }
+];
+const table_data = [
+  { name: '张三', age: 20,sex:'男' },
+  { name: '李四', age: 21,sex:'女' },
+  { name: '王五', age: 22,sex:'男' },
+  { name: '赵六', age: 23,sex:'女' },
+];
+
 const useStorage = inject('useStorage')
 const useFetch = inject('useFetch')
 console.log('useStorage', useStorage('_grecaptcha'))
-// const usePayment = inject('usePayment')
-// const useDialog = inject('useDialog')
-// const useLogin = inject('useLogin')
 const useMessage = inject('useMessage')
 const onSearch = (data)=>{
   console.log('onSearch', data)

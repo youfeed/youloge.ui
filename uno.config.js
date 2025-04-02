@@ -6,6 +6,25 @@ export default defineConfig({
     ['f-c-b', 'flex justify-between items-center'],
   ],
   theme:{
+    colors:{
+      primary: '#3498db', // 主色
+      secondary: '#2ecc71', // 辅助色
+      accent: '#e74c3c', // 强调色
+      background: '#ecf0f1', // 背景色
+      text: '#2c3e50', // 文字颜色
+      border: '#bdc3c7', // 边框颜色
+
+      success: '#2ecc71', // 成功色
+      warning: '#f39c12', // 警告色
+      info: '#3498db', // 信息色
+      danger: '#e74c3c', // 危险色
+      default: '#7f8c8d', // 默认色
+    },
+    extend:{
+      fontFamily:{
+        sans: ['Inter var', 'sans-serif'],
+      },
+    },
     breakpoints:{
       sm:'640px',
       md:'768px',
@@ -14,6 +33,11 @@ export default defineConfig({
       xxl:'1536px',
     }
   },
+  safelist:[
+    'bg-primary','bg-secondary','bg-accent','bg-background','bg-text','bg-border',
+    'text-primary','text-secondary','text-accent','text-background','text-text','text-border',
+    'border-primary','border-secondary','border-accent','border-background','border-text','border-border'
+  ],
   presets: [
     presetUno({ attributifyPseudo: true,}),presetAttributify(),
     presetIcons({ scale: 1.2, warn: true}),

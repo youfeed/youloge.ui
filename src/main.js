@@ -1,15 +1,12 @@
 import { createApp } from 'vue'
 
-// import '../dist/index.css'
 import App from './App.vue'
-// import youloge from '../dist/youloge.es'
-import Layout from './components/Layout.vue'
-// import youloge, {functions,version,useLoading,useMessage} from '../lib/index.js'
+
 import  youloge,{useLoading} from '../lib/index.js'
-const app = createApp(App)
+const app = createApp(App);
 // * 处理路由
 const modules = import.meta.glob(['/views/*.vue','/views/*/*.vue','/views/*/*/*.vue']);
-const routes = []
+const routes = [];
 for (const key in modules) {
   const mod = await modules[key]();
   const {name,icon} = mod.default;
