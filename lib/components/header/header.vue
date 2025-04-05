@@ -5,7 +5,7 @@
         <p>&#8801;  {{props.logo}}<sup font-size-2 c-dark-3>{{aria}}</sup></p>
       </div>
       <div class="placeholder" v-search="onSearch">
-        <div>🔍</div>
+        <yIcon name="tdesign:search" size="24"></yIcon>
       </div>
 
       <slot name="right"></slot>
@@ -121,6 +121,9 @@ const {aria,profile,aside} = toRefs(state)
       display: flex;
       height: 100%;
       cursor: pointer;
+      sup{
+        top:-1.5em
+      }
     }
 
   }
