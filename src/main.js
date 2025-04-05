@@ -2,7 +2,7 @@ import { createApp } from 'vue'
 
 import App from './App.vue'
 
-import  youloge,{useLoading} from '../lib/index.js'
+import  youloge from '../lib/index.js'
 const app = createApp(App);
 // * 处理路由
 const modules = import.meta.glob(['/views/*.vue','/views/*/*.vue','/views/*/*/*.vue']);

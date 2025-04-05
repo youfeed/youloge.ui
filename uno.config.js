@@ -26,22 +26,24 @@ export default defineConfig({
       },
     },
     breakpoints:{
-      sm:'640px',
-      md:'768px',
-      lg:'1024px',
-      xl:'1280px',
-      xxl:'1536px',
+      xs: '480px',
+      sm: '576px',
+      md: '768px',
+      lg: '992px',
+      xl: '1200px',
+      xxl: '1600px',
     }
   },
   safelist:[
     'bg-primary','bg-secondary','bg-accent','bg-background','bg-text','bg-border',
     'text-primary','text-secondary','text-accent','text-background','text-text','text-border',
-    'border-primary','border-secondary','border-accent','border-background','border-text','border-border'
+    'border-primary','border-secondary','border-accent','border-background','border-text','border-border',
+    'rounded-none','rounded-sm','rounded-md','rounded-lg','rounded-xl','rounded-2xl','rounded-3xl','rounded-full'
   ],
   presets: [
     presetUno({ attributifyPseudo: true,}),presetAttributify(),
-    presetIcons({ scale: 1.2, warn: true}),
     presetTypography(),
+    presetIcons({ scale: 1.2, warn: true}),
     presetWebFonts({
       provider: 'none',
       fonts: {

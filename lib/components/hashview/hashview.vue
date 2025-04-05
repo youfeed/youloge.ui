@@ -15,7 +15,6 @@
 </template>
 <script setup>
 import {useAuth} from '@lib/utils';
-import useLogin from '@lib/functions/login/login';
 import {onMounted, computed, reactive,defineAsyncComponent, onBeforeMount, toRefs, onUnmounted, inject } from 'vue'
 const routes = inject('useRoutes') || [];
 const state = reactive({
@@ -45,9 +44,7 @@ const onChange = () =>{
   value.at(0) == '/' || (value = `/${value}`);
   value.at(-1) == '/' && (value = `${value}index`);
   let cursor = state.routes.findIndex(item=>item.path === value);
-  cursor > -1 && (useAuth() ? onOpen(cursor) : useLogin().then(res=>{
-    console.log(res);onOpen(cursor)
-  }));
+  cursor > -1 &&  onOpen(cursor);
 }
 const onClose = () =>{
   document.body.style.overflow = 'auto';

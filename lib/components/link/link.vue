@@ -1,9 +1,7 @@
 <template>
   <a
     class="y-link"
-    :class="[
-
-    ]"
+    :class="classed"
     :href="disabled || !href ? undefined : href"
     :target="disabled || !href ? undefined : target"
     @click="handleClick">
@@ -16,30 +14,28 @@ import { computed } from 'vue'
 const props = defineProps({
     type: {
         type: String,
-        values: ['primary', 'success', 'warning', 'info', 'danger', 'default'],
         default: 'default',
+        validator: (value) => ['primary','success', 'warning', 'info', 'danger', 'default'].includes(value)
     },
-    underline: {
-        type: Boolean,
-        default: true,
-    },
-    href: { type: String, default: '' },
     target: {
         type: String,
-        values:['_blank','_parent','_self','_top'],
-        default: '_self',
+        default: '_blank',
+        validator: (value) => ['_blank', '_self', '_parent', '_top'].includes(value)
     },
+    underline: { type: Boolean,default: true },
+    disabled: { type: Boolean,default: false },
+    href: { type: String, default: '/' },
 });
 const emit = defineEmits({
     click: (e) => e instanceof MouseEvent,
 });
 //
-const linkKls = computed(() => {
+const classed = computed(() => {
     return [
-        'y-link',
-        { [`bg-${props.type}`]: props.type },
+        'y-link hover:underline hover:text-blue-500',
+        { [`text-${props.type}`]: props.type },
         { [`y-link-underline`]: props.underline },
-        { 'y-link-disabled': props.disabled }
+        { 'cursor-not-allowed opacity-50': props.disabled }
     ]
 })
 //

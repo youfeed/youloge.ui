@@ -65,10 +65,10 @@ console.log(props.data)
 .y-table {
     width: 100%;
     overflow: auto;
-    box-shadow: 1px 1px 10px 1px #ccc;
     padding: 4px;
+    color: #222;
+    border: 1px solid #eee;
     border-radius: 5px;
-    height: 120px;
     table{
         width: 100%;
     }
@@ -79,12 +79,12 @@ console.log(props.data)
         text-align: center;
     }
     thead th:first-child,tbody td:first-child{
-        color: #f00;
         text-align: left;
+        padding-left: 2%;
     }
     thead th:last-child,tbody td:last-child{
-        color: rgba(0, 0, 0, .5);
         text-align: right;
+        padding-right: 2%;
     }
 }
 </style>

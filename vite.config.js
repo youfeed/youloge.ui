@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import {resolve} from 'path'
 import vue from '@vitejs/plugin-vue'
+import Icons from 'unplugin-icons/vite'
 import UnoCSS from 'unocss/vite'
 
 export default defineConfig({
@@ -27,7 +28,10 @@ export default defineConfig({
       '@lib':resolve(__dirname, './lib')
     }
   },
-  plugins: [vue(),UnoCSS()],
+  plugins: [vue(),UnoCSS(),Icons({
+    autoInstall: true,
+    compiler: 'vue3',
+  })],
   css:{
     preprocessorOptions:{
       scss:{
