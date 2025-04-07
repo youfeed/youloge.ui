@@ -1,32 +1,55 @@
-# 这是一个Youloge.com 配套定制项目(快速上手) 欢迎PR [主仓库] - beta版本
+# Youloge.com 配套定制`Vue3组件库` - beta版本
 
+### 这个库干啥的
+
+这是个`vue3`的组件库，进行高度定制化的自用组件库，很多组件都是配合`youloge.com`一起使用的，如果你仅仅是需要一个UI库开发自己的项目，这个并不适合。
+如果你有自己的网站，那么可以接入`youloge.console`开放平台，我会将某些组件抽离成`js umd`脚本服务,可以单独引入到你自己的网站使用。
+
+在使用该库的时候,你需要申请一对`apikey/secret`密钥对使用，再调用开放接口时候需要`组织凭证apikey`你可以理解为其他开放平台的`APPID`。
+
+平台不区分`官方`和`非官方`，平台用户可以等同于你自己网站用户，比如`云盘服务`,`视频服务`也都是基于`apikey/secret`进行的分发。
+
+### 组件库特点
 - 图标动态引入：不用再担心图标文件体积过大，只需引入图标名称即可
 - 配套简单路由：组件库自带路由，无需再引入路由文件
+- 极简的全局函数方法：可以再样式组件中直接调用全局函数方法
+- 极度精简 体积小 代码简单
+
 
 ### [💡 ⚡️ 🛠️ 📦 🔩 🔑](https://docs.youloge.com/ui/) - 开放文档
 
-> 可以直接引入CDN 即可使用 `54.14 kB │ gzip: 14.87 kB`
+- 直接引入CDN 即可使用 `52.35 kB │ gzip: 15.11 kB`
+- `https://unpkg.com/youloge`或者`https://cdn.jsdelivr.net/npm/youloge`
 
-> `https://unpkg.com/youloge`或者`https://cdn.jsdelivr.net/npm/youloge`
+### NPM 安装
+``` js
+npm install youloge
+
+import { createApp } from 'vue'
+```
+
+### 快速开始
 
 ``` js
 createApp(App).use(youloge,{
-  APIKEY:'', // *必须填写 可以让`v-login` `usePayment` 权限指令自动注入初始化
-  APIURL:'https://api.youloge.com', 
-  VIPURL:'https://www.youloge.com',
-  OPENURL:'',
-  // 可选文件路由 参考文档
+  APIKEY:'', // *必须填写 接口平台组织调用凭证 可以理解为其他开发平台的`APPID`
+  APIURL:'https://api.youloge.com', // inject('apiFetch')的请求地址
+  VIPURL:'https://www.youloge.com', // inject('vipFetch')的请求地址
+  // 可选：载入哈希路由可以实现更丰富得页面功能
   ROUTES:[
-    name:'',
-    path:'',
-    component:'',
-    icon:'...'
+    {
+      name:'', // 路由名称 
+      path:'', // 当URL Hash值为`#{path}`时，默认跳转的页面
+      component:'', // 推荐使用 `defineAsyncComponent` 可以实现动态懒加载
+      icon:'...' // tdesign:activity 图标集:图标名称
+    }
   ]
 }).mount('#app')
 ```
 
 ### 更新日志
 
+- 2.1.1 提炼出全局属性和方法，更好的服务于业务开发
 - 2.1.0 组件库进行重构：重新拆分`样式组件`,`函数组件`,`指令函数`更好得服务于业务开发
 - 1.9.4 新增`y-discuss` 评论组件 跳转个人主页由开发者控制`@navigate 事件`
 - 1.8.9 新增`useShopcart`套餐下单组件，作为商品购物的前置条件(配合`usePayment`食用)
@@ -34,7 +57,7 @@ createApp(App).use(youloge,{
 - 1.8.0 优化`useLoading useFetch` 互相嵌套逻辑`useFetch 默认mask:true`
 - 1.7.3 新增`useStorage`函数组件 仅支持对象读(对象)写(对象覆盖),均返回最新对象
 - 1.7.1 优化项目结构：组件支持尽量多方式调用
-- 1.6.5 更换导出方式，支持按需导入使用: 组件模式正式确认：可以规范化书写新增`组件``指令``函数`
+- 1.6.5 更换导出方式，支持按需导入使用: 组件模式正式确认：可以规范化书写新增`组件`,`指令`,`函数`
 - 1.5.0 去除样式组件，全部采用关键组件集，不倾入代码，组件库定位为`定制小组件`
 - 1.4.9 引入`unocss`来作为基础样式
 - 1.4.8 新增`hashview`组件用于承接`hash文件路由功能`同于动态懒加载组件
@@ -60,12 +83,7 @@ createApp(App).use(youloge,{
 - 0.2.6 新增`useDialog`组件 支持`alert`,`confirm`,`prompt` 三种模式
 - 0.2.5 优化provide 重新封装`fetch`等函数式组件
 
-### 这个库干啥的？
 
-这是个`vue3`的组件库，进行高度定制化的自用组件库，很多组件都是配合`youloge.com`一起使用的，如果你仅仅是需要一个UI库开发自己的项目，这个并不适合。
-如果你有自己的网站，那么可以接入`youloge.console`开放平台，我会将某些组件抽离成`js umd`脚本服务，例如`登录注册`,`支付`,`充值`,`视频播放器`,`音乐播放器`,`团购商城`，可以单独引入到你自己的网站使用。
-
-在使用该库的时候,你需要申请一对`apikey/secret`密钥对使用，在引入使用产生的-收入/广告费/佣金 会结算到你的账户中。平台不怎么区分官方和非官方，比如`云盘服务`,`视频服务`也都是基于`apikey/secret`进行的分发。
 
 
 ### 项目结构
@@ -74,28 +92,36 @@ createApp(App).use(youloge,{
 ``` TREE
 project
 │
-└───lib 不用npm install
+└───lib 开发目录(其他组件库一般叫packages)
 │   │   
 │   │   index.js UI组件库的入口
 │   │
-│   └───components
+│   └───components 页面组件
 │       │   button
 │       │   input
-│       │   components.js 统一导出组件
+│       │   table/index.js 导出文件
 │       │   ...
 │       │   
-│   └───function
+│   └───composables 函数组件
 │       │   alert
-│       │   ...
-│       │   function.js 统一导出函数组件
-│   └───...
-│   
-└───src
-    │   assets 静态资源
-    │   route 路由
-    │   components 组件
-    │   views 视图文件
-    │   ...
+│       │   fetch
+│       │   message
+│       │   storage/index.js 导出文件 
+│   └───directives 指令组件
+│       │   copy
+│       │   ripple/index.js 导出文件 
+│   └───style
+│       │   index.scss 导出文件
+│   └───utils 辅助方法
+│       │   index.js 导出文件
+│   index.js   导出安装方法
+|
+└───src 测试目录
+│   │   assets 静态资源
+│   │   route 路由
+│   │   components 组件
+│   │   views 视图文件
+│   │   ...
 │   vite.config.js 项目默认的配置
 │   libs.config.js 打包组件库配置
 │   package.json   项目依赖和脚本
