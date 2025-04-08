@@ -63,8 +63,9 @@
     </div>
 </template>
 <script setup>
-import  xxx,{exportFunctions,exported} from '../lib/index.js'
+import  {exported} from '../lib/index.js'
 import { inject, reactive, ref, toRefs } from 'vue'
+const useStorage = inject('useStorage'),useMessage = inject('useMessage');
 console.log('useMessage.exported',exported,)
 const table_columns = [
     { title: '姓名', key: 'name' },
@@ -86,8 +87,10 @@ const yMenu_items = [
 const onButtonClick = (data) => {
     console.log(data)
 }
-const useStorage = inject('useStorage')
 
+const onMessage = () => {
+    console.log('onMessage', useMessage('useMessage'))
+}
 console.log('useStorage.then', useStorage('_grecaptcha'))
 
 
