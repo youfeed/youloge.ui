@@ -3,7 +3,18 @@
         <y-header aria="UI" logo="Youloge" @search="onSearch"></y-header>
         <!-- <hash-view></hash-view> -->
         <main max-w-200 mx-a>
-            <yDivider position="left">Icon</yDivider>
+            <yDivider position="left">Timeing -- 计时器</yDivider>
+            <div>
+                <!-- <Suspense> -->
+                    <yTiming time="100" v-slot="$slot">
+                        <!-- <template > -->
+                            icon default==> {{ $slot.days }}
+                        <!-- </template> -->
+                    </yTiming>
+                <!-- </Suspense> -->
+                
+            </div>
+            <yDivider position="left">Icon -- </yDivider>
             <ySpace>
                 <yIcon name="tabler:badge-8k" size="20" color="blue" />
                 <yIcon name="weui:previous2-outlined" size="64" />
