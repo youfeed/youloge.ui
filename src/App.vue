@@ -5,7 +5,7 @@
         <main max-w-200 mx-a>
             <yDivider position="left">Timeing -- 计时器</yDivider>
             <div>
-                <yTimer deadline="2025-04-09 23:15:00" current="2025-04-09 23:14:00" @finish="timerFinish" v-slot="$slot">
+                <yTimer deadline="2025-04-09T16:10:00.000Z" current="2025-04-09T16:09:00.000Z" @finish="timerFinish" v-slot="$slot">
                     {{ $slot.total }}#
                     {{ $slot.days }}-{{ $slot.hours }}-{{ $slot.minutes }}
                     {{ $slot.seconds }}:{{ $slot.milliseconds }}

@@ -40,13 +40,13 @@ const state = reactive({
 // 目标时间 毫秒
 const targeTime = computed(()=>{
   let {deadline} = props;
-  const currenTime = Number(deadline) ? new Date(Number(deadline) * 1000) : new Date(deadline.replace(/-/g, '/'));
+  const currenTime = Number(deadline) ? new Date(Number(deadline) * 1000) : new Date(deadline) || new Date(deadline.replace(/-/g, '/'));
   return currenTime.getTime(); 
 });
 // 时间方差 毫秒
 const marginTime = computed(()=>{
     let {current} = props;
-    const currenTime = Number(current) ? new Date(Number(current) * 1000) : new Date(current.replace(/-/g, '/'));
+    const currenTime = Number(current) ? new Date(Number(current) * 1000) : new Date(current) || new Date(current.replace(/-/g, '/'));
     return Date.now() - currenTime.getTime();
 });
 // 开始循环
