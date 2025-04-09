@@ -61,11 +61,11 @@
             state.seconds = Math.max(Math.floor(diff / 1000 % 60),0).toString().padStart(2, '0');
             state.milliseconds = Math.max((diff % 1000),0).toString().padStart(3, '0');
             state.total = Math.floor(diff / 1000);
-            if(state.offset && state.total - props.offset <= 0){
+            if(state.offset && (state.total - props.offset) <= 0){
                 state.offset = 0;emits('finish'); 
             }
             if(state.total <= 0){
-                state.total = 0;
+                state.total = 0;state.offset = props.offset;
                 state.milliseconds = '000'
                 clearInterval(state.timer);
             }
