@@ -55,25 +55,18 @@
         if (state.timer) { clearInterval(state.timer); }
         state.timer = setInterval(() => {
             let diff = targeTime.value + marginTime.value - Date.now();
-            if (diff < 0) {
-                diff = 0;
-            }
-            state.days = Math.floor(diff / (1000 * 60 * 60 * 24)).toString().padStart(2, '0');
-            diff %= (1000 * 60 * 60 * 24);
-            state.hours = Math.floor(diff / (1000 * 60 * 60)).toString().padStart(2, '0');
-            diff %= (1000 * 60 * 60);
-            state.minutes = Math.floor(diff / (1000 * 60)).toString().padStart(2, '0');
-            diff %= (1000 * 60);
-            state.seconds = Math.floor(diff / 1000).toString().padStart(2, '0');
-            state.milliseconds = (diff % 1000).toString().padStart(3, '0');
+            state.days = Math.max(Math.floor(diff / (1000 * 60 * 60 * 24)),0).toString().padStart(2, '0');
+            state.hours = Math.max(Math.floor(diff / 1000 / 3600),0).toString().padStart(2, '0');
+            state.minutes = Math.max(Math.floor(diff / 1000 / 60),0).toString().padStart(2, '0');
+            state.seconds = Math.max(Math.floor(diff / 1000 % 60),0).toString().padStart(2, '0');
+            state.milliseconds = Math.max((diff % 1000),0).toString().padStart(3, '0');
             state.total = Math.floor(diff / 1000);
-            if (state.offset && state.total - props.offset <= 0) {
-                state.offset = 0;
-                emits('finish');
+            if(state.offset && state.total - props.offset <= 0){
+                state.offset = 0;emits('finish'); 
             }
-            if (state.total <= 0) {
+            if(state.total <= 0){
                 state.total = 0;
-                state.milliseconds = '000';
+                state.milliseconds = '000'
                 clearInterval(state.timer);
             }
         }, props.interval);
