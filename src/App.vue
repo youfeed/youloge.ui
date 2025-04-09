@@ -5,14 +5,11 @@
         <main max-w-200 mx-a>
             <yDivider position="left">Timeing -- 计时器</yDivider>
             <div>
-                <!-- <Suspense> -->
-                    <yTiming time="100" v-slot="$slot">
-                        <!-- <template > -->
-                            icon default==> {{ $slot.days }}
-                        <!-- </template> -->
-                    </yTiming>
-                <!-- </Suspense> -->
-                
+                <yTimer deadline="2025-04-09 23:15:00" current="2025-04-09 23:14:00" @finish="timerFinish" v-slot="$slot">
+                    {{ $slot.total }}#
+                    {{ $slot.days }}-{{ $slot.hours }}-{{ $slot.minutes }}
+                    {{ $slot.seconds }}:{{ $slot.milliseconds }}
+                </yTimer>
             </div>
             <yDivider position="left">Icon -- </yDivider>
             <ySpace>
@@ -98,7 +95,9 @@ const yMenu_items = [
 const onButtonClick = (data) => {
     console.log(data)
 }
-
+const timerFinish = () => {
+    console.log('timerFinish') 
+}
 const onMessage = () => {
     console.log('onMessage', useMessage('useMessage'))
 }
