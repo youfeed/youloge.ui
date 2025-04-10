@@ -5,7 +5,7 @@
         <main max-w-200 mx-a>
             <yDivider position="left">Timeing -- 计时器</yDivider>
             <div>
-                <yTimer deadline="2025-04-09T16:10:00.000Z" current="2025-04-09T16:09:00.000Z" @finish="timerFinish" v-slot="$slot">
+                <yTimer :deadline="state.deadline" @finish="timerFinish" v-slot="$slot" @click="timerFinish">
                     {{ $slot.total }}#
                     {{ $slot.days }}-{{ $slot.hours }}-{{ $slot.minutes }}
                     {{ $slot.seconds }}:{{ $slot.milliseconds }}
@@ -96,7 +96,13 @@ const onButtonClick = (data) => {
     console.log(data)
 }
 const timerFinish = () => {
-    console.log('timerFinish') 
+    console.log('timerFinish.old',state.deadline) 
+    setTimeout(()=>{
+        state.deadline = Date.now() + 30 * 1000;
+        console.log('timerFinish.new',state.deadline) 
+    },1000)
+    
+    
 }
 const onMessage = () => {
     console.log('onMessage', useMessage('useMessage'))
@@ -113,8 +119,8 @@ const onNavigate = (data) => {
     console.log('onNavigate', data)
 }
 
-
 const state = reactive({
+    deadline: 0,
     gallery_list: [
         'https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/byted-player-videos/1.0.0/poster.jpg',
         'https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/byted-player-videos/1.0.0/poster.jpg',
