@@ -3,6 +3,17 @@
         <y-header aria="UI" logo="Youloge" @search="onSearch"></y-header>
         <!-- <hash-view></hash-view> -->
         <main max-w-200 mx-a>
+            <yDivider position="left">Form -- </yDivider>
+            <yDivider position="left">Radio -- </yDivider>
+            <ySpace>
+                <div>
+                    <yInput :name="form.input.name" :options="form.input.options" @change="inputChange"></yInput>
+                </div>
+                <yRadio :name="form.radio.name" :options="form.radio.options" @change="radioChange"></yRadio>
+                <ySwitch :name="form.switch.name" :options="form.switch.options" @change="switchChange"></ySwitch>
+                <yCheckbox :name="form.checkbox.name" :options="form.checkbox.options" @change="checkboxChange"></yCheckbox>
+                <ySelect :name="form.select.name" :options="form.select.options" @change="selectChange"></ySelect>
+            </ySpace>
             <yDivider position="left">Timeing -- 计时器</yDivider>
             <div>
                 <yTimer :deadline="state.deadline" @finish="timerFinish" v-slot="$slot" @click="timerFinish">
@@ -11,6 +22,10 @@
                     {{ $slot.seconds }}:{{ $slot.milliseconds }}
                 </yTimer>
             </div>
+            <yDivider position="left">Navbar -- </yDivider>
+            <ySpace>
+                <yNavbar :items="navbar.items" :size="navbar.size" @change="navbarChange"></yNavbar>
+            </ySpace>
             <yDivider position="left">Icon -- </yDivider>
             <ySpace>
                 <yIcon name="tabler:badge-8k" size="20" color="blue" />
@@ -101,9 +116,28 @@ const timerFinish = () => {
         state.deadline = Date.now() + 30 * 1000;
         console.log('timerFinish.new',state.deadline) 
     },1000)
-    
-    
 }
+const inputChange = (data) => {
+    console.log('inputChange', data)
+}
+const navbarChange = (data) => {
+    console.log('navbarChange', data)
+}
+const radioChange = (data) => {
+    console.log('radioChange', data)
+}
+const switchChange = (data) => {
+    console.log('switchChange', data)
+}
+const checkboxChange = (data) => {
+    console.log('checkboxChange', data)
+}
+const selectChange = (data) => {
+    console.log('selectChange', data)
+}
+
+
+
 const onMessage = () => {
     console.log('onMessage', useMessage('useMessage'))
 }
@@ -130,12 +164,68 @@ const state = reactive({
         'https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/byted-player-videos/1.0.0/poster.jpg',
         'https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/byted-player-videos/1.0.0/poster.jpg',
     ],
+    navbar: {
+        size: 'md',
+        items: [
+            { values: 'Home', label: '首页',active:true },
+            { value: 'Profile', label: '个人中心',active:true },
+            { value: 'Settings', label: '设置',icon:'tdesign:architecture-hui-style-filled' },
+        ], 
+    },
+    form:{
+        input:{
+            title:'文章标题',
+            name:'radio',
+            placeholder:'请选择标签',
+            options:[
+                {value:'1',label:'选项1'},
+                {value:'2',label:'选项2'}
+            ]
+        },
+        radio:{
+            title:'文章标签',
+            name:'radio',
+            placeholder:'请选择标签',
+            options:[
+                {value:'1',label:'选项1'},
+                {value:'2',label:'选项2'}
+            ]
+        },
+        switch:{
+            title:'文章标签',
+            name:'switch',
+            placeholder:'请选择标签',
+            options:[
+                {value:'1',label:'选项1'},
+                {value:'2',label:'选项2'}
+            ]
+        },
+        checkbox:{
+            title:'文章标签',
+            name:'checkbox',
+            placeholder:'请选择标签',
+            options:[
+                {value:'1',label:'选项1'},
+                {value:'2',label:'选项2'}
+            ] 
+        },
+        select:{
+            title:'文章标签',
+            name:'select',
+            placeholder:'请选择标签',
+            rule:'required|int',
+            options:[
+                {value:'1',label:'选项1'},
+                {value:'2',label:'选项2'}
+            ]
+        }
+    },
     label_data: ['潇洒', 'a安抚', '个', '是德国', '啊是服务'],
     rich_data: [{ "type": "paragraph", "children": [{ "text": "" }] }, { "type": "list-item", "children": [{ "text": "saf" }], "ordered": true }, { "type": "list-item", "ordered": true, "children": [{ "text": "sag" }] }, { "type": "list-item", "ordered": true, "children": [{ "text": "sg " }] }, { "type": "list-item", "ordered": true, "children": [{ "text": "sag" }] }]
 })
 
 // ----------
-const { label_data, rich_data, gallery_list } = toRefs(state)
+const { label_data, rich_data, gallery_list,navbar,form } = toRefs(state)
 
 </script>
 
