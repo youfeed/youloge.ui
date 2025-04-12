@@ -1,6 +1,6 @@
 <template>
     <div class="y-input">
-        <input type="text" id="input" placeholder="请输入"/>
+        <input type="text" id="input" placeholder=""/>
         <label for="input">Label for input</label>
     </div>
 </template>
@@ -36,16 +36,16 @@ const props = defineProps({
             &:focus {
                 outline: none;
                 border-color: blue;
+                color: blue;
             }
-            &:focus+label,
+            &:focus+label{
+                color: blue;
+            }
             &:not(:placeholder-shown) + label,
             &:not(:placeholder-shown)+label {
-                color: blue;
-                transform: translateY(-200%);
-                font-size: 0.7em; 
-            }
-            &:read-write:not(:placeholder-shown) {
-                // background-color: #f00;
+                transform: translate(1em, -2.3em);
+                font-size: 0.8em; 
+                background-color: #fff;
             }
         }
         label {
