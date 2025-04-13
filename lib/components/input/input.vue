@@ -2,7 +2,7 @@
     <fieldset>
         <legend class="text-sm">{{props.label}}</legend>
         <div class="text-md m-1px">
-            <input type="text" class="w-full h-full px-1 py-1 text-md border-none outline-none" placeholder=""/>
+            <input type="text" :name="uuid" class="w-full h-full px-1 py-1 text-md border-none outline-none" placeholder=""/>
         </div>
     </fieldset>
 </template>
@@ -12,13 +12,13 @@ import { onUnmounted, reactive, toRefs, watch,inject } from 'vue'
 const { setRules,deleteRules } = inject('formContext');
 const symbol = Symbol('uuid');
 const props = defineProps({
-    label:{
-        type:String,
-        default:'输入框',
-    },
     type: {
         type: String,
         default: 'text',
+    },
+    label:{
+        type:String,
+        default:'输入框',
     },
     rules: {
         type:[String,Array,Function],
@@ -31,12 +31,11 @@ const props = defineProps({
     }
 }),model = defineModel({required: false}), emits = defineEmits(['change']);
 const state = reactive({
-    uuid:'radio'+Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
-    name:'name',
+    uuid: `input.${Math.random().toString(36)}.${Math.random().toString(36)}`.split('.').join(''),
     options:props.options.map(({value,label,checked=false,disabled=false}) => {
         return {value,label,checked}
     })
-}),{uuid,name,options} = toRefs(state);
+}),{uuid,options} = toRefs(state);
 // 验证函数
 const onValidator = (value) => {
     console.log('onValidator.model.input',model.value)

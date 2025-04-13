@@ -2,7 +2,7 @@
     <fieldset>
         <legend class="text-sm">{{props.label}}</legend>
         <div class="text-md m-1px relative cursor-pointer" @click="openDialog">
-            <input type="text" class="w-full h-full px-1 py-1 text-md cursor-pointer border-none outline-none" :value="sValue" readonly />
+            <input type="text" class="w-full h-full px-1 py-1 text-md cursor-pointer border-none outline-none" :value="joinValue" readonly />
             <span class="float-right absolute top-0 right-1 pointer-events-none">
                 <svg class="w-1.5em h-1.5em" fill="currentColor" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"></path></svg>
             </span>
@@ -10,7 +10,7 @@
                 <ul class="list-none">
                     <li v-for="(item, index) in options" :key="index" class=" p-2 hover:bg-gray-100" :class="{
                         'bg-blue-100 text-blue-400': item.checked
-                    }" @click="chooseItem($event,item)">{{item.value}}</li>
+                    }" @click="chooseItem(item)">{{item.value}}</li>
                 </ul>
             </dialog>
         </div>
@@ -23,13 +23,13 @@ const { setRules,deleteRules } = inject('formContext');
 const symbol = Symbol('uuid');
 const dialogRef = ref(null);
 const props = defineProps({
-    label: {
-        type: String,
-        default: '下拉选择',
-    },
     multiple: {
         type: Boolean,
         default: false,
+    },
+    label: {
+        type: String,
+        default: '下拉选择',
     },
     rules:{
         type:[String,Array,Function],
@@ -42,19 +42,17 @@ const props = defineProps({
     }
 }),model = defineModel({required: false}), emits = defineEmits(['change']);
 const state = reactive({
-    value: true,
-    uuid: 'switch' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+    uuid: `select.${Math.random().toString(36)}.${Math.random().toString(36)}`.split('.').join(''),
     options: props.options.map(({ value, label, checked = false, disabled = false }) => {
         return { label, value,  checked, disabled }
-    }),
-    open:false
-}), { uuid, value,open, options } = toRefs(state);
+    })
+}), { uuid,open, options } = toRefs(state);
 // 验证函数
 const onValidator = (value) => {
     console.log('onValidator.model.input',model.value)
     return {err:400,'msg':'验证失败'}
 }
-const sValue = computed(()=>{
+const joinValue = computed(()=>{
     return options.value.filter((item) => item.checked).map(item=>item.value).join(',')
 });
 const onChange = (item) => {
@@ -74,8 +72,11 @@ const dialogClick = (e) => {
         dialogRef.value.close()
     }
 }
-const chooseItem = (e,item) => {
+const chooseItem = (item) => {
+    props.multiple || dialogRef.value.close();
+    props.multiple || state.options.forEach((it) => it.checked = false);
     item.checked = !item.checked;
+    emits('change',item);
 }
 // 监听value变化
 watch(props, (newValue, oldValue) => {

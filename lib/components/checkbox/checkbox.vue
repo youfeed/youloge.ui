@@ -7,7 +7,7 @@
                   <label class="vertical-middle cursor-pointer " :class="{
                       ' text-blue-500':item.checked,
                   }">
-                      <input type="checkbox" class="display-none" :name="name" :checked="props.checked" @change="onChange(item)"/>
+                      <input type="checkbox" class="display-none" :name="uuid" :checked="props.checked" @change="onChange(item)"/>
                       <div class="flex items-center justify-center gap-1">
                               <div class="w-1.5em h-1.5em">
                                 <svg class="w-1.5em h-1.5em absolute" fill="currentColor" viewBox="0 0 24 24"><path d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"></path></svg>
@@ -25,16 +25,15 @@
 <script setup>
 import { onUnmounted, reactive, toRefs, watch,inject } from 'vue'
 const { setRules,deleteRules } = inject('formContext');
-let symbol = Symbol('uuid');
+const symbol = Symbol('uuid');
 const props = defineProps({
     label: {
         type: String,
         default: '多选',
     },
-    name: {
-        type: String,
-        default: '',
-        required: true,
+    rules:{  
+        type:[String,Array,Function],
+        default:'',
     },
     options: {
         type: Array,
@@ -43,12 +42,11 @@ const props = defineProps({
     }
 }),model = defineModel({required: true}), emits = defineEmits(['change']);
 const state = reactive({
-    name: 'true',
-    uuid: 'switch' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+    uuid: `checkbox.${Math.random().toString(36)}.${Math.random().toString(36)}`.split('.').join(''),
     options: props.options.map(({ value, label, checked = false, disabled = false }) => {
         return { value, label, checked, disabled }
     })
-}), { uuid,name,options } = toRefs(state);
+}), { uuid,options } = toRefs(state);
 // 验证函数
 const onValidator = (value) => {
     console.log('onValidator.model.10000000',model.value)
@@ -72,7 +70,7 @@ watch(props, (newValue, oldValue) => {
 // 销毁验证函数
 onUnmounted(() => {
     deleteRules(symbol);
-})
+});
 </script>
 
 <style lang="scss">

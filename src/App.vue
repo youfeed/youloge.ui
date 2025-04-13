@@ -10,7 +10,7 @@
                     <yRadio v-model="form.radio.value" rules="required" :options="form.radio.options" @change="radioChange"></yRadio>
                     <ySwitch :name="form.switch.name" :options="form.switch.options" @change="switchChange"></ySwitch>
                     <yCheckbox :name="form.checkbox.name" v-model="form.checkbox.value" :options="form.checkbox.options" @change="checkboxChange"></yCheckbox>
-                    <ySelect :name="form.select.name" :options="form.select.options" @change="selectChange"></ySelect>
+                    <ySelect :name="form.select.name" :options="form.select.options" @change="selectChange" multiple></ySelect>
 
                     <button type="submit">提交</button>
                 </yForm>

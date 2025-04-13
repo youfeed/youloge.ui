@@ -1,6 +1,5 @@
 <template>
   <form @submit.prevent="onSubmit" class="w-full">
-
     <slot></slot>
   </form>
 </template>
@@ -25,10 +24,6 @@ const deleteRules = (name) => {
     validators.delete(name);
     console.log('delete',name)
 };
-const pushValidator = (name, validator) => {
-    console.log('pushValidator',name,validator)
-    validators.set(name, validator);
-};
 //  
 const onSubmit = (e) => {
     e.preventDefault()
@@ -41,7 +36,7 @@ const onSubmit = (e) => {
 }
 // 抛出上下文
 provide('formContext', {
-    pushValidator,deleteRules,setRules
+    deleteRules,setRules
 });
 
 </script>

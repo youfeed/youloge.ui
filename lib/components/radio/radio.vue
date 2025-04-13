@@ -7,7 +7,7 @@
                   <label class="vertical-middle cursor-pointer " :class="{
                       ' text-blue-500':item.checked,
                   }">
-                      <input type="radio" class="display-none" :name="name" :checked="props.checked" @change="onChange(item)"/>
+                      <input type="radio" class="display-none" :name="uuid" :checked="props.checked" @change="onChange(item)"/>
                       <div class="flex items-center justify-center gap-1">
                               <div class="w-1.5em h-1.5em">
                                   <svg class="w-1.5em h-1.5em absolute" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"></path></svg>
@@ -42,12 +42,11 @@ const props = defineProps({
     }
 }),model = defineModel({required: false}),emits = defineEmits(['change']);
 const state = reactive({
-    uuid:'radio'+Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
-    name:'name',
+    uuid: `checkbox.${Math.random().toString(36)}.${Math.random().toString(36)}`.split('.').join(''),
     options:props.options.map(({value,label,checked=false,disabled=false}) => {
         return {value,label,checked}
     })
-}),{uuid,name,options} = toRefs(state);
+}),{uuid,options} = toRefs(state);
 // 验证函数
 const onValidator = (value) => {
     console.log('onValidator.model.10000000',model.value)
