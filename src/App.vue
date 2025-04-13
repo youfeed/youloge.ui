@@ -1,6 +1,8 @@
 <template>
     <div>
-        <y-header aria="UI" logo="Youloge" @search="onSearch"></y-header>
+        <y-header aria="UI" logo="Youloge" @search="onSearch">
+            
+        </y-header>
         <!-- <hash-view></hash-view> -->
         <main max-w-200 mx-a>
             <yDivider position="left">Form -- </yDivider>

@@ -1,49 +1,33 @@
 <template>
   <div class="y-header">
     <header>
-      <div class="y-logo" @click="onLogo">
+      <div class="y-logo cursor-pointer" @click="logoClick">
         <p>&#8801;  {{props.logo}}<sup font-size-2 c-dark-3>{{aria}}</sup></p>
       </div>
+      <slot name="mobile" :profile="profile"></slot>
+      <slot name="mobiles" :profile="profile"></slot>
       <div class="placeholder" v-search="onSearch">
         <yIcon name="tdesign:search" size="24"></yIcon>
       </div>
-
       <slot name="right"></slot>
     </header>
-    <aside class="y-aside" v-show="aside">
-      <div class="head">
-        <ul>
-          <li>首页</li>
-        </ul>
-      </div>
-      <div class="body">
-        <div>订阅内容</div>
-        <ul>
-          <li>头像 首页</li>
-          <li>头像 首页</li>
-        </ul>
-      </div>
-      <div class="foot">
-        <div>@Youloge.UI</div>
-        <div class="y-profile">
-          <div class="avatar">
-            <img :src="'//img.youloge.com/'+profile.avatar+'!0'" class="y-profile-avatar"/>
-          </div>
-          <div class="y-profile-info">
-            <div></div>
-            <div></div>
-          </div>
+    <aside>
+      <dialog ref="dialog" class="border-none outline-none max-h-unset " @click="dialogClick">
+        <div class="y-logo cursor-pointer">
+            <p>&#8801;  {{props.logo}}<sup font-size-2 c-dark-3>{{aria}}</sup></p>
         </div>
-      </div>
+        <slot name="aside"></slot>
+      </dialog>
     </aside>
   </div>
 </template>
 
 <script setup>
 defineOptions({ name: 'y-header',inheritAttrs:false });
-import { onMounted, toRefs, reactive, computed, inject } from 'vue'
+import { onMounted, ref,toRefs, reactive, computed, inject } from 'vue'
 const emit = defineEmits('search');
 import {useAuth,useConfig,useStorage,apiFetch} from '@lib/utils'
+const dialog = ref(null)
 const props = defineProps({
   aria:{
     type:String,
@@ -63,15 +47,20 @@ const state = reactive({
     name:'You_游客',
     avatar:'FjjHFE7RwJqfjiwM9aqL4G53kPv3'
   },
-})
+}),{aria,aside,profile} = toRefs(state);
 onMounted(()=>{
   state.profile = useStorage('youloge')
   // console.log('onMounted',state.profile)
   useAuth() && onProfile();
 }) 
 // 菜单点击
-const onLogo = ()=>{
-  state.aside = !state.aside
+const logoClick = ()=>{
+    // PC端 
+    if(window.innerWidth > 768){
+        dialog.value.style = `inset: 0px auto 0 0px;width: 180px;height: 100vh;`;
+    }
+    console.log('logoClick',dialog.value)
+    dialog.value.showModal()
 }
 // 搜索点击
 const onSearch = (data)=>emit('search',data)
@@ -88,7 +77,14 @@ const onProfile = (el)=>{
     },{once:true})
   },200)
 }
-const {aria,profile,aside} = toRefs(state)
+// 点击dialog
+const dialogClick = (e)=>{
+  e.stopPropagation()
+  console.log('dialogClick',e.target,e.currentTarget)
+  if(e.target === e.currentTarget){
+    dialog.value.close()
+  }
+}
 </script>
 <style lang="scss">
 .y-header{
@@ -116,8 +112,12 @@ const {aria,profile,aside} = toRefs(state)
       }
     }
     .y-logo{
+        align-items: center;
+    }
+  }
+  .y-logo{
       font-size: 24px;
-      align-items: center;
+    //   
       display: flex;
       height: 100%;
       cursor: pointer;
@@ -125,54 +125,6 @@ const {aria,profile,aside} = toRefs(state)
         top:-1.5em
       }
     }
-
-  }
-  aside{
-    position: absolute;
-    width: 100%;
-    border-right: 1px solid #eee;
-    background: #00000036;
-    height: calc(100vh - 60px);
-    // top: 60px;
-    display: flex;
-    flex-direction: column;
-    .head,.body,.foot{
-      background: #fff;
-      width: 240px;
-
-    }
-    .body{
-      height: 100%;
-      overflow-y: scroll;
-    }
-    ::-webkit-scrollbar{
-      width: 5px;
-    }
-    ::-webkit-scrollbar-thumb{
-      background: #bfbfbf;
-      border-radius:10px;
-    }
-    ::-webkit-scrollbar-track{
-      background: rgb(239, 239, 239);
-      border-radius:2px;
-    }
-    ::-webkit-scrollbar-corner{
-      background: #179a16;
-    }
-    ::-webkit-scrollbar-thumb:hover{
-      background: #333;
-    }
-    .y-profile{
-      height: 60px;
-      display: flex;
-      padding: 5px;
-      border: 1px solid #eee;
-      img{
-        width: 40px;
-        height: 40px;
-      }
-    }
-  }
 }
 
 </style>
