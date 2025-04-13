@@ -2,7 +2,7 @@
     <fieldset>
         <legend class="text-sm">{{props.label}}</legend>
         <div class="text-md m-1px">
-            <input type="text" class="w-full h-full px-1 py-1 text-md border-current outline-transparent" placeholder=""/>
+            <input type="text" class="w-full h-full px-1 py-1 text-md border-none outline-none" placeholder=""/>
         </div>
     </fieldset>
 </template>
