@@ -8,9 +8,9 @@
                 <yForm v-model="form" >
                     <yInput v-model="form.input.value" rules="required" :options="form.input.options" @change="inputChange"></yInput>
                     <yRadio v-model="form.radio.value" rules="required" :options="form.radio.options" @change="radioChange"></yRadio>
-                    <ySwitch :name="form.switch.name" :options="form.switch.options" @change="switchChange"></ySwitch>
-                    <yCheckbox :name="form.checkbox.name" v-model="form.checkbox.value" :options="form.checkbox.options" @change="checkboxChange"></yCheckbox>
-                    <ySelect :name="form.select.name" :options="form.select.options" @change="selectChange" multiple></ySelect>
+                    <ySwitch v-model="form.switch.value" rules="required" :options="form.switch.options" @change="switchChange"></ySwitch>
+                    <yCheckbox v-model="form.checkbox.value" rules="required" :options="form.checkbox.options" @change="checkboxChange"></yCheckbox>
+                    <ySelect v-model="form.select.value" rules="required" :options="form.select.options" @change="selectChange" multiple></ySelect>
 
                     <button type="submit">提交</button>
                 </yForm>
