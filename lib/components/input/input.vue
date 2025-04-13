@@ -1,70 +1,68 @@
 <template>
-    <div class="y-input">
-        <input type="text" id="input" placeholder=""/>
-        <label for="input">Label for input</label>
-    </div>
+    <fieldset>
+        <legend class="text-sm">{{props.label}}</legend>
+        <div class="text-md m-1px">
+            <input type="text" class="w-full h-full px-1 py-1 text-md border-current outline-transparent" placeholder=""/>
+        </div>
+    </fieldset>
 </template>
 
 <script setup>
-import { computed, reactive, toRefs, inject } from 'vue'
+import { onUnmounted, reactive, toRefs, watch,inject } from 'vue'
+const { setRules,deleteRules } = inject('formContext');
+const symbol = Symbol('uuid');
 const props = defineProps({
-    form: {
-        type: String,
-        default: '23',
+    label:{
+        type:String,
+        default:'输入框',
     },
-    name: {
+    type: {
         type: String,
+        default: 'text',
+    },
+    rules: {
+        type:[String,Array,Function],
         default: '',
-        required: true,
     },
     options: {
         type: Array,
         required: true,
         default: [],
     }
-}), emits = defineEmits(['change']);
+}),model = defineModel({required: false}), emits = defineEmits(['change']);
+const state = reactive({
+    uuid:'radio'+Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+    name:'name',
+    options:props.options.map(({value,label,checked=false,disabled=false}) => {
+        return {value,label,checked}
+    })
+}),{uuid,name,options} = toRefs(state);
+// 验证函数
+const onValidator = (value) => {
+    console.log('onValidator.model.input',model.value)
+    return {err:400,'msg':'验证失败'}
+}
+// 监听value变化
+const onChange = (item)=>{
+    // state.options.forEach((it) => {
+    //     it.checked = false;
+    // });
+    // item.checked = true;
+    // model.value = item.value;
+    console.log('onChange',item) 
+}
+// 监听value变化
+watch(props, (newValue, oldValue) => {
+    // 注册验证函数
+    newValue.rules && setRules && setRules(symbol,onValidator)
+    console.log('input.watch', newValue, oldValue);
+},{deep:true,immediate:true});
+// 销毁验证函数
+onUnmounted(() => {
+    deleteRules && deleteRules(symbol);
+})
 </script>
 
 <style lang="scss">
-    .y-input  {
-        position: relative;
-        input {
-            padding: 6px 4px;
-            border: 1px solid #ccc;
-            width: 100%;
-            border-radius: 4px;
-            &:focus {
-                outline: none;
-                border-color: blue;
-                color: blue;
-            }
-            &:focus+label{
-                color: blue;
-            }
-            &:not(:placeholder-shown) + label,
-            &:not(:placeholder-shown)+label {
-                transform: translate(1em, -2.3em);
-                font-size: 0.8em; 
-                background-color: #fff;
-            }
-        }
-        label {
-            position: absolute;
-            top: 50%;
-            left: 5px;
-            font-size: 1em;
-            transform: translateY(-50%);
-            transition: all 0.3s ease;
-            pointer-events: none;
-        }
-    }
-    // input:placeholder-shown + label {
-    //   color: gray;
-    //   transform: translateY(50%);
-    // }
-    // input:not(:placeholder-shown) + label {
-    //   color: blue;
-    //   transform: translateY(-20px);
-    //   font-size: 0.8em;
-    // }
+    
 </style>

@@ -6,3 +6,17 @@
   --text-color: #2c3e50; /* 文字颜色 */
   --border-color: #bdc3c7; /* 边框颜色 */
 }
+fieldset{
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  &:hover{
+      border-color: rgb(108, 108, 255);
+      legend{
+          color: rgb(108, 108, 255);
+      }
+  }
+  legend{
+      padding: 0 10px;
+      margin-left: 10px;
+  }
+}

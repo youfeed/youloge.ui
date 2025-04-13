@@ -4,15 +4,16 @@
         <!-- <hash-view></hash-view> -->
         <main max-w-200 mx-a>
             <yDivider position="left">Form -- </yDivider>
-            <yDivider position="left">Radio -- </yDivider>
-            <ySpace>
-                <div>
-                    <yInput :name="form.input.name" :options="form.input.options" @change="inputChange"></yInput>
-                </div>
-                <yRadio :name="form.radio.name" :options="form.radio.options" @change="radioChange"></yRadio>
-                <ySwitch :name="form.switch.name" :options="form.switch.options" @change="switchChange"></ySwitch>
-                <yCheckbox :name="form.checkbox.name" :options="form.checkbox.options" @change="checkboxChange"></yCheckbox>
-                <ySelect :name="form.select.name" :options="form.select.options" @change="selectChange"></ySelect>
+            <ySpace >
+                <yForm v-model="form" >
+                    <yInput v-model="form.input.value" rules="required" :options="form.input.options" @change="inputChange"></yInput>
+                    <yRadio v-model="form.radio.value" rules="required" :options="form.radio.options" @change="radioChange"></yRadio>
+                    <ySwitch :name="form.switch.name" :options="form.switch.options" @change="switchChange"></ySwitch>
+                    <yCheckbox :name="form.checkbox.name" v-model="form.checkbox.value" :options="form.checkbox.options" @change="checkboxChange"></yCheckbox>
+                    <ySelect :name="form.select.name" :options="form.select.options" @change="selectChange"></ySelect>
+
+                    <button type="submit">提交</button>
+                </yForm>
             </ySpace>
             <yDivider position="left">Timeing -- 计时器</yDivider>
             <div>
@@ -176,6 +177,7 @@ const state = reactive({
         input:{
             title:'文章标题',
             name:'radio',
+            value:'',
             placeholder:'请选择标签',
             options:[
                 {value:'1',label:'选项1'},
@@ -185,6 +187,7 @@ const state = reactive({
         radio:{
             title:'文章标签',
             name:'radio',
+            value:'',
             placeholder:'请选择标签',
             options:[
                 {value:'1',label:'选项1'},
@@ -194,6 +197,7 @@ const state = reactive({
         switch:{
             title:'文章标签',
             name:'switch',
+            value:'',
             placeholder:'请选择标签',
             options:[
                 {value:'1',label:'选项1'},
@@ -203,6 +207,7 @@ const state = reactive({
         checkbox:{
             title:'文章标签',
             name:'checkbox',
+            value:'',
             placeholder:'请选择标签',
             options:[
                 {value:'1',label:'选项1'},
@@ -212,6 +217,7 @@ const state = reactive({
         select:{
             title:'文章标签',
             name:'select',
+            value:'',
             placeholder:'请选择标签',
             rule:'required|int',
             options:[
