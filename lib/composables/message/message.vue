@@ -33,7 +33,7 @@ defineExpose({onPush});
 .y-message-container{
   user-select: none;
   position: fixed;
-  top: 10px;
+  top: 50px;
   left: 50%;
   display: flex;
   align-items: center;

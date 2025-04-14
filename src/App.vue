@@ -1,7 +1,7 @@
 <template>
     <div>
         <y-header aria="UI" logo="Youloge" @search="onSearch">
-            
+
         </y-header>
         <!-- <hash-view></hash-view> -->
         <main max-w-200 mx-a>
@@ -142,7 +142,7 @@ const selectChange = (data) => {
 
 
 const onMessage = () => {
-    console.log('onMessage', useMessage('useMessage'))
+    console.log('onMessage', useMessage('success',5266))
 }
 console.log('useStorage.then', useStorage('_grecaptcha'))
 
