@@ -1,11 +1,11 @@
 {
   "name": "youloge",
   "private": false,
-  "version": "2.1.2",
+  "version": "3.0.0",
   "author": "Youfeed",
   "license": "MIT",
   "homepage": "https://youfeed.github.io",
-  "description": "youloge.com website dedicated UI library",
+  "description": "Youloge.com website dedicated UI library",
   "main": "dist/youloge.umd.js",
   "module": "dist/youloge.es.js",
   "unpkg": "dist/youloge.umd.js",
@@ -28,9 +28,8 @@
     "./dist/index.css": "./dist/index.css"
   },
   "keywords": [
-    "vue",
-    "youloge",
-    "webui"
+    "Github Style",
+    "Youloge"
   ],
   "repository": {
     "type": "git",
