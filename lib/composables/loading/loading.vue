@@ -1,61 +1,73 @@
 <template>
-  <transition name="fade-pupop">
-    <div class="y-loading" v-show="show">
-      <i class="loading"></i>
-      <p>{{props.text}}</p>
-    </div>
-  </transition>
+  <div v-if="taskGroup.length > 0" class="loading-overlay">
+    <div class="spinner"></div>
+    <div class="taskCount">x{{ taskGroup.length }}</div>
+  </div>
 </template>
 
-<script>
-export default { name:'yLoading' }
-</script>
 <script setup>
-import { reactive, toRefs } from 'vue'
-const props = defineProps({
-  text:String,
-  duration:Number
-})
+import { reactive, toRefs } from 'vue';
 const state = reactive({
-  show:false,
-})
-const toggle = ()=>{
-  state.show = !state.show
+  taskGroup: [],
+  lastMessage: '...'
+}), { taskGroup } = toRefs(state);
+// 
+const create = (options) => {
+  let uuid = crypto.randomUUID();
+  let timer = setTimeout(() => {
+    remove(uuid);
+  }, options.duration || 8000)
+  // 
+  state.taskGroup.push({
+    uuid: uuid,
+    timer: timer
+  });
+  return uuid
 }
-defineExpose({toggle})
-const {show} = toRefs(state)
+// 移出指示器
+const remove = (uuid) => {
+  let findIndex = state.taskGroup.findIndex(is => is.uuid == uuid);
+  findIndex == -1 || state.taskGroup.splice(findIndex, 1);
+};
+// 暴露 create 和 remove 方法给函数组件
+defineExpose({ create, remove });
 </script>
-<style lang="less">
-.y-loading {
+
+<style scoped>
+.loading-overlay,
+.taskCount {
   position: fixed;
-  top: 0;
+  top: -20%;
   left: 0;
   width: 100%;
   height: 100%;
+  background: transparent;
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 99999;
-  flex-direction: column;
-  background: transparent;
-  user-select: none;
+  z-index: 999;
 }
-.loading {
-  width: 30px;
-  height: 30px;
-  border: 2px solid #000;
-  border-top-color: transparent;
-  border-radius: 100%;
-  animation: circle infinite 0.75s linear;
-  margin-top: -20vh;
+
+.taskCount {
+  color: #c5c3c3;
 }
-@keyframes circle {
+
+.spinner {
+  border: 4px solid rgba(73, 69, 69, 0.3);
+  border-top: 4px solid #ffffff;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
   0% {
-    transform: rotate(0);
+    transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }
 }
-
 </style>

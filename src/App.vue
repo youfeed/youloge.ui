@@ -17,7 +17,7 @@
         <!--  -->
         <y-aside :width="240" :collapsed="asideCollapsed">
             <div class="aside-menu">
-                <div class="menu-item">首页{{ useBytes(55555) }}</div>
+                <div class="menu-item" @click="useLoading()">首页 </div>
                 <div class="menu-item">文档</div>
                 <div class="menu-item">组件</div>
                 <div class="menu-item">示例</div>
@@ -201,9 +201,9 @@
 import { exported } from '../lib/index.js'
 import { inject, reactive, ref, toRefs } from 'vue'
 import  useYouloge  from './composables/useYouloge'
-const { useBytes } = useYouloge(); 
+const { useBytes,useLoading,useTheme } = useYouloge(); 
 
-console.log( useBytes(555) )
+console.log( useBytes(555), useTheme())
 const useStorage = inject('useStorage'), useMessage = inject('useMessage');
 // console.log('useMessage.exported', exported,)
 const table_columns = [
@@ -271,7 +271,6 @@ const toggleAside = ()=>{
 const onMessage = () => {
     console.log('onMessage', useMessage('success', 5266))
 }
-console.log('useStorage.then', useStorage('_grecaptcha'))
 
 
 const onSearch = (data) => {
