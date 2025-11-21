@@ -1,7 +1,6 @@
 import { defineConfig } from 'vite'
 import {resolve} from 'path'
 import vue from '@vitejs/plugin-vue'
-import UnoCSS from 'unocss/vite'
 
 export default defineConfig({
   define: {
@@ -15,7 +14,7 @@ export default defineConfig({
       name: 'youloge',
       fileName: (format) => `youloge.${format}.js`,
     },
-    cssCodeSplit:true,
+    cssCodeSplit:false,
     rollupOptions: { 
       external: ['vue'],
       output: {
@@ -30,12 +29,18 @@ export default defineConfig({
       '@lib':resolve(__dirname, './lib')
     }
   },
-  plugins: [vue(),UnoCSS()],
+  plugins: [vue()],
   css:{
     preprocessorOptions:{
-      scss:{
-        additionalData: `@import "./lib/style/index.scss";`
+      less:{
+        strictMath: true,
+        strictUnits: true,
+        // javascriptEnabled: true,
+        dumpLineNumbers: 'comments', // 辅助调试，可选
+        additionalData: `@import "./lib/styles/main.less";`
       },
-    }
+      minify: false,
+    },
+    cacheDir: false,
   }
 })

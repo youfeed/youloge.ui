@@ -25,7 +25,7 @@ const toggle = ()=>{
 defineExpose({toggle})
 const {show} = toRefs(state)
 </script>
-<style lang="scss">
+<style lang="less">
 .y-loading {
   position: fixed;
   top: 0;

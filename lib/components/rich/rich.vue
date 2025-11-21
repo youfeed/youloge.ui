@@ -28,7 +28,7 @@ const onContent = ()=>{
 }
 const {ref,src,metadata,content} = toRefs(state)
 </script>
-<style lang="scss">
+<style lang="less">
 .y-rich{
   padding: 10px;
   max-width: 680px; 

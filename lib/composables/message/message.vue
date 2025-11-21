@@ -29,7 +29,7 @@ const onPush = (method,params,duration)=>{
 // const {message} = toRefs(state);
 defineExpose({onPush});
 </script>
-<style lang="scss">
+<style lang="less">
 .y-message-container{
   user-select: none;
   position: fixed;

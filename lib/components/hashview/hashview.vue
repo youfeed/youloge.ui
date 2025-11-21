@@ -56,7 +56,7 @@ const refresh = () =>{
 }
 const {compkey,opener} = toRefs(state)
 </script>
-<style lang="scss">
+<style lang="less">
 .y-hash-view{
   position: fixed;
   top: 0;

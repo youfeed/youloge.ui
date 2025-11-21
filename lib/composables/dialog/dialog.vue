@@ -74,7 +74,7 @@ const onClose = (e)=>{
 const {show,value,ref} = toRefs(state);
 // defineExpose({onShow});
 </script>
-<style lang="scss">
+<style lang="less">
 .y-mask-flex{
   position: fixed;
   top: 0;

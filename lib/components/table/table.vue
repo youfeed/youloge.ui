@@ -61,7 +61,7 @@ console.log(props.data)
 
 </script>
 
-<style lang="scss">
+<style lang="less">
 .y-table {
     width: 100%;
     overflow: auto;

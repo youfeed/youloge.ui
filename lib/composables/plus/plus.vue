@@ -20,7 +20,7 @@ onMounted(()=>{
 })
 const {show} = toRefs(state)
 </script>
-<style lang="scss">
+<style lang="less">
 .y-plus{
   position: fixed;
   top: 0;
