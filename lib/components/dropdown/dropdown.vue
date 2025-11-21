@@ -24,8 +24,8 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted, provide, computed } from 'vue'
-// 导入自定义 atClickOutside（替换 @vueuse/core）
-import { atClickOutside } from '@lib/utils'
+// 导入自定义 useClickOutside @vueuse/core）
+import useClickOutside from '@lib/composables/click.outside/'
 
 const props = defineProps({
   trigger: {
@@ -88,11 +88,11 @@ const handleTriggerHover = (action) => {
   }
 }
 
-// 核心修改：使用自定义 atClickOutside
+// 核心修改：使用自定义 useClickOutside
 let clickOutsideInstance = null
 onMounted(() => {
-  // 初始化 atClickOutside：目标元素是 triggerRef，忽略菜单 ref（点击菜单不关闭）
-  clickOutsideInstance = atClickOutside(triggerRef, () => {
+  // 初始化 useClickOutside triggerRef，忽略菜单 ref（点击菜单不关闭）
+  clickOutsideInstance = useClickOutside(triggerRef, () => {
     if (props.clickOutsideClose && isOpen.value) {
       isOpen.value = false
     }
