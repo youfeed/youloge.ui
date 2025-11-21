@@ -24,6 +24,20 @@ export default defineConfig({
                     { text: 'Button 按钮', link: '/button/' },
                     { text: 'Link 链接', link: '/link/' },
                 ]
+            }, {
+                text: '布局组件',
+                base: '/layout/',
+                items: [
+                    { text: 'Divider 分割线', link: '/divider/' },
+                    { text: 'Layout 布局', link: '/layout/' },
+                ]
+            }, {
+                text: '导航组件',
+                base: '/layout/',
+                items: [
+                    { text: 'Divider 分割线', link: '/divider/' },
+                    { text: 'Layout 布局', link: '/layout/' },
+                ]
             }
         ],
         footer: {

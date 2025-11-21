@@ -1,123 +1,195 @@
 <template>
-  <div class="w-full transition-all duration-200" :class="tabsClasses">
-    <!-- 标签容器 -->
-    <div class="flex border-b" :class="tabListClasses">
-      <slot name="tab"></slot> <!-- 嵌套 GhTab 标签 -->
+  <div class="y-tabs" :class="tabsClasses">
+    <!-- 标签容器（支持滚动 + 样式适配） -->
+    <div class="y-tabs__list-container">
+      <div class="y-tabs__list" :class="tabListClasses">
+        <slot name="tab"></slot> <!-- 嵌套 y-tab 子组件 -->
+      </div>
     </div>
-    <!-- 内容容器（过渡动画） -->
-    <div class="mt-4">
+    <!-- 内容容器（优化过渡动画） -->
+    <div class="y-tabs__content-container">
       <transition-group name="y-tab-fade" mode="out-in" tag="div">
-        <slot :key="activeKey"></slot> <!-- 嵌套 GhTabPane 内容 -->
+        <slot :key="activeKey"></slot> <!-- 嵌套 y-tab-pane 子组件 -->
       </transition-group>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, provide, computed, watch } from 'vue'
+import { ref, provide, computed, watch, onMounted } from 'vue'
 
-// Props 定义
+defineOptions({ name: 'y-tabs' })
+
+// Props 定义：保留功能，默认值贴合 GitHub 风格
 const props = defineProps({
-  // 默认激活的标签 name（未指定则激活第一个非禁用标签）
-  defaultActive: {
+  defaultActive: { type: [String, Number], default: '' },
+  align: { type: String, default: 'left', validator: val => ['left', 'center', 'right'].includes(val) },
+  type: { type: String, default: 'line', validator: val => ['line', 'card'].includes(val) },
+  activeTextColor: { type: String, default: '#0969da' }, // GitHub 链接蓝
+  activeBorderColor: { type: String, default: '' },
+  borderColor: { type: String, default: '#e5e7eb' }, // 浅灰边框
+  tabPadding: {
     type: [String, Number],
-    default: ''
+    default: 16,
+    validator: val => typeof val === 'number' ? val >= 8 && val <= 32 : /^\d+(px|rem|em)$/.test(val)
   },
-  // 标签对齐方式：left（默认）/ center / right
-  align: {
-    type: String,
-    default: 'left',
-    validator: val => ['left', 'center', 'right'].includes(val)
-  },
-  // 是否启用卡片式样式（默认下划线式，贴合 GitHub 原生）
-  type: {
-    type: String,
-    default: 'line',
-    validator: val => ['line', 'card'].includes(val)
-  },
-  // 卡片式样式的边框颜色（仅 type="card" 生效）
-  borderColor: {
-    type: String,
-    default: 'border-gray-200 dark:border-gray-700'
-  },
-  // 激活态颜色（下划线/卡片边框颜色）
-  activeColor: {
-    type: String,
-    default: 'text-blue-600 dark:text-blue-400'
-  }
+  scrollable: { type: Boolean, default: true }
 })
 
-// 暴露事件：标签切换时触发
-const emit = defineEmits(['tab-change'])
+const emit = defineEmits(['tab-change', 'tab-before-change'])
 
-// 激活状态管理（优先使用 defaultActive，无则后续自动激活第一个）
+// 状态管理
 const activeKey = ref(props.defaultActive)
-// 存储所有标签的 name（用于自动激活第一个）
 const tabNames = ref([])
+const allTabNames = ref([])
+const isMounted = ref(false)
 
-// 计算标签容器样式（对齐方式 + 卡片式样式）
+// 格式化单位
+const formatUnit = (val) => typeof val === 'number' ? `${val}px` : val
+
+// 最终激活态边框颜色（未指定则复用文本色）
+const finalActiveBorderColor = computed(() => props.activeBorderColor || props.activeTextColor)
+
+// 计算样式类
 const tabListClasses = computed(() => {
-  const alignClass = {
-    left: 'justify-start',
-    center: 'justify-center',
-    right: 'justify-end'
-  }[props.align]
-
-  const cardClass = props.type === 'card' 
-    ? `rounded-t-md overflow-hidden ${props.borderColor}` 
-    : ''
-
-  return `${alignClass} ${cardClass}`
+  const alignClass = `y-tabs__list--${props.align}`
+  const typeClass = `y-tabs__list--${props.type}`
+  const scrollClass = props.scrollable ? 'y-tabs__list--scrollable' : ''
+  return `${alignClass} ${typeClass} ${scrollClass}`
 })
 
-// 计算整体样式（卡片式时添加顶部边框）
-const tabsClasses = computed(() => {
-  return props.type === 'card' ? `border ${props.borderColor}` : ''
-})
+const tabsClasses = computed(() => props.type === 'card' ? 'y-tabs--card' : '')
 
 // 切换标签逻辑
-const changeTab = (key) => {
-  if (activeKey.value === key) return
+const changeTab = (key, fromChild = true) => {
+  if (activeKey.value === key || !tabNames.value.includes(key)) {
+    fromChild && console.warn(`[y-tabs] 标签 ${key} 不可切换（已激活或禁用）`)
+    return
+  }
+  if (emit('tab-before-change', key, activeKey.value) === false) return
   activeKey.value = key
-  emit('tab-change', key) // 触发切换事件
+  emit('tab-change', key, activeKey.value)
 }
 
-// 提供状态和方法给子组件（GhTab/GhTabPane）
-provide('tabsContext', {
+// 提供给子组件的上下文（传递动态值，而非 CSS 变量）
+provide('yTabsContext', {
   activeKey,
   changeTab,
   type: props.type,
-  activeColor: props.activeColor,
-  borderColor: props.borderColor
+  activeTextColor: props.activeTextColor,
+  activeBorderColor: finalActiveBorderColor,
+  borderColor: props.borderColor,
+  tabPadding: formatUnit(props.tabPadding),
+  registerTab: (name, disabled = false) => {
+    if (!allTabNames.value.includes(name)) allTabNames.value.push(name)
+    if (!disabled && !tabNames.value.includes(name)) tabNames.value.push(name)
+  },
+  unregisterTab: (name) => {
+    allTabNames.value = allTabNames.value.filter(item => item !== name)
+    tabNames.value = tabNames.value.filter(item => item !== name)
+    if (activeKey.value === name && tabNames.value.length > 0) {
+      changeTab(tabNames.value[0], false)
+    }
+  }
 })
 
-// 监听 tabNames 变化：无默认激活时，自动激活第一个非禁用标签
-watch(tabNames, (newNames) => {
-  if (!props.defaultActive && newNames.length > 0) {
-    activeKey.value = newNames[0]
+// 初始化激活标签
+const initActiveKey = () => {
+  if (props.defaultActive && tabNames.value.includes(props.defaultActive)) {
+    activeKey.value = props.defaultActive
+  } else if (tabNames.value.length > 0) {
+    activeKey.value = tabNames.value[0]
   }
-}, { immediate: true })
+}
 
-// 暴露给父组件的方法（手动切换标签）
+watch(tabNames, () => isMounted.value && initActiveKey(), { deep: true })
+
+onMounted(() => {
+  isMounted.value = true
+  initActiveKey()
+})
+
+// 暴露 API
 defineExpose({
-  setActiveKey: (key) => {
-    if (tabNames.value.includes(key)) {
-      changeTab(key)
-    }
-  },
-  getActiveKey: () => activeKey.value
+  setActiveKey: (key) => changeTab(key, false),
+  getActiveKey: () => activeKey.value,
+  getAllTabs: () => allTabNames.value.map(name => ({
+    name,
+    disabled: !tabNames.value.includes(name)
+  })),
+  refreshCurrentTab: () => {
+    const currentKey = activeKey.value
+    activeKey.value = Symbol('temp')
+    nextTick(() => activeKey.value = currentKey)
+  }
 })
 </script>
 
-<!-- 内容区过渡动画样式（贴合 GitHub 温和过渡风格） -->
-<style scoped>
+<style lang="less" scoped>
+// 完全无 Less 变量，所有值为固定原生值
+.y-tabs {
+  width: 100%;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+
+  // 卡片式整体样式
+  &--card {
+    border: 1px solid #e5e7eb; // 固定浅灰边框
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  // 标签容器（支持滚动）
+  &__list-container {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    &::-webkit-scrollbar { display: none; }
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  // 标签列表：flex 布局
+  &__list {
+    display: flex;
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+
+    // 对齐方式
+    &--left { justify-content: flex-start; }
+    &--center { justify-content: center; }
+    &--right { justify-content: flex-end; }
+
+    // 滚动模式
+    &--scrollable { flex-wrap: nowrap; }
+
+    // 下划线式样式
+    &--line { border-bottom: 1px solid #e5e7eb; } // 固定边框色
+
+    // 卡片式样式
+    &--card {
+      border-bottom: 1px solid #e5e7eb; // 固定边框色
+      background-color: #f9fafb; // 固定浅背景
+    }
+  }
+
+  // 内容容器
+  &__content-container {
+    padding: 16px;
+    box-sizing: border-box;
+  }
+}
+
+// 过渡动画
 .y-tab-fade-enter-from,
 .y-tab-fade-leave-to {
   opacity: 0;
-  transform: translateY(4px);
+  transform: translateY(3px);
 }
 .y-tab-fade-enter-active,
 .y-tab-fade-leave-active {
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition: opacity 0.25s ease-in-out, transform 0.25s ease-in-out;
 }
 </style>

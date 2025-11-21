@@ -1,36 +1,52 @@
 <template>
-  <!-- 仅激活的标签对应的内容显示 -->
-  <div v-if="isActive" class="w-full transition-all duration-200" :class="paneClasses">
-    <slot></slot> <!-- 内容区域 -->
+  <div class="y-tab-pane" v-if="isActive">
+    <slot />
   </div>
 </template>
 
 <script setup>
-import { computed, inject } from 'vue'
+import { defineProps, computed, inject, ref,watch } from 'vue'
 
-// Props 定义（name 需与 GhTab 一致）
+defineOptions({ name: 'y-tab-pane' })
+
+// 注入上下文
+const tabsContext = inject('yTabsContext', null)
+if (!tabsContext) {
+  throw new Error('[y-tab-pane] 必须嵌套在 <y-tabs> 组件中使用')
+}
+
+// Props
 const props = defineProps({
-  name: {
-    type: [String, Number],
-    required: true
-  },
-  // 内容区内边距（默认 0，贴合 GitHub 紧凑风格）
-  padding: {
-    type: String,
-    default: '0',
-    validator: val => val.endsWith('px') || val.endsWith('rem')
-  }
+  name: { type: [String, Number], required: true },
+  cache: { type: Boolean, default: false }
 })
 
-// 注入主组件激活状态
-const { activeKey } = inject('tabsContext')
+// 计算是否激活（缓存逻辑）
+const isActive = computed(() => {
+  if (props.cache) {
+    return tabsContext.activeKey.value === props.name || hasActivated.value
+  }
+  return tabsContext.activeKey.value === props.name
+})
 
-// 判断是否激活（name 与 activeKey 匹配）
-const isActive = computed(() => activeKey.value === props.name)
+const hasActivated = ref(false)
 
-// 计算内容区样式（内边距）
-const paneClasses = computed(() => {
-  const paddingValue = props.padding.replace(/[a-z]+/, '')
-  return `p-${paddingValue}`
+// 监听激活状态
+watch(isActive, (val) => {
+  if (val) hasActivated.value = true
 })
 </script>
+
+<style lang="less" scoped>
+// 完全无 Less 变量
+.y-tab-pane {
+  width: 100%;
+  box-sizing: border-box;
+  animation: fadeIn 0.25s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+</style>
