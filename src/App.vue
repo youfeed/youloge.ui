@@ -1,26 +1,30 @@
 <template>
     <y-layout>
         <!-- 头部导航 -->
-        <y-header>
+        <y-header padding="0 24px" justify="space-between" bgColor="#ffffff">
             <div class="flex items-center justify-between w-full">
-                <y-link type="primary" class="text-lg font-bold">
-                    <y-icon name="mdi-light:menu" />
+                <y-link type="primary" class="text-lg font-bold" @click="toggleAside">
+                    <y-icon name="mdi-light:menu" :size="40" />
                     GitHub Style
                 </y-link>
-                <div class="flex gap-4">
-                    <y-link>首页</y-link>
-                    <y-link>文档</y-link>
-                    <y-link>关于</y-link>
-                </div>
+            </div>
+            <div class="flex gap-4">
+                <y-link>首页 </y-link>
+                <y-link>文档</y-link>
+                <y-link>关于</y-link>
             </div>
         </y-header>
         <!--  -->
-        <y-aside>
-            aside
-            <y-menu></y-menu>
+        <y-aside :width="240" :collapsed="asideCollapsed">
+            <div class="aside-menu">
+                <div class="menu-item">首页{{ useBytes(55555) }}</div>
+                <div class="menu-item">文档</div>
+                <div class="menu-item">组件</div>
+                <div class="menu-item">示例</div>
+            </div>
         </y-aside>
         <!-- 主体内容 -->
-        <y-content padding="24px">
+        <y-content :asideWidth="240" :asideCollapsed="asideCollapsed">
             <h1 class="text-2xl font-bold mb-6">基础布局示例</h1>
             <p class="text-gray-700 dark:text-gray-300 mb-4">这是页面主体内容区域，默认居中显示，最大宽度 1200px。</p>
             <!-- 嵌套栅格组件 -->
@@ -149,10 +153,10 @@
             </ySpace>
             <yDivider position="left">Icon -- </yDivider>
             <ySpace>
-                <yIcon name="tabler:badge-8k" size="20" color="blue" />
-                <yIcon name="weui:previous2-outlined" size="64" />
-                <yIcon name="weui:email-outlined" size="20" />
-                <yIcon name="weui:me-filled" size="32" color="blue" />
+                <y-icon name="tabler:badge-8k" :size="18" color="blue" />
+                <yIcon name="weui:previous2-outlined" :size="64" />
+                <yIcon name="weui:email-outlined" :size="70" />
+                <yIcon name="weui:me-filled" :size="32" color="blue" />
             </ySpace>
             <yDivider position="left">Link</yDivider>
             <y-space title="Link" size="sm">
@@ -196,8 +200,12 @@
 <script setup>
 import { exported } from '../lib/index.js'
 import { inject, reactive, ref, toRefs } from 'vue'
+import  useYouloge  from './composables/useYouloge'
+const { useBytes } = useYouloge(); 
+
+console.log( useBytes(555) )
 const useStorage = inject('useStorage'), useMessage = inject('useMessage');
-console.log('useMessage.exported', exported,)
+// console.log('useMessage.exported', exported,)
 const table_columns = [
     { title: '姓名', key: 'name' },
     { title: '年龄', key: 'age' },
@@ -252,7 +260,11 @@ const handleSubmit = (data) => {
 const handleReset = (data) => {
     console.log('handleReset', data)
 }
-
+// 开关侧边栏
+const asideCollapsed = ref(false)
+const toggleAside = ()=>{
+    asideCollapsed.value = !asideCollapsed.value
+}
 
 
 
@@ -358,13 +370,13 @@ const formModel = ref({
 })
 // 选项数据
 const cityOptions = ref([
-  { label: '北京', value: 'beijing' },
-  { label: '上海', value: 'shanghai' },
-  { label: '广州', value: 'guangzhou' },
-  { label: '深圳', value: 'shenzhen' },
-  { label: '杭州', value: 'hangzhou' },
-  { label: '成都', value: 'chengdu' },
-  { label: '武汉', value: 'wuhan' }
+    { label: '北京', value: 'beijing' },
+    { label: '上海', value: 'shanghai' },
+    { label: '广州', value: 'guangzhou' },
+    { label: '深圳', value: 'shenzhen' },
+    { label: '杭州', value: 'hangzhou' },
+    { label: '成都', value: 'chengdu' },
+    { label: '武汉', value: 'wuhan' }
 ])
 // 表单验证规则
 const formRules = ref({

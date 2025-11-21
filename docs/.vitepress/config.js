@@ -28,8 +28,10 @@ export default defineConfig({
                 text: '布局组件',
                 base: '/layout/',
                 items: [
-                    { text: 'Divider 分割线', link: '/divider/' },
                     { text: 'Layout 布局', link: '/layout/' },
+                    { text: 'Grid 栅格', link: '/grid/' },
+                    { text: 'Divider 分割线', link: '/divider/' },
+                    { text: 'Space 间距', link: '/space/' },
                 ]
             }, {
                 text: '导航组件',
