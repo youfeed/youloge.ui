@@ -133,7 +133,7 @@
             © 2025 GitHub Style Component Library. All riyts reserved.
         </y-footer>
     </y-layout>
-    <div>
+    <div class="m-2 bg-red-500 md:m-5 lg:m-8">
         <!-- 嵌套子组件 -->
         <!-- <hash-view></hash-view> -->
         <main max-w-200 mx-a>
@@ -166,7 +166,7 @@
             <yDivider position="left">Button</yDivider>
             <ySpace title="Button" size="md" wrap>
                 <yButton rounded="none">
-                    <yIcon name="weui:location-filled" size="12" />icon default
+                    <yIcon name="weui:location-filled" :size="12" />icon default
                 </yButton>
                 <yButton type="primary" @click="onButtonClick">primaryonClick</yButton>
                 <yButton type="secondary" class="i-">secondary</yButton>
