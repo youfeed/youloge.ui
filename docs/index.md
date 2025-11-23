@@ -6,7 +6,7 @@ GitHub 风格的 Vue3 组件库，基于 Unocss 构建，轻量、易用、响�
 
 - 🎨 **GitHub 风格**：视觉统一，贴合 GitHub 简洁克制的设计语言
 - 🚀 **Vue3 原生**：基于 Composition API，支持 Vue3 所有特性
-- ⚡ **Unocss 驱动**：原子化 CSS，体积小、灵活性高
+- ⚡ **cssinjs 驱动**：原子化 CSS，体积小、灵活性高
 - 🔧 **自动导入**：支持 unplugin-auto-import，无需手动导入组件
 - 🌙 **暗黑模式**：原生支持暗黑模式，自动适配系统主题
 - 📱 **响应式**：组件自动适配桌面/移动端，字体、布局自适应
@@ -52,3 +52,16 @@ seTimeout(()=>{
     load.close();
 },5000)
 ```
+
+### Atomized 原子化CSS
+
+```html
+// .vue templte 中可以直接使用
+<div class="flex items-center bg-red-500"></div>
+```
+
+与Unocss和tailwindcss类似，仅提供常用样式 基础响应式：
+
+色彩方案 基础色 主题色 颜色板
+
+响应式 'sm': '640px', 'md': '768px', 'lg': '1024px', 'xl': '1280px', '2xl': '1536px' 移动优先

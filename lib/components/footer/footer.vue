@@ -1,10 +1,6 @@
 <template>
-  <footer 
-    class="flex items-center justify-center transition-all duration-200 border-t text-sm"
-    :class="footerClasses"
-    :style="customStyle"
-  >
-    <slot></slot>
+  <footer class="y-footer" :style="footerStyle">
+    <slot />
   </footer>
 </template>
 
@@ -12,42 +8,28 @@
 import { computed } from 'vue'
 
 const props = defineProps({
-  // 高度（默认 48px）
   height: {
-    type: String,
-    default: '48px'
+    type: [String, Number],
+    default: 48
   },
-  // 边框颜色
-  borderColor: {
+  bgColor: {
     type: String,
-    default: 'border-gray-200 dark:border-gray-800'
-  },
-  // 文本颜色（默认灰色，GitHub 底部文本风格）
-  textColor: {
-    type: String,
-    default: 'text-gray-500 dark:text-gray-400'
-  },
-  // 内边距
-  padding: {
-    type: String,
-    default: '16px',
-    validator: val => val.endsWith('px') || val.endsWith('rem')
+    default: 'var(--y-bg)'
   }
 })
 
-const footerClasses = computed(() => {
-  const paddingValue = props.padding.replace(/[a-z]+/, '')
-  return [
-    props.borderColor,
-    props.textColor,
-    `px-${paddingValue}`
-  ].join(' ')
-})
-
-const customStyle = computed(() => {
-  return {
-    height: props.height,
-    minHeight: props.height
-  }
-})
+const footerStyle = computed(() => ({
+  height: typeof props.height === 'number' ? `${props.height}px` : props.height,
+  backgroundColor: props.bgColor
+}))
 </script>
+
+<style scoped>
+.y-footer {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+</style>

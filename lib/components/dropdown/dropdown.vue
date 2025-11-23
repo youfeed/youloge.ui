@@ -1,132 +1,218 @@
 <template>
-  <div
-    class="inline-block relative"
-    :class="{ 'opacity-50 cursor-not-allowed': disabled }"
-    @click="handleTriggerClick"
-    @mouseenter="handleTriggerHover('show')"
-    @mouseleave="handleTriggerHover('hide')"
-  >
-    <slot name="trigger"></slot>
+  <div class="y-dropdown" ref="dropdownRef">
+    <div 
+      class="y-dropdown__trigger"
+      @click="toggleDropdown"
+      @mouseenter="handleMouseEnter"
+      @mouseleave="handleMouseLeave"
+    >
+      <slot name="trigger"></slot>
+    </div>
 
-    <teleport to="body">
-      <div
-        v-if="isOpen"
-        ref="menuRef"
-        class="absolute z-50 transition-all duration-200 origin-top-left"
-        :class="menuPositionClasses"
-        @click.stop
-      >
-        <slot></slot>
-      </div>
-    </teleport>
+    <!-- 移除teleport，直接在触发元素下方渲染 -->
+    <div
+      v-show="isOpen"
+      ref="contentRef"
+      class="y-dropdown__content"
+      :class="contentClasses"
+      :style="contentStyle"
+      @click.stop
+      @mouseenter="handleContentMouseEnter"
+      @mouseleave="handleContentMouseLeave"
+    >
+      <slot></slot>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, provide, computed } from 'vue'
-// 导入自定义 useClickOutside @vueuse/core）
-import useClickOutside from '@lib/composables/click.outside/'
+import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
 
 const props = defineProps({
-  trigger: {
-    type: String,
-    default: 'click',
-    validator: val => ['click', 'hover'].includes(val)
-  },
-  disabled: {
-    type: Boolean,
-    default: false
-  },
-  placement: {
-    type: String,
-    default: 'bottom-start',
-    validator: val => ['bottom-start', 'bottom-end', 'top-start', 'top-end'].includes(val)
-  },
-  clickOutsideClose: {
-    type: Boolean,
-    default: true
-  },
-  escClose: {
-    type: Boolean,
-    default: true
-  }
+  trigger: { type: String, default: 'click' },
+  placement: { type: String, default: 'bottom-start' },
+  width: { type: [String, Number], default: 'auto' },
+  offset: { type: Number, default: 4 }
 })
 
+const emit = defineEmits(['open', 'close', 'toggle'])
+
+const dropdownRef = ref(null)
+const contentRef = ref(null)
 const isOpen = ref(false)
-provide('dropdownContext', { isOpen, disabled: props.disabled })
+const contentStyle = ref({})
 
-// 新增：目标元素 ref（触发元素容器）和菜单 ref（忽略点击）
-const triggerRef = ref(null)
-const menuRef = ref(null)
-
-const menuPositionClasses = computed(() => {
-  const base = 'rounded-md shadow-sm border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'
-  const positionMap = {
-    'bottom-start': 'left-0 top-full mt-1',
-    'bottom-end': 'right-0 top-full mt-1',
-    'top-start': 'left-0 bottom-full mb-1',
-    'top-end': 'right-0 bottom-full mb-1'
+watch(isOpen, async (newVal) => {
+  if (newVal) {
+    await nextTick()
+    calculatePosition()
   }
-  return `${base} ${positionMap[props.placement]}`
+  emit(newVal ? 'open' : 'close')
+  emit('toggle', newVal)
 })
 
-const handleTriggerClick = () => {
-  if (props.disabled) return
-  if (props.trigger === 'click') {
-    isOpen.value = !isOpen.value
+const contentClasses = computed(() => ({
+  'y-dropdown__content--open': isOpen.value
+}))
+
+const calculatePosition = () => {
+  if (!dropdownRef.value || !contentRef.value) return
+  
+  const triggerRect = dropdownRef.value.getBoundingClientRect()
+  const contentRect = contentRef.value.getBoundingClientRect()
+  
+  let top = 0
+  let left = 0
+  
+  const placements = {
+    'bottom-start': () => {
+      top = triggerRect.height + props.offset
+      left = 0
+    },
+    'bottom-end': () => {
+      top = triggerRect.height + props.offset
+      left = triggerRect.width - contentRect.width
+    },
+    'bottom': () => {
+      top = triggerRect.height + props.offset
+      left = (triggerRect.width - contentRect.width) / 2
+    },
+    'top-start': () => {
+      top = -contentRect.height - props.offset
+      left = 0
+    },
+    'top-end': () => {
+      top = -contentRect.height - props.offset
+      left = triggerRect.width - contentRect.width
+    },
+    'top': () => {
+      top = -contentRect.height - props.offset
+      left = (triggerRect.width - contentRect.width) / 2
+    },
+    'left-start': () => {
+      top = 0
+      left = -contentRect.width - props.offset
+    },
+    'left-end': () => {
+      top = triggerRect.height - contentRect.height
+      left = -contentRect.width - props.offset
+    },
+    'left': () => {
+      top = (triggerRect.height - contentRect.height) / 2
+      left = -contentRect.width - props.offset
+    },
+    'right-start': () => {
+      top = 0
+      left = triggerRect.width + props.offset
+    },
+    'right-end': () => {
+      top = triggerRect.height - contentRect.height
+      left = triggerRect.width + props.offset
+    },
+    'right': () => {
+      top = (triggerRect.height - contentRect.height) / 2
+      left = triggerRect.width + props.offset
+    }
+  }
+  
+  placements[props.placement]?.() || placements['bottom-start']()
+  
+  contentStyle.value = {
+    width: typeof props.width === 'number' ? `${props.width}px` : props.width,
+    top: `${top}px`,
+    left: `${left}px`,
+    transform: isOpen.value ? 'scale(1)' : 'scale(0.8)',
+    opacity: isOpen.value ? 1 : 0
   }
 }
 
-let hoverTimer = null
-const handleTriggerHover = (action) => {
-  if (props.disabled || props.trigger !== 'hover') return
-  clearTimeout(hoverTimer)
-  if (action === 'show') {
-    hoverTimer = setTimeout(() => { isOpen.value = true }, 150)
-  } else {
-    hoverTimer = setTimeout(() => { isOpen.value = false }, 150)
-  }
+const toggleDropdown = () => {
+  if (props.trigger !== 'click') return
+  isOpen.value = !isOpen.value
 }
 
-// 核心修改：使用自定义 useClickOutside
-let clickOutsideInstance = null
-onMounted(() => {
-  // 初始化 useClickOutside triggerRef，忽略菜单 ref（点击菜单不关闭）
-  clickOutsideInstance = useClickOutside(triggerRef, () => {
-    if (props.clickOutsideClose && isOpen.value) {
+const handleMouseEnter = () => {
+  if (props.trigger !== 'hover') return
+  isOpen.value = true
+}
+
+const handleMouseLeave = () => {
+  if (props.trigger !== 'hover') return
+  setTimeout(() => {
+    if (!isMouseOverContent.value) {
       isOpen.value = false
     }
-  }, {
-    ignoreRefs: [menuRef] // 忽略菜单元素，点击菜单内部不关闭
-  })
+  }, 100)
+}
 
-  // 挂载事件监听
-  if (props.clickOutsideClose) {
-    clickOutsideInstance.mount()
-  }
+const isMouseOverContent = ref(false)
 
-  // ESC 键监听
-  window.addEventListener('keydown', handleEscKey)
-})
+const handleContentMouseEnter = () => {
+  if (props.trigger !== 'hover') return
+  isMouseOverContent.value = true
+}
 
-onUnmounted(() => {
-  // 卸载事件监听（避免内存泄漏）
-  if (clickOutsideInstance) {
-    clickOutsideInstance.unmount()
-  }
-  window.removeEventListener('keydown', handleEscKey)
-  clearTimeout(hoverTimer)
-})
+const handleContentMouseLeave = () => {
+  if (props.trigger !== 'hover') return
+  isMouseOverContent.value = false
+  setTimeout(() => {
+    if (!isMouseOverContent.value) {
+      isOpen.value = false
+    }
+  }, 100)
+}
 
-const handleEscKey = (e) => {
-  if (props.escClose && e.key === 'Escape' && isOpen.value) {
+const handleClickOutside = (event) => {
+  if (!isOpen.value) return
+  if (!dropdownRef.value?.contains(event.target)) {
     isOpen.value = false
   }
 }
 
-defineExpose({
-  open: () => { if (!props.disabled) isOpen.value = true },
-  close: () => { isOpen.value = false },
-  toggle: () => { if (!props.disabled) isOpen.value = !isOpen.value }
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
 })
 </script>
+
+<style scoped>
+.y-dropdown {
+  display: inline-block;
+  position: relative;
+}
+
+.y-dropdown__trigger {
+  cursor: pointer;
+}
+
+.y-dropdown__content {
+  position: absolute;
+  min-width: 160px;
+  background: white;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 1px solid #e5e7eb;
+  z-index: 1000;
+  overflow: hidden;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: scale(0.8);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.y-dropdown__content--open {
+  transform: scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (prefers-color-scheme: dark) {
+  .y-dropdown__content {
+    background: #1f2937;
+    border-color: #374151;
+  }
+}
+</style>
