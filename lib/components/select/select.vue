@@ -140,8 +140,14 @@ const props = defineProps({
     type: String,
     default: '无匹配数据'
   },
-  max: Number,
-  min: Number,
+  max: {
+    type: Number,
+    default: 1
+  },
+  min: {
+    type: Number,
+    default: 1
+  },
   clearable: {
     type: Boolean,
     default: true
