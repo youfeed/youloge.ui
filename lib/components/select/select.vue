@@ -17,7 +17,7 @@
             ref="inputRef"
             v-model="query"
             class="y-select__input"
-            placeholder="新选项回车确认输入"
+            placeholder="回车确认输入"
             @input="handleInput"
             @keydown="handleKeydown"
             @focus="handleInputFocus"
