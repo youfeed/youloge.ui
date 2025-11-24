@@ -40,6 +40,12 @@ export default defineConfig({
                     { text: 'Divider 分割线', link: '/divider/' },
                     { text: 'Layout 布局', link: '/layout/' },
                 ]
+            }, {
+                text: '输入组件',
+                base: '/input/',
+                items: [
+                    { text: 'Select 选择器', link: '/select/' },
+                ]
             }
         ],
         footer: {

@@ -185,8 +185,7 @@
                             </y-form-item>
                             <!-- 单选选择器（基础用法） -->
                             <y-form-item label="所在城市" prop="city" required>
-                                <y-select v-model="formModel.city" :options="cityOptions" placeholder="请选择城市"
-                                    width="200px" />
+                                <y-select label="城市" multiple filterable allowCreate v-model="formModel.city" :options="cityOptions" placeholder="请选择城市"/>
                             </y-form-item>
                             <y-form-item>
                                 <div>

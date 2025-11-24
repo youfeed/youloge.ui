@@ -1,427 +1,372 @@
 <template>
-  <div class="y-select" :class="{ 'y-select--disabled': disabled, 'y-select--error': error }">
-    <!-- 选择器触发区（选中值 + 箭头） -->
-    <div
-      class="y-select__trigger"
-      :style="{ width: width }"
-      @click="toggleDropdown"
-      @keydown.enter="toggleDropdown"
-      @keydown.space="toggleDropdown"
-      @keydown.esc="closeDropdown"
-      tabindex="0"
-      :aria-expanded="isDropdownOpen"
-      :aria-disabled="disabled"
-    >
-      <!-- 选中值显示 -->
-      <div class="y-select__value">
-        <template v-if="isMultiple">
-          <!-- 多选：标签组显示 -->
-          <div class="y-select__tags" v-if="selectedValues.length > 0">
-            <span
-              v-for="(value, index) in selectedValues"
-              :key="index"
-              class="y-select__tag"
-            >
-              {{ getLabelByValue(value) }}
-              <button
-                type="button"
-                class="y-select__tag-close"
-                @click.stop="removeMultipleValue(value)"
-              >
-                ×
-              </button>
-            </span>
-          </div>
-          <span class="y-select__placeholder" v-else>{{ placeholder }}</span>
-        </template>
-        <template v-else>
-          <!-- 单选：文本显示 -->
-          <span v-if="selectedValue !== '' && selectedValue !== undefined">{{ getLabelByValue(selectedValue) }}</span>
-          <span class="y-select__placeholder" v-else>{{ placeholder }}</span>
-        </template>
+  <div class="y-select" :class="selectClass" ref="selectRef">
+    <!-- 选择框 -->
+    <div class="y-select__trigger" @click="toggleDropdown">
+      <!-- 标签显示区域 -->
+      <div class="y-select__display">
+        <!-- 多选模式：显示标签 -->
+        <div v-if="multiple" class="y-select__tags">
+          <span v-for="(item, index) in selectedItems" :key="index" class="y-select__tag">
+            {{ getOptionLabel(item) }}
+            <span v-if="!disabled" class="y-select__tag-close" @click.stop="removeTag(item)">×</span>
+          </span>
+          
+          <!-- 输入区域（多选时可输入） -->
+          <input
+            v-if="filterable"
+            ref="inputRef"
+            v-model="query"
+            class="y-select__input"
+            placeholder="新选项回车确认输入"
+            @input="handleInput"
+            @keydown="handleKeydown"
+            @focus="handleInputFocus"
+          />
+        </div>
+        
+        <!-- 单选模式 -->
+        <div v-else class="y-select__single">
+          <!-- 显示选中值或占位符 -->
+          <span v-if="selectedItems.length > 0" class="y-select__value">
+            {{ getOptionLabel(selectedItems[0]) }}
+          </span>
+          <span v-else class="y-select__placeholder">
+            {{ placeholder }}
+          </span>
+          
+          <!-- 输入区域（单选时可输入） -->
+          <input
+            v-if="filterable"
+            ref="inputRef"
+            v-model="query"
+            class="y-select__input"
+            :placeholder="placeholder"
+            @input="handleInput"
+            @focus="handleInputFocus"
+          />
+        </div>
       </div>
-
-      <!-- 下拉箭头（旋转动画） -->
-      <div class="y-select__arrow" :class="{ 'y-select__arrow--rotate': isDropdownOpen }">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M2 5L8 11L14 5" stroke="#6b7280" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
-        </svg>
+      
+      <!-- 操作图标区域 -->
+      <div class="y-select__actions">
+        <span v-if="clearable && selectedItems.length > 0" class="y-select__clear" @click.stop="handleClear">
+          ×
+        </span>
+        <span class="y-select__arrow" :class="{ 'y-select__arrow--open': showDropdown }">▼</span>
       </div>
-
-      <!-- 清空按钮（单选/多选有选中值时显示） -->
-      <button
-        v-if="allowClear && (selectedValue !== '' || selectedValues.length > 0) && !disabled"
-        class="y-select__clear"
-        @click.stop="clearSelection"
-        aria-label="清空选择"
-      >
-        ×
-      </button>
     </div>
-
-    <!-- 下拉面板（悬浮定位） -->
-    <div
-      v-if="isDropdownOpen"
-      class="y-select__dropdown"
-      :style="{ width: width }"
-      @click.stop
-      @keydown.esc="closeDropdown"
-      @keydown.up="handleKeyUp"
-      @keydown.down="handleKeyDown"
-      @keydown.enter="handleKeyEnter"
-    >
-      <!-- 搜索框（支持过滤选项） -->
-      <div class="y-select__search" v-if="showSearch">
+    
+    <!-- 下拉区域 -->
+    <div v-show="showDropdown" class="y-select__dropdown">
+      <!-- 过滤输入区域 -->
+      <div v-if="filterable" class="y-select__filter">
         <input
-          type="text"
-          class="y-select__search-input"
-          v-model="searchKeyword"
-          placeholder="搜索选项..."
-          @focus="isSearchFocused = true"
-          @blur="isSearchFocused = false"
-          @input="filterOptions"
+          ref="searchInputRef"
+          v-model="searchQuery"
+          class="y-select__filter-input"
+          :placeholder="searchPlaceholder"
+          @input="handleSearch"
         />
       </div>
-
-      <!-- 选项列表 -->
+      
+      <!-- 选项区域 -->
       <div class="y-select__options">
-        <!-- 无匹配选项 -->
-        <div class="y-select__option--empty" v-if="filteredOptions.length === 0">
-          {{ searchKeyword ? '无匹配选项' : '暂无选项' }}
-        </div>
-
-        <!-- 选项列表 -->
         <div
-          v-for="(option, index) in filteredOptions"
-          :key="option.value + index"
+          v-for="option in filteredOptions"
+          :key="getOptionValue(option)"
           class="y-select__option"
-          :class="{
-            'y-select__option--selected': isMultiple 
-              ? selectedValues.includes(option.value) 
-              : selectedValue === option.value,
-            'y-select__option--disabled': option.disabled,
-            'y-select__option--highlighted': highlightedIndex === index
-          }"
-          @click.stop="selectOption(option)"
-          @mouseenter="highlightedIndex = index"
-          :aria-selected="isMultiple ? selectedValues.includes(option.value) : selectedValue === option.value"
+          :class="getOptionClass(option)"
+          @click="handleOptionClick(option)"
         >
-          <!-- 自定义选项模板（插槽优先） -->
-          <slot name="option" :option="option">
-            {{ option.label }}
-          </slot>
+          <!-- 多选复选框 -->
+          <span v-if="multiple" class="y-select__checkbox">
+            <input
+              type="checkbox"
+              :checked="isSelected(option)"
+              readonly
+              class="y-select__checkbox-input"
+            />
+            <span class="y-select__checkbox-inner"></span>
+          </span>
+          
+          <!-- 选项内容 -->
+          <span class="y-select__option-label">
+            {{ getOptionLabel(option) }}
+          </span>
         </div>
+        
+        <!-- 无数据提示 -->
+        <div v-if="filteredOptions.length === 0" class="y-select__empty">
+          {{ emptyText }}
+        </div>
+      </div>
+      
+      <!-- 自定义创建区域 -->
+      <div v-if="allowCreate && query && !isExistingOption" class="y-select__create" @click="createOption">
+        + 创建 "{{ query }}"
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, watch, computed, onMounted, onUnmounted, inject } from 'vue'
+import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
 
 defineOptions({ name: 'y-select' })
 
-// Props 定义：覆盖核心+增强功能
+// 双向绑定
+const modelValue = defineModel({
+  type: [String, Number, Array, Object],
+  default: null
+})
+
 const props = defineProps({
-  // 选项列表：[{ label: string, value: any, disabled?: boolean }]
   options: {
     type: Array,
-    default: () => [],
-    validator: (val) => val.every(item => 'label' in item && 'value' in item)
+    default: () => []
   },
-  // 绑定值（单选字符串/数字，多选数组）
-  modelValue: {
-    type: [String, Number, Array],
-    default: ''
-  },
-  // 占位提示文本
+  multiple: Boolean,
+  filterable: Boolean,
+  allowCreate: Boolean,
   placeholder: {
     type: String,
     default: '请选择'
   },
-  // 是否支持多选
-  multiple: {
-    type: Boolean,
-    default: false
+  searchPlaceholder: {
+    type: String,
+    default: '搜索...'
   },
-  // 是否支持搜索过滤
-  showSearch: {
-    type: Boolean,
-    default: false
+  emptyText: {
+    type: String,
+    default: '无匹配数据'
   },
-  // 是否允许清空选择
-  allowClear: {
+  max: Number,
+  min: Number,
+  clearable: {
     type: Boolean,
     default: true
   },
-  // 选择器宽度（支持数字/字符串单位）
-  width: {
-    type: [String, Number],
-    default: '100%'
-  },
-  // 是否禁用
-  disabled: {
-    type: Boolean,
-    default: false
-  },
-  // 错误态（由 form-item 传递）
-  error: {
-    type: Boolean,
-    default: false
-  },
-  // 多选时最大显示标签数（超出显示数量提示）
-  maxTagCount: {
-    type: Number,
-    default: 0 // 0 表示全部显示
-  },
-  // 搜索匹配方式：label/value/all（默认匹配标签）
-  searchMatch: {
+  disabled: Boolean,
+  valueKey: {
     type: String,
-    default: 'label',
-    validator: val => ['label', 'value', 'all'].includes(val)
+    default: 'value'
+  },
+  labelKey: {
+    type: String,
+    default: 'label'
   }
 })
 
-// 事件派发
-const emit = defineEmits([
-  'update:modelValue',
-  'change',
-  'clear',
-  'dropdown-open',
-  'dropdown-close'
+const emit = defineEmits(['change', 'create', 'search'])
+
+// 响应式数据
+const selectRef = ref(null)
+const inputRef = ref(null)
+const searchInputRef = ref(null)
+const showDropdown = ref(false)
+const query = ref('')
+const searchQuery = ref('')
+
+// 计算属性
+const selectClass = computed(() => [
+  'y-select',
+  {
+    'y-select--open': showDropdown.value,
+    'y-select--disabled': props.disabled,
+    'y-select--multiple': props.multiple,
+    'y-select--filterable': props.filterable
+  }
 ])
 
-// 表单适配：与 y-form/y-form-item 联动
-const formItemContext = inject('yFormItemContext', { disabled: false })
-const formContext = inject('formContext', null)
-const prop = inject('formItemProp', '')
-
-// 状态管理
-const isDropdownOpen = ref(false) // 下拉面板是否展开
-const selectedValue = ref('') // 单选选中值
-const selectedValues = ref([]) // 多选选中值
-const searchKeyword = ref('') // 搜索关键词
-const filteredOptions = ref([]) // 过滤后的选项
-const highlightedIndex = ref(-1) // 高亮选项索引
-const isSearchFocused = ref(false) // 搜索框是否聚焦
-
-// 格式化单位（数字转 px，字符串直接使用）
-const formatUnit = (val) => {
-  if (typeof val === 'number') return `${val}px`
-  return val
+// 工具函数
+const getOptionValue = (option) => {
+  return typeof option === 'object' ? option[props.valueKey] : option
 }
 
-// 初始化：同步绑定值到组件状态
-const initSelectedValues = () => {
-  if (props.multiple) {
-    selectedValues.value = Array.isArray(props.modelValue) ? [...props.modelValue] : []
-  } else {
-    selectedValue.value = props.modelValue || ''
+const getOptionLabel = (option) => {
+  if (typeof option === 'object') {
+    return option[props.labelKey] || String(getOptionValue(option))
   }
-  // 初始化过滤选项
-  filteredOptions.value = [...props.options]
+  return String(option)
 }
 
-// 根据值获取标签文本
-const getLabelByValue = (value) => {
-  const option = props.options.find(item => item.value === value)
-  return option ? option.label : ''
+// 选中的选项
+const selectedItems = computed(() => {
+  if (!modelValue.value) return []
+  if (props.multiple) {
+    return Array.isArray(modelValue.value) ? modelValue.value : []
+  }
+  return [modelValue.value]
+})
+
+// 过滤后的选项
+const filteredOptions = computed(() => {
+  let options = props.options.map((option, index) => ({
+    ...(typeof option === 'object' ? option : { 
+      [props.valueKey]: option, 
+      [props.labelKey]: option 
+    }),
+    index
+  }))
+  
+  // 搜索过滤
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase()
+    options = options.filter(option => 
+      getOptionLabel(option).toLowerCase().includes(query)
+    )
+  }
+  
+  return options
+})
+
+// 检查是否已存在相同选项
+const isExistingOption = computed(() => {
+  return props.options.some(option => 
+    getOptionLabel(option).toLowerCase() === query.value.toLowerCase()
+  )
+})
+
+// 检查选项是否选中
+const isSelected = (option) => {
+  const value = getOptionValue(option)
+  if (props.multiple) {
+    return selectedItems.value.some(item => getOptionValue(item) === value)
+  }
+  return getOptionValue(selectedItems.value[0]) === value
 }
 
-// 切换下拉面板显示/隐藏
+// 选项类名
+const getOptionClass = (option) => ({
+  'y-select__option--selected': isSelected(option),
+  'y-select__option--disabled': option.disabled
+})
+
+// 事件处理
 const toggleDropdown = () => {
-  if (props.disabled || formItemContext.disabled) return
-  isDropdownOpen.value = !isDropdownOpen.value
-  if (isDropdownOpen.value) {
-    emit('dropdown-open')
-    highlightedIndex.value = -1
-    // 搜索框自动聚焦
-    if (props.showSearch) {
-      setTimeout(() => {
-        const searchInput = document.querySelector('.y-select__search-input')
-        searchInput?.focus()
-      }, 100)
-    }
-  } else {
-    emit('dropdown-close')
-    // 清空搜索关键词
-    searchKeyword.value = ''
-    filteredOptions.value = [...props.options]
+  if (props.disabled) return
+  showDropdown.value = !showDropdown.value
+  if (showDropdown.value) {
+    nextTick(() => {
+      if (props.filterable) {
+        searchInputRef.value?.focus()
+      }
+    })
   }
 }
 
-// 关闭下拉面板
-const closeDropdown = () => {
-  if (isDropdownOpen.value) {
-    isDropdownOpen.value = false
-    emit('dropdown-close')
-    searchKeyword.value = ''
-    filteredOptions.value = [...props.options]
+const handleInputFocus = () => {
+  if (!showDropdown.value) {
+    showDropdown.value = true
   }
 }
 
-// 选中选项
-const selectOption = (option) => {
-  if (option.disabled || props.disabled || formItemContext.disabled) return
+const handleInput = () => {
+  if (!showDropdown.value) {
+    showDropdown.value = true
+  }
+}
 
+const handleSearch = () => {
+  emit('search', searchQuery.value)
+}
+
+const handleOptionClick = (option) => {
+  if (option.disabled || props.disabled) return
+  
+  const value = getOptionValue(option)
+  
   if (props.multiple) {
-    // 多选：添加/移除选中值
-    const index = selectedValues.value.indexOf(option.value)
-    if (index === -1) {
-      selectedValues.value.push(option.value)
+    // 多选逻辑
+    const currentValues = selectedItems.value.map(getOptionValue)
+    const index = currentValues.indexOf(value)
+    
+    if (index > -1) {
+      // 取消选择
+      if (selectedItems.value.length > (props.min || 0)) {
+        const newValues = [...selectedItems.value]
+        newValues.splice(index, 1)
+        modelValue.value = newValues
+      }
     } else {
-      selectedValues.value.splice(index, 1)
+      // 添加选择
+      if (!props.max || selectedItems.value.length < props.max) {
+        modelValue.value = [...selectedItems.value, option]
+      }
     }
-    // 同步绑定值
-    emit('update:modelValue', [...selectedValues.value])
-    emit('change', [...selectedValues.value])
   } else {
-    // 单选：设置选中值并关闭下拉
-    selectedValue.value = option.value
-    emit('update:modelValue', option.value)
-    emit('change', option.value)
-    closeDropdown()
+    // 单选逻辑
+    modelValue.value = option
+    showDropdown.value = false
+    query.value = ''
+    searchQuery.value = ''
   }
+  
+  emit('change', modelValue.value)
+}
 
-  // 触发表单验证
-  if (formContext && prop) {
-    formContext.validateField(prop)
+const removeTag = (item) => {
+  if (props.disabled) return
+  const value = getOptionValue(item)
+  const currentValues = selectedItems.value.map(getOptionValue)
+  const index = currentValues.indexOf(value)
+  
+  if (index > -1 && selectedItems.value.length > (props.min || 0)) {
+    const newValues = [...selectedItems.value]
+    newValues.splice(index, 1)
+    modelValue.value = newValues
+    emit('change', modelValue.value)
   }
 }
 
-// 移除多选值
-const removeMultipleValue = (value) => {
-  if (props.disabled || formItemContext.disabled) return
-  const index = selectedValues.value.indexOf(value)
-  if (index !== -1) {
-    selectedValues.value.splice(index, 1)
-    emit('update:modelValue', [...selectedValues.value])
-    emit('change', [...selectedValues.value])
-    // 触发表单验证
-    if (formContext && prop) {
-      formContext.validateField(prop)
-    }
+const handleClear = () => {
+  if (props.disabled) return
+  modelValue.value = props.multiple ? [] : null
+  emit('change', modelValue.value)
+}
+
+const handleKeydown = (event) => {
+  if (event.key === 'Enter' && props.allowCreate && query.value) {
+    createOption()
+    event.preventDefault()
+  } else if (event.key === 'Backspace' && !query.value && selectedItems.value.length > 0) {
+    removeTag(selectedItems.value[selectedItems.value.length - 1])
   }
 }
 
-// 清空选择
-const clearSelection = () => {
-  if (props.disabled || formItemContext.disabled) return
+const createOption = () => {
+  if (!query.value || props.disabled) return
+  
+  const newOption = {
+    [props.valueKey]: query.value,
+    [props.labelKey]: query.value
+  }
+  
   if (props.multiple) {
-    selectedValues.value = []
-    emit('update:modelValue', [])
-  } else {
-    selectedValue.value = ''
-    emit('update:modelValue', '')
-  }
-  emit('change', props.multiple ? [] : '')
-  emit('clear')
-  // 触发表单验证
-  if (formContext && prop) {
-    formContext.validateField(prop)
-  }
-}
-
-// 搜索过滤选项
-const filterOptions = () => {
-  if (!props.showSearch || !searchKeyword.value) {
-    filteredOptions.value = [...props.options]
-    return
-  }
-
-  const keyword = searchKeyword.value.toLowerCase()
-  filteredOptions.value = props.options.filter(option => {
-    if (props.searchMatch === 'label') {
-      return option.label.toLowerCase().includes(keyword)
-    } else if (props.searchMatch === 'value') {
-      return String(option.value).toLowerCase().includes(keyword)
-    } else {
-      return option.label.toLowerCase().includes(keyword) || String(option.value).toLowerCase().includes(keyword)
+    if (!props.max || selectedItems.value.length < props.max) {
+      modelValue.value = [...selectedItems.value, newOption]
     }
-  })
-}
-
-// 键盘导航：上键
-const handleKeyUp = (e) => {
-  e.preventDefault()
-  if (highlightedIndex.value <= 0) {
-    highlightedIndex.value = filteredOptions.length - 1
   } else {
-    highlightedIndex.value--
+    modelValue.value = newOption
+    showDropdown.value = false
   }
-  scrollToHighlightedOption()
+  
+  emit('create', newOption)
+  emit('change', modelValue.value)
+  query.value = ''
+  searchQuery.value = ''
 }
 
-// 键盘导航：下键
-const handleKeyDown = (e) => {
-  e.preventDefault()
-  if (highlightedIndex.value >= filteredOptions.length - 1) {
-    highlightedIndex.value = 0
-  } else {
-    highlightedIndex.value++
-  }
-  scrollToHighlightedOption()
-}
-
-// 键盘导航：回车选中
-const handleKeyEnter = (e) => {
-  e.preventDefault()
-  if (highlightedIndex.value >= 0 && filteredOptions.length > 0) {
-    const option = filteredOptions[highlightedIndex.value]
-    selectOption(option)
+// 点击外部关闭
+const handleClickOutside = (event) => {
+  if (selectRef.value && !selectRef.value.contains(event.target)) {
+    showDropdown.value = false
+    query.value = ''
+    searchQuery.value = ''
   }
 }
 
-// 滚动到高亮选项
-const scrollToHighlightedOption = () => {
-  const optionsContainer = document.querySelector('.y-select__options')
-  const highlightedOption = optionsContainer?.querySelector(`.y-select__option--highlighted`)
-  if (highlightedOption) {
-    const containerRect = optionsContainer.getBoundingClientRect()
-    const optionRect = highlightedOption.getBoundingClientRect()
-    if (optionRect.top < containerRect.top) {
-      optionsContainer.scrollTop -= containerRect.top - optionRect.top
-    } else if (optionRect.bottom > containerRect.bottom) {
-      optionsContainer.scrollTop += optionRect.bottom - containerRect.bottom
-    }
-  }
-}
-
-// 监听绑定值变化，同步组件状态
-watch(
-  () => props.modelValue,
-  () => {
-    initSelectedValues()
-  },
-  { deep: true, immediate: true }
-)
-
-// 监听选项变化，同步过滤结果
-watch(
-  () => props.options,
-  () => {
-    filteredOptions.value = [...props.options]
-    // 移除已被删除的选项的选中状态
-    if (props.multiple) {
-      selectedValues.value = selectedValues.value.filter(value => 
-        props.options.some(option => option.value === value)
-      )
-    } else if (selectedValue.value && !props.options.some(option => option.value === selectedValue.value)) {
-      selectedValue.value = ''
-    }
-  },
-  { deep: true }
-)
-
-// 点击外部关闭下拉面板
-const handleClickOutside = (e) => {
-  const selectEl = document.querySelector('.y-select')
-  if (selectEl && !selectEl.contains(e.target)) {
-    closeDropdown()
-  }
-}
-
-// 组件挂载/卸载时绑定/解绑事件
+// 生命周期
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
 })
@@ -429,292 +374,259 @@ onMounted(() => {
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
 })
-
-// 暴露 API 给父组件
-defineExpose({
-  openDropdown: () => {
-    if (!props.disabled && formItemContext.disabled) toggleDropdown()
-  },
-  closeDropdown,
-  clearSelection,
-  getSelectedValues: () => props.multiple ? [...selectedValues.value] : selectedValue.value
-})
 </script>
 
-<style lang="less" scoped>
-// 选择器容器：基础样式
+<style scoped>
 .y-select {
   position: relative;
   display: inline-block;
-  box-sizing: border-box;
+  width: 100%;
   font-size: 14px;
-  color: #1f2937;
+}
 
-  // 禁用态
-  &--disabled {
-    .y-select__trigger {
-      background-color: #f9fafb;
-      border-color: #f3f4f6;
-      cursor: not-allowed;
+/* 触发区域 */
+.y-select__trigger {
+  display: flex;
+  align-items: center;
+  padding: 4px 6px;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-height: 20px;
+}
 
-      .y-select__placeholder,
-      .y-select__value,
-      .y-select__arrow svg path {
-        color: #9ca3af;
-        stroke: #9ca3af;
-      }
+.y-select__trigger:hover:not(.y-select--disabled) {
+  border-color: #c0c4cc;
+}
 
-      .y-select__clear {
-        color: #d1d5db;
-        cursor: not-allowed;
-      }
-    }
-  }
+.y-select--open .y-select__trigger {
+  border-color: #409eff;
+  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
+}
 
-  // 错误态
-  &--error {
-    .y-select__trigger {
-      border-color: #cf222e;
+.y-select--disabled .y-select__trigger {
+  background: #f5f7fa;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
 
-      &:focus-within {
-        box-shadow: 0 0 0 2px rgba(207, 34, 46, 0.1);
-      }
-    }
-  }
+/* 显示区域 */
+.y-select__display {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
 
-  // 触发区：核心交互区域
-  &__trigger {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    padding: 8px 12px;
-    padding-right: 36px; // 预留箭头和清空按钮空间
-    border: 1px solid #e5e7eb;
-    border-radius: 4px;
-    background-color: #ffffff;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    box-sizing: border-box;
-    overflow: hidden;
+/* 标签区域 */
+.y-select__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+  flex: 1;
+}
 
-    &:focus-within {
-      outline: none;
-      border-color: #0969da;
-      box-shadow: 0 0 0 2px rgba(9, 105, 218, 0.1);
-    }
+.y-select__tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 6px;
+  background: #f0f9ff;
+  border: 1px solid #c6e2ff;
+  border-radius: 2px;
+  font-size: 12px;
+  color: #409eff;
+}
 
-    &:hover:not(.y-select--disabled) {
-      border-color: #d1d5db;
-    }
-  }
+.y-select__tag-close {
+  margin-left: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
 
-  // 选中值容器
-  &__value {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-  }
+.y-select__tag-close:hover {
+  color: #0678ff;
+}
 
-  // 多选标签组
-  &__tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    width: 100%;
-  }
+/* 单选显示 */
+.y-select__single {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
 
-  // 多选标签
-  &__tag {
-    display: inline-flex;
-    align-items: center;
-    padding: 2px 6px;
-    font-size: 13px;
-    color: #4b5563;
-    background-color: #f3f4f6;
-    border-radius: 3px;
-    border: 1px solid #e5e7eb;
-  }
+.y-select__value {
+  color: #606266;
+}
 
-  // 多选标签关闭按钮
-  &__tag-close {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 14px;
-    height: 14px;
-    margin-left: 4px;
-    padding: 0;
-    border: none;
-    background: transparent;
-    color: #9ca3af;
-    font-size: 10px;
-    cursor: pointer;
-    transition: color 0.15s ease;
+.y-select__placeholder {
+  color: #c0c4cc;
+}
 
-    &:hover {
-      color: #cf222e;
-    }
-  }
+/* 输入区域 */
+.y-select__input {
+  border: none;
+  outline: none;
+  background: transparent;
+  flex: 1;
+  min-width: 60px;
+  color: #606266;
+}
 
-  // 占位提示文本
-  &__placeholder {
-    color: #9ca3af;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+.y-select__input::placeholder {
+  color: #c0c4cc;
+}
 
-  // 下拉箭头
-  &__arrow {
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    transition: transform 0.2s ease;
+/* 操作区域 */
+.y-select__actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 8px;
+}
 
-    &--rotate {
-      transform: translateY(-50%) rotate(180deg);
-    }
-  }
+.y-select__clear {
+  cursor: pointer;
+  color: #c0c4cc;
+  padding: 2px;
+  font-size: 16px;
+}
 
-  // 清空按钮
-  &__clear {
-    position: absolute;
-    right: 28px;
-    top: 50%;
-    transform: translateY(-50%);
-    padding: 2px;
-    border: none;
-    background: transparent;
-    color: #9ca3af;
-    font-size: 14px;
-    cursor: pointer;
-    transition: color 0.2s ease;
+.y-select__clear:hover {
+  color: #909399;
+}
 
-    &:hover {
-      color: #cf222e;
-    }
-  }
+.y-select__arrow {
+  transition: transform 0.2s;
+  color: #c0c4cc;
+  font-size: 12px;
+}
 
-  // 下拉面板
-  &__dropdown {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    z-index: 1000;
-    margin-top: 4px;
-    border: 1px solid #e5e7eb;
-    border-radius: 4px;
-    background-color: #ffffff;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    box-sizing: border-box;
-    max-height: 250px;
-    overflow-y: auto;
-  }
+.y-select__arrow--open {
+  transform: rotate(180deg);
+}
 
-  // 搜索框容器
-  &__search {
-    padding: 8px;
-    border-bottom: 1px solid #f3f4f6;
-  }
+/* 下拉区域 */
+.y-select__dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #e4e7ed;
+  border-radius: 4px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  margin-top: 4px;
+  z-index: 1000;
+  max-height: 200px;
+  overflow: hidden;
+}
 
-  // 搜索输入框
-  &__search-input {
-    width: 100%;
-    padding: 6px 8px;
-    border: 1px solid #e5e7eb;
-    border-radius: 3px;
-    font-size: 13px;
-    color: #1f2937;
-    box-sizing: border-box;
+/* 过滤区域 */
+.y-select__filter {
+  padding: 8px;
+  border-bottom: 1px solid #f0f0f0;
+}
 
-    &:focus {
-      outline: none;
-      border-color: #0969da;
-      box-shadow: 0 0 0 2px rgba(9, 105, 218, 0.1);
-    }
+.y-select__filter-input {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid #dcdfe6;
+  border-radius: 2px;
+  outline: none;
+}
 
-    &::placeholder {
-      color: #9ca3af;
-      font-size: 12px;
-    }
-  }
+.y-select__filter-input:focus {
+  border-color: #409eff;
+}
 
-  // 选项列表容器
-  &__options {
-    max-height: 200px;
-    overflow-y: auto;
-  }
+/* 选项区域 */
+.y-select__options {
+  max-height: 150px;
+  overflow-y: auto;
+}
 
-  // 选项项
-  &__option {
-    padding: 8px 12px;
-    cursor: pointer;
-    transition: background-color 0.15s ease;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+.y-select__option {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
 
-    &:hover:not(&--disabled):not(&--selected) {
-      background-color: #f3f4f6;
-    }
+.y-select__option:hover:not(.y-select__option--disabled) {
+  background: #f5f7fa;
+}
 
-    // 选中态
-    &--selected {
-      background-color: #eff6ff;
-      color: #0969da;
-    }
+.y-select__option--selected {
+  background: #f0f9ff;
+  color: #409eff;
+}
 
-    // 禁用态
-    &--disabled {
-      color: #9ca3af;
-      cursor: not-allowed;
-      background-color: transparent !important;
-    }
+.y-select__option--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
-    // 高亮态（键盘导航）
-    &--highlighted:not(&--disabled) {
-      background-color: #f3f4f6;
-    }
-  }
+/* 复选框 */
+.y-select__checkbox {
+  position: relative;
+  margin-right: 8px;
+}
 
-  // 无选项提示
-  &__option--empty {
-    padding: 12px;
-    color: #6b7280;
-    text-align: center;
-    font-size: 13px;
-  }
+.y-select__checkbox-input {
+  position: absolute;
+  opacity: 0;
+}
 
-  // 响应式适配：小屏幕
-  @media (max-width: 575px) {
-    &__trigger {
-      padding: 6px 10px;
-      padding-right: 32px;
-    }
+.y-select__checkbox-inner {
+  display: block;
+  width: 14px;
+  height: 14px;
+  border: 1px solid #dcdfe6;
+  border-radius: 2px;
+  position: relative;
+}
 
-    &__tag {
-      padding: 1px 4px;
-      font-size: 12px;
-    }
+.y-select__option--selected .y-select__checkbox-inner {
+  background: #409eff;
+  border-color: #409eff;
+}
 
-    &__dropdown {
-      max-height: 200px;
-    }
+.y-select__option--selected .y-select__checkbox-inner::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 4px;
+  height: 8px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
 
-    &__option {
-      padding: 6px 10px;
-      font-size: 13px;
-    }
+.y-select__option-label {
+  flex: 1;
+}
 
-    &__search-input {
-      padding: 4px 6px;
-      font-size: 12px;
-    }
-  }
+/* 空状态 */
+.y-select__empty {
+  padding: 16px;
+  text-align: center;
+  color: #909399;
+}
+
+/* 创建选项 */
+.y-select__create {
+  padding: 8px 12px;
+  border-top: 1px solid #f0f0f0;
+  cursor: pointer;
+  color: #409eff;
+}
+
+.y-select__create:hover {
+  background: #f5f7fa;
 }
 </style>
