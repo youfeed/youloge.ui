@@ -79,7 +79,6 @@ const loadMore = ()=>{
     props.loadPromise().then(data=>{
         Array.isArray(data) && (model.value = [...model.value,...data]);
         props.loadTrigger == 'infinite' && nextTick(()=>{
-            console.log(999,io,listRef.value,sentinelRef.value,containerRef.value)
             addObserver()
         });
     }).catch(err=>{

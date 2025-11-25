@@ -1,50 +1,55 @@
 <template>
-  <div class="y-card" :class="cardClass" :style="cardStyle">
-    <div v-if="slots.header || title" class="y-card__header">
-      <slot name="header">
-        <h3 class="y-card__title">{{ title }}</h3>
-      </slot>
+    <div class="y-card" :class="cardClass" :style="cardStyle">
+        <div v-if="slots.header || title" class="y-card__header">
+            <slot name="header">
+                <h3 class="y-card__title">{{ title }}</h3>
+            </slot>
+        </div>
+        <div class="y-card__body">
+            <slot name="default"></slot>
+        </div>
+        <div v-if="slots.footer" class="y-card__footer">
+            <slot name="footer"></slot>
+        </div>
     </div>
-    <div class="y-card__body">
-      <slot name="default"></slot>
-    </div>
-    <div v-if="slots.footer" class="y-card__footer">
-      <slot name="footer"></slot>
-    </div>
-  </div>
 </template>
 
 <script setup>
-import { computed,defineProps,useSlots } from 'vue';
+import { computed, defineProps, useSlots } from 'vue';
 const slots = useSlots();
 const props = defineProps({
     title: String,
-    subtitle:String,
-    description:String,
-    loading:{
-        type:Boolean,
-        default:false
+    subtitle: String,
+    description: String,
+    loading: {
+        type: Boolean,
+        default: false
     },
-    border:{
-        type:Boolean,
-        default:true
+    border: {
+        type: Boolean,
+        default: true
+    },
+    classs:{
+
+    },
+    styles:{
+
+    },
+    shadow:{
+        type: String, 
+        default: 'hover', 
+        validator: val => ['always','never','hover'].includes(val)
     }
-}),emits = defineEmits(['']);
+}), emits = defineEmits(['']);
 
 // 
-const cardClass = computed(()=>{
-
-
-    return {
-        'block p-1':true,
+const cardClass = computed(() => [
+    'block p-1',
+    {
         'border': props.border
     }
-});
-const cardStyle = computed(()=>{
-
-});
+]);
+const cardStyle = computed(() => []);
 </script>
 
-<style>
-
-</style>
+<style></style>

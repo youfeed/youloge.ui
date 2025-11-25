@@ -1,255 +1,389 @@
-<!-- y-menu.vue -->
 <template>
-    <nav 
-        class="y-menu" 
-        :class="computedClass"
-        :aria-orientation="orientation"
-        role="menu"
-    >
-        <!-- 菜单标题 -->
-        <div v-if="$slots.header || title" class="y-menu__header">
-            <slot name="header">
-                <h3 v-if="title" class="y-menu__title">{{ title }}</h3>
-            </slot>
-        </div>
+  <div 
+    class="y-menu"
+    :class="menuClass"
+    :style="menuStyle"
+  >
+    <!-- Logo 区域 -->
+    <div v-if="hasLogoSlot" class="y-menu__logo">
+      <slot name="logo" />
+    </div>
+
+    <!-- 菜单容器 -->
+    <div class="y-menu__container">
+      <!-- 左侧内容 -->
+      <div v-if="hasLeftSlot" class="y-menu__left">
+        <slot name="left" />
+      </div>
+
+      <!-- 菜单内容 -->
+      <div class="y-menu__content" :class="contentClass">
+        <!-- 水平菜单 -->
+        <template v-if="mode === 'horizontal'">
+          <ul class="y-menu__horizontal">
+            <template v-for="(item, index) in options" :key="getItemKey(item, index)">
+              <!-- 有子菜单：使用 group 组件 -->
+              <y-menu-group
+                v-if="hasChildren(item)"
+                :item="item"
+                :level="0"
+                :mode="mode"
+                :active-key="internalActiveKey"
+                :open-keys="internalOpenKeys"
+                @item-click="handleItemClick"
+                @submenu-change="handleSubmenuChange"
+              >
+                <!-- 传递插槽 -->
+                <template v-if="hasSlot(item)" #[getSlotName(item)]="{ item: slotItem }">
+                  <slot :name="getSlotName(slotItem)" :item="slotItem" />
+                </template>
+              </y-menu-group>
+              
+              <!-- 无子菜单：使用 item 组件 -->
+              <y-menu-item
+                v-else
+                :item="item"
+                :level="0"
+                :mode="mode"
+                :active-key="internalActiveKey"
+                @click="handleItemClick(item)"
+              >
+                <template v-if="hasSlot(item)" #[getSlotName(item)]="{ item: slotItem }">
+                  <slot :name="getSlotName(slotItem)" :item="slotItem" />
+                </template>
+              </y-menu-item>
+            </template>
+          </ul>
+        </template>
         
-        <!-- 菜单项容器 -->
-        <ul class="y-menu__list" :class="listClass" role="none">
-            <slot />
-        </ul>
-        
-        <!-- 菜单底部 -->
-        <div v-if="$slots.footer" class="y-menu__footer">
-            <slot name="footer" />
-        </div>
-    </nav>
+        <!-- 垂直菜单 -->
+        <template v-else>
+          <ul class="y-menu__vertical">
+            <template v-for="(item, index) in options" :key="getItemKey(item, index)">
+              <!-- 有子菜单：使用 group 组件 -->
+              <y-menu-group
+                v-if="hasChildren(item)"
+                :item="item"
+                :level="0"
+                :mode="mode"
+                :active-key="internalActiveKey"
+                :open-keys="internalOpenKeys"
+                @item-click="handleItemClick"
+                @submenu-change="handleSubmenuChange"
+              >
+                <template v-if="hasSlot(item)" #[getSlotName(item)]="{ item: slotItem }">
+                  <slot :name="getSlotName(slotItem)" :item="slotItem" />
+                </template>
+              </y-menu-group>
+              
+              <!-- 无子菜单：使用 item 组件 -->
+              <y-menu-item
+                v-else
+                :item="item"
+                :level="0"
+                :mode="mode"
+                :active-key="internalActiveKey"
+                @click="handleItemClick(item)"
+              >
+                <template v-if="hasSlot(item)" #[getSlotName(item)]="{ item: slotItem }">
+                  <slot :name="getSlotName(slotItem)" :item="slotItem" />
+                </template>
+              </y-menu-item>
+            </template>
+          </ul>
+        </template>
+      </div>
+
+      <!-- 右侧内容 -->
+      <div v-if="hasRightSlot" class="y-menu__right">
+        <slot name="right" />
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { computed, provide } from 'vue'
+import { ref, computed, watch, useSlots } from 'vue'
+// import YMenuGroup from './YMenuGroup.vue'
+// import YMenuItem from './YMenuItem.vue'
+
+const slots = useSlots()
 
 const props = defineProps({
-    // 菜单模式：vertical(侧边栏) / horizontal(导航栏)
-    mode: {
-        type: String,
-        default: 'vertical',
-        validator: (value) => ['vertical', 'horizontal'].includes(value)
-    },
-    // 菜单方向
-    orientation: {
-        type: String,
-        default: 'vertical',
-        validator: (value) => ['vertical', 'horizontal'].includes(value)
-    },
-    // 激活的菜单项key
-    activeKey: [String, Number],
-    // 标题
-    title: String,
-    // 尺寸
-    size: {
-        type: String,
-        default: 'md',
-        validator: (value) => ['sm', 'md', 'lg'].includes(value)
-    },
-    // 是否可折叠
-    collapsible: Boolean,
-    // 是否折叠
-    collapsed: Boolean,
-    // 主题风格
-    theme: {
-        type: String,
-        default: 'default',
-        validator: (value) => ['default', 'primary', 'neutral', 'dark'].includes(value)
-    },
-    // 内边距
-    padding: {
-        type: String,
-        default: 'normal',
-        validator: (value) => ['none', 'compact', 'normal', 'comfortable'].includes(value)
-    }
+  // 菜单模式
+  mode: {
+    type: String,
+    default: 'vertical',
+    validator: val => ['vertical', 'horizontal'].includes(val)
+  },
+  // 菜单数据（最多支持2级）
+  options: {
+    type: Array,
+    default: () => []
+  },
+  // 当前选中的菜单项 key
+  activeKey: {
+    type: [String, Number],
+    default: ''
+  },
+  // 当前展开的子菜单 key 数组
+  openKeys: {
+    type: Array,
+    default: () => []
+  },
+  // 菜单宽度（垂直模式）
+  width: {
+    type: [String, Number],
+    default: '200px'
+  },
+  // 菜单高度（水平模式）
+  height: {
+    type: [String, Number],
+    default: '64px'
+  },
+  // 主题色
+  theme: {
+    type: String,
+    default: 'light',
+    validator: val => ['light', 'dark'].includes(val)
+  },
+  // 菜单对齐方式
+  align: {
+    type: String,
+    default: 'start',
+    validator: val => ['start', 'center', 'end'].includes(val)
+  }
 })
 
-const emit = defineEmits(['update:activeKey', 'update:collapsed', 'item-click'])
+const emit = defineEmits(['update:activeKey', 'update:openKeys', 'select', 'open-change'])
 
-// 计算根类名
-const computedClass = computed(() => {
-    return [
-        `y-menu--${props.mode}`,
-        `y-menu--${props.size}`,
-        `y-menu--${props.theme}`,
-        `y-menu--padding-${props.padding}`,
-        {
-            'y-menu--collapsible': props.collapsible,
-            'y-menu--collapsed': props.collapsed,
-            'y-menu--selectable': props.activeKey !== undefined
-        }
-    ].filter(Boolean).join(' ')
+// 检查插槽是否存在
+const hasLogoSlot = computed(() => !!slots.logo)
+const hasLeftSlot = computed(() => !!slots.left)
+const hasRightSlot = computed(() => !!slots.right)
+
+// 响应式数据
+const internalActiveKey = ref(props.activeKey)
+const internalOpenKeys = ref([...props.openKeys])
+
+// 计算属性
+const menuClass = computed(() => [
+  'y-menu',
+  `y-menu--${props.mode}`,
+  `y-menu--${props.theme}`
+])
+
+const menuStyle = computed(() => ({
+  width: props.mode === 'vertical' ? 
+    (typeof props.width === 'number' ? `${props.width}px` : props.width) : '100%',
+  height: props.mode === 'horizontal' ? 
+    (typeof props.height === 'number' ? `${props.height}px` : props.height) : 'auto'
+}))
+
+const contentClass = computed(() => [
+  'y-menu__content',
+  `y-menu__content--${props.align}`
+])
+
+// 方法
+const getItemKey = (item, index) => {
+  return item.key || item.id || `menu-item-${index}`
+}
+
+const hasChildren = (item) => {
+  return item.children && item.children.length > 0
+}
+
+const hasSlot = (item) => {
+  return !!slots[getSlotName(item)]
+}
+
+const getSlotName = (item) => {
+  return item.key
+}
+
+const handleItemClick = (item) => {
+  if (item.disabled) return
+  
+  internalActiveKey.value = item.key
+  emit('update:activeKey', item.key)
+  emit('select', item)
+}
+
+const handleSubmenuChange = (item, open) => {
+  const key = item.key
+  if (open) {
+    if (!internalOpenKeys.value.includes(key)) {
+      internalOpenKeys.value.push(key)
+    }
+  } else {
+    const index = internalOpenKeys.value.indexOf(key)
+    if (index > -1) {
+      internalOpenKeys.value.splice(index, 1)
+    }
+  }
+  
+  emit('update:openKeys', [...internalOpenKeys.value])
+  emit('open-change', internalOpenKeys.value)
+}
+
+// 监听 props 变化
+watch(() => props.activeKey, (newVal) => {
+  internalActiveKey.value = newVal
 })
 
-// 列表容器类
-const listClass = computed(() => {
-    return {
-        'y-menu__list--horizontal': props.mode === 'horizontal',
-        'y-menu__list--vertical': props.mode === 'vertical'
-    }
-})
-
-// 提供上下文给子菜单项
-provide('y-menu-context', {
-    mode: computed(() => props.mode),
-    size: computed(() => props.size),
-    theme: computed(() => props.theme),
-    activeKey: computed(() => props.activeKey),
-    collapsed: computed(() => props.collapsed),
-    onItemClick: (item) => {
-        emit('item-click', item)
-        if (item.key !== undefined) {
-            emit('update:activeKey', item.key)
-        }
-    }
+watch(() => props.openKeys, (newVal) => {
+  internalOpenKeys.value = [...newVal]
 })
 </script>
 
-<style>
+<style scoped>
 .y-menu {
-    font-family: var(--font-family);
-    box-sizing: border-box;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
-/* 模式样式 */
-.y-menu--vertical {
-    width: var(--menu-width, 240px);
-    background: var(--menu-bg, var(--white));
-    border-right: 1px solid var(--menu-border-color, var(--neutral-200));
-    transition: all 0.3s ease;
-}
-
-.y-menu--horizontal {
-    width: 100%;
-    background: var(--menu-bg, var(--white));
-    border-bottom: 1px solid var(--menu-border-color, var(--neutral-200));
-}
-
-/* 折叠状态 */
-.y-menu--collapsed {
-    width: var(--menu-collapsed-width, 60px);
-}
-
-/* 尺寸控制 */
-.y-menu--sm {
-    --menu-width: 200px;
-    --menu-collapsed-width: 48px;
-    font-size: var(--font-size-sm);
-}
-
-.y-menu--md {
-    --menu-width: 240px;
-    --menu-collapsed-width: 60px;
-    font-size: var(--font-size-base);
-}
-
-.y-menu--lg {
-    --menu-width: 280px;
-    --menu-collapsed-width: 72px;
-    font-size: var(--font-size-lg);
-}
-
-/* 内边距控制 */
-.y-menu--padding-none .y-menu__item {
-    padding: 0;
-}
-
-.y-menu--padding-compact .y-menu__item {
-    padding: var(--spacing-1) var(--spacing-2);
-}
-
-.y-menu--padding-normal .y-menu__item {
-    padding: var(--spacing-2) var(--spacing-3);
-}
-
-.y-menu--padding-comfortable .y-menu__item {
-    padding: var(--spacing-3) var(--spacing-4);
-}
-
-/* 主题样式 */
-.y-menu--default {
-    --menu-bg: var(--white);
-    --menu-border-color: var(--neutral-200);
-    --menu-item-hover-bg: var(--neutral-100);
-    --menu-item-active-bg: var(--primary-10);
-    --menu-item-active-color: var(--primary);
-}
-
-.y-menu--primary {
-    --menu-bg: var(--primary);
-    --menu-border-color: var(--primary-active);
-    --menu-item-hover-bg: rgba(255, 255, 255, 0.1);
-    --menu-item-active-bg: rgba(255, 255, 255, 0.2);
-    --menu-item-active-color: var(--white);
-    color: var(--white);
-}
-
-.y-menu--neutral {
-    --menu-bg: var(--neutral-50);
-    --menu-border-color: var(--neutral-200);
-    --menu-item-hover-bg: var(--neutral-100);
-    --menu-item-active-bg: var(--neutral-200);
-    --menu-item-active-color: var(--neutral-900);
+.y-menu--light {
+  background: #ffffff;
+  color: #333333;
+  border-bottom: 1px solid #f0f0f0;
 }
 
 .y-menu--dark {
-    --menu-bg: var(--neutral-900);
-    --menu-border-color: var(--neutral-700);
-    --menu-item-hover-bg: var(--neutral-800);
-    --menu-item-active-bg: var(--primary-20);
-    --menu-item-active-color: var(--primary);
-    color: var(--neutral-100);
+  background: #001529;
+  color: rgba(255, 255, 255, 0.65);
 }
 
-/* 菜单头部 */
-.y-menu__header {
-    padding: var(--spacing-4) var(--spacing-4) var(--spacing-2);
-    border-bottom: 1px solid var(--menu-border-color);
+.y-menu--vertical {
+  border-right: 1px solid #f0f0f0;
+  border-bottom: none;
 }
 
-.y-menu__title {
-    margin: 0;
-    font-size: var(--font-size-lg);
-    font-weight: 600;
-    color: inherit;
+.y-menu--dark.y-menu--vertical {
+  border-right: 1px solid #434343;
 }
 
-/* 菜单列表 */
-.y-menu__list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
+/* Logo 区域 */
+.y-menu__logo {
+  padding: 16px 24px;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  align-items: center;
+  min-height: 64px;
 }
 
-.y-menu__list--vertical {
-    display: flex;
-    flex-direction: column;
+.y-menu--dark .y-menu__logo {
+  border-bottom: 1px solid #434343;
 }
 
-.y-menu__list--horizontal {
-    display: flex;
-    flex-direction: row;
+/* 菜单容器 */
+.y-menu__container {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
 }
 
-/* 菜单底部 */
-.y-menu__footer {
-    padding: var(--spacing-4);
-    border-top: 1px solid var(--menu-border-color);
+.y-menu--vertical .y-menu__container {
+  flex-direction: column;
+  align-items: stretch;
 }
 
-/* 响应式设计 */
-@media (max-width: 768px) {
-    .y-menu--horizontal {
-        flex-direction: column;
-    }
-    
-    .y-menu--horizontal .y-menu__list {
-        flex-direction: column;
-    }
+/* 左侧内容 */
+.y-menu__left {
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  flex-shrink: 0;
+}
+
+.y-menu--vertical .y-menu__left {
+  padding: 16px 24px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.y-menu--dark .y-menu__left {
+  border-bottom: 1px solid #434343;
+}
+
+/* 菜单内容 */
+.y-menu__content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.y-menu--vertical .y-menu__content {
+  flex: 1;
+  display: block;
+  padding: 8px 0;
+}
+
+.y-menu__content--start {
+  justify-content: flex-start;
+}
+
+.y-menu__content--center {
+  justify-content: center;
+}
+
+.y-menu__content--end {
+  justify-content: flex-end;
+}
+
+/* 右侧内容 */
+.y-menu__right {
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.y-menu--vertical .y-menu__right {
+  margin-left: 0;
+  padding: 16px 24px;
+  border-top: 1px solid #f0f0f0;
+  margin-top: auto;
+}
+
+.y-menu--dark .y-menu__right {
+  border-top: 1px solid #434343;
+}
+
+/* 水平菜单列表 */
+.y-menu__horizontal {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+}
+
+.y-menu__content--start .y-menu__horizontal {
+  justify-content: flex-start;
+}
+
+.y-menu__content--center .y-menu__horizontal {
+  justify-content: center;
+}
+
+.y-menu__content--end .y-menu__horizontal {
+  justify-content: flex-end;
+}
+
+/* 垂直菜单列表 */
+.y-menu__vertical {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
 }
 </style>

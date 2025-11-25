@@ -1,6 +1,10 @@
 <template>
     <y-layout direction="vertical">
         <!-- 头部导航 -->
+        <y-header>
+            <y-menu mode="horizontal" :options="menuOptions" v-model:active-key="activeKey"
+                    v-model:open-keys="openKeys" width="240px" theme="dark" @select="handleSelect" position="end" />
+        </y-header>
         <y-header padding="0 24px" justify="space-between" bgColor="#ffffff">
             <div class="flex items-center justify-between w-full">
                 <y-link type="primary" class="text-lg font-bold" @click="toggleAside">
@@ -9,8 +13,8 @@
                 </y-link>
             </div>
             <div class="flex gap-4">
-                <y-link>首页 </y-link>
-                <y-link>文档</y-link>
+                <y-link @click="onMessage">首页 </y-link>
+                <y-link @click="onMaterial">文档</y-link>
                 <y-link>关于</y-link>
             </div>
         </y-header>
@@ -18,68 +22,8 @@
         <y-layout direction="horizontal">
             <y-aside bgColor="white" :width="240" :collapsed="asideCollapsed" style="height:100vh;">
                 <!-- 侧边栏菜单 -->
-                <y-menu title="控制台" mode="vertical" theme="default" size="md" :active-key="activeKey"
-                    :collapsible="true" :collapsed="collapsed" @update:collapsed="collapsed = $event"
-                    @item-click="handleMenuClick">
-                    <template #header>
-                        <div class="flex items-center gap-3 p-4">
-                            <!-- <img src="/logo.png" alt="Logo" class="w-8 h-8" /> -->
-                            <h3 v-if="!collapsed" class="text-lg font-semibold">控制台</h3>
-                        </div>
-                    </template>
-
-                    <!-- 仪表板组 -->
-                    <y-menu-group title="仪表板">
-                        <y-menu-item key="dashboard" icon="📊" to="/dashboard">
-                            仪表板
-                        </y-menu-item>
-
-                        <y-menu-item key="analytics" icon="📈" to="/analytics" badge="New">
-                            数据分析
-                        </y-menu-item>
-                    </y-menu-group>
-
-                    <!-- 用户管理组 -->
-                    <y-menu-group title="用户管理">
-                        <y-menu-item key="users" icon="👥" :expandable="true" badge="5">
-                            用户管理
-                            <template #children>
-                                <y-menu-item key="users-list" to="/users">
-                                    用户列表
-                                </y-menu-item>
-                                <y-menu-item key="users-add" to="/users/add">
-                                    添加用户
-                                </y-menu-item>
-                                <y-menu-item key="users-roles" to="/users/roles">
-                                    角色管理
-                                </y-menu-item>
-                            </template>
-                        </y-menu-item>
-
-                        <y-menu-item key="permissions" icon="🔐" to="/permissions">
-                            权限管理
-                        </y-menu-item>
-                    </y-menu-group>
-
-                    <!-- 系统设置组 -->
-                    <y-menu-group title="系统设置">
-                        <y-menu-item key="settings" icon="⚙️" to="/settings">
-                            系统设置
-                        </y-menu-item>
-
-                        <y-menu-item key="backup" icon="💾" to="/backup" disabled>
-                            数据备份
-                        </y-menu-item>
-                    </y-menu-group>
-
-                    <template #footer>
-                        <div class="p-4 border-t border-neutral-200">
-                            <y-menu-item icon="🚪" @click="handleLogout">
-                                退出登录
-                            </y-menu-item>
-                        </div>
-                    </template>
-                </y-menu>
+                <y-menu mode="vertical" :options="menuOptions"  v-model:active-key="activeKey" style="height:100vh;"
+                    v-model:open-keys="openKeys" width="240px" theme="dark" @select="handleSelect" />
             </y-aside>
             <!-- 主体内容 -->
             <y-content :asideWidth="240" :asideCollapsed="asideCollapsed">
@@ -185,7 +129,8 @@
                             </y-form-item>
                             <!-- 单选选择器（基础用法） -->
                             <y-form-item label="所在城市" prop="city" required>
-                                <y-select label="城市" multiple filterable allowCreate v-model="formModel.city" :options="cityOptions" placeholder="请选择城市"/>
+                                <y-select label="城市" multiple filterable allowCreate v-model="formModel.city"
+                                    :options="cityOptions" placeholder="请选择城市" />
                             </y-form-item>
                             <y-form-item>
                                 <div>
@@ -243,6 +188,30 @@
                             </y-space>
                         </y-form>
                     </y-col>
+                    <y-col span="20">
+                        <y-table :data="tableData" :columns="columns" stripe>
+                            <template #status="{ row }">
+                                <span :class="`status-${row.status}`">
+                                    <!-- {{ row }} -->
+                                    {{ row.status === 1 ? '正常' : '禁用2' }}
+                                </span>
+                            </template>
+                        </y-table>
+                        <!-- 复杂多级表头 -->
+                        <y-table :data="complexData" :columns="complexColumns" :selected-rows="selectedRows"
+                            enable-active :max-active-count="2" height="500px">
+                            <template #profitRate="{ row }">
+                                <span class="profit-rate">
+                                    利润率: {{ ((row.profit / row.price) * 100).toFixed(1) }}%
+                                </span>
+                            </template>
+                            <template #profit-Rate="{ row }">
+                                <span class="profit-rate">
+                                    利润率: {{ ((row.profit / row.price) * 100).toFixed(1) }}%
+                                </span>
+                            </template>
+                        </y-table>
+                    </y-col>
                 </y-row>
             </y-content>
 
@@ -258,12 +227,86 @@
 import { exported } from '../lib/index.js'
 import { inject, reactive, ref, toRefs } from 'vue'
 import useYouloge from './composables/useYouloge'
-const { useBytes, useLoading, useTheme } = useYouloge();
+const { useBytes, useLoading, useMessage, useMaterial, useTheme } = useYouloge();
 
 
 const collapsed = ref(false)
-const activeKey = ref('dashboard')
+
 const activeNavKey = ref('home')
+
+const activeKey = ref('1')
+const openKeys = ref(['2'])
+
+const menuOptions = ref([
+    {
+        key: '1',
+        label: '首页',
+        icon: 'mdi:home',
+        badge: 'New'
+    },
+    {
+        key: '2',
+        label: '产品管理',
+        icon: 'mdi:package',
+        children: [
+            {
+                key: '2-1',
+                label: '产品列表',
+                icon: 'mdi:format-list-bulleted'
+            },
+            {
+                key: '2-2',
+                label: '产品分类',
+                icon: 'mdi:tag',
+                children: [
+                    {
+                        key: '2-2-1',
+                        label: '电子产品',
+                        icon: 'mdi:laptop'
+                    },
+                    {
+                        key: '2-2-2',
+                        label: '家居用品',
+                        icon: 'mdi:sofa'
+                    }
+                ]
+            },
+            {
+                key: '2-3',
+                label: '产品分析',
+                icon: 'mdi:chart-bar'
+            }
+        ]
+    },
+    {
+        key: '3',
+        label: '用户管理',
+        icon: 'mdi:account-group',
+        children: [
+            {
+                key: '3-1',
+                label: '用户列表',
+                icon: 'mdi:account-box'
+            },
+            {
+                key: '3-2',
+                label: '角色管理',
+                icon: 'mdi:shield-account'
+            }
+        ]
+    },
+    {
+        key: '4',
+        label: '系统设置',
+        icon: 'mdi:cog',
+        disabled: true
+    },
+    {
+        key: '5',
+        label: '帮助中心',
+        icon: 'mdi:help-circle'
+    }
+])
 
 const handleMenuClick = (item) => {
     console.log('菜单点击:', item)
@@ -281,8 +324,98 @@ const listLoad = () => {
     console.log('listLoad')
     return promise;
 }
+
+const complexData = ref([
+    { id: 1, product: '商品A', price: 100, cost: 60, profit: 40, stock: 50, sales: 100, category: '电子产品' },
+    { id: 2, product: '商品B', price: 200, cost: 120, profit: 80, stock: 30, sales: 80, category: '家居用品' },
+    { id: 3, product: '商品B', price: 200, cost: 120, profit: 80, stock: 30, sales: 80, category: '家居用品' },
+    { id: 4, product: '商品B', price: 200, cost: 120, profit: 80, stock: 30, sales: 80, category: '家居用品' },
+    { id: 5, product: '商品B', price: 200, cost: 120, profit: 80, stock: 30, sales: 80, category: '家居用品' },
+    { id: 6, product: '商品B', price: 200, cost: 120, profit: 80, stock: 30, sales: 80, category: '家居用品' },
+    { id: 7, product: '商品B', price: 200, cost: 120, profit: 80, stock: 30, sales: 80, category: '家居用品' },
+    { id: 8, product: '商品B', price: 200, cost: 120, profit: 80, stock: 30, sales: 80, category: '家居用品' },
+])
+
+// 多级表头配置
+const multiLevelColumns = ref([
+
+    {
+        label: '基本信息',
+        children: [
+            { label: '姓名', prop: 'name', width: '120px', sortable: true },
+            { label: '年龄', prop: 'age', width: '80px', align: 'center', sortable: true },
+            { label: '状态', prop: 'status', width: '80px', align: 'center', slot: 'status' }
+        ]
+    },
+    {
+        label: '联系信息',
+        children: [
+            { label: '手机号', prop: 'phone', width: '120px' },
+            { label: '邮箱', prop: 'email', width: '150px' }
+        ]
+    },
+    {
+        label: '工作信息',
+        children: [
+            { label: '部门', prop: 'department', width: '100px' },
+            { label: '职位', prop: 'position', width: '120px' }
+        ]
+    }
+])
+// 复杂多级表头配置
+const complexColumns = ref([
+    { type: 'checkbox', width: '50px' },
+    { type: 'numbers', width: '60px' },
+    { type: 'radio', width: '60px' },
+    {
+        label: '商品信息',
+        children: [
+            { label: '商品名称', prop: 'product', width: '150px' },
+            { label: '分类', prop: 'category', width: '100px' }
+        ]
+    },
+    {
+        label: '价格信息',
+        children: [
+            {
+                label: '成本相关',
+                children: [
+                    { label: '售价', prop: 'price', width: '100px', sortable: true, align: 'right' },
+                    { label: '成本', prop: 'cost', width: '100px', align: 'right' }
+                ]
+            },
+            {
+                label: '利润相关',
+                children: [
+                    { label: '利润', prop: 'profit', width: '100px', align: 'right' },
+                    { label: '利润率', prop: 'profitRate', width: '100px', align: 'right' }
+                ]
+            }
+        ]
+    },
+    {
+        label: '库存销售',
+        children: [
+            { label: '库存', prop: 'stock', width: '80px', align: 'center' },
+            { label: '销量', prop: 'sales', width: '80px', align: 'center' }
+        ]
+    }
+])
+const tableData = ref([
+    { id: 1, name: '张三', age: 25, status: 1 },
+    { id: 2, name: '李四', age: 30, status: 2 },
+    { id: 2, name: '李四', age: 30, status: 6 }
+])
+
+const columns = ref([
+    { label: '姓名', prop: 'name', width: '120px' },
+    { label: '年龄', prop: 'age', width: '80px', align: 'center' },
+    { label: '状态', prop: 'status', width: '80px', align: 'center', slot: 'status' }
+])
+
+
 console.log(useBytes(555), useTheme())
-const useStorage = inject('useStorage'), useMessage = inject('useMessage');
+const useStorage = inject('useStorage')
 // console.log('useMessage.exported', exported,)
 const table_columns = [
     { title: '姓名', key: 'name' },
@@ -347,9 +480,20 @@ const toggleAside = () => {
 
 
 const onMessage = () => {
+    useMessage().success(999);
+    useMessage().warning('warning');
+    useMessage().error('error');
+    useMessage().info(999);
     console.log('onMessage', useMessage('success', 5266))
 }
+// 素材选则
+const onMaterial = () => {
+    useMaterial({
+        type: 'image'
+    }).then(res => {
 
+    })
+}
 
 const onSearch = (data) => {
     console.log('onSearch', data)
