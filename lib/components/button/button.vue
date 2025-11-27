@@ -1,13 +1,19 @@
 <template>
     <button 
         class="y-button"
-        :class="computedClass"
-        :disabled="disabled"
+        :class="buttonClass"
+        :disabled="disabled || loading"
         @click="clickHandler"
     >
-        <span v-if="$slots.icon" class="y-button__icon">
+        <!-- 加载状态 -->
+        <span v-if="loading" class="y-button__loading"></span>
+        
+        <!-- 图标 -->
+        <span v-if="$slots.icon && !loading" class="y-button__icon">
             <slot name="icon" />
         </span>
+        
+        <!-- 文本 -->
         <span class="y-button__text">
             <slot />
         </span>
@@ -20,92 +26,28 @@ import { defineProps, defineEmits, computed } from 'vue'
 defineOptions({ name: 'y-button' });
 
 const props = defineProps({
-    type: {
-        type: String,
-        default: 'default',
-        validator: (value) => ['default', 'primary', 'success', 'error', 'danger', 'warning', 'info', 'secondary', 'accent', 'outline', 'ghost', 'link'].includes(value)
-    },
-    size: {
-        type: String,
-        validator: (value) => ['sm', 'md', 'lg'].includes(value),
-        default: 'md'
-    },
-    rounded: {
-        type: String,
-        validator: (value) => ['', 'none', 'sm', 'md', 'lg', 'xl', 'full'].includes(value),
-        default: ''
-    },
-    noHover: {
-        type: Boolean,
-        default: false
-    },
+    type: { type: String, default: 'default' },
+    size: { type: String, default: 'md' },
+    rounded: { type: String, default: '' },
     disabled: Boolean,
-    block: Boolean, // 新增：块级按钮
-    loading: Boolean // 新增：加载状态
+    block: Boolean,
+    loading: Boolean
 });
 
 const emit = defineEmits(['click']);
 
-// 计算类名 - 完全使用工具类
-const computedClass = computed(() => {
-    const classes = [
-        // 基础按钮类
-        'inline-flex items-center justify-center border border-solid outline-none cursor-pointer select-none transition-200',
-        // 禁用状态
-        props.disabled ? 'opacity-70 cursor-not-allowed pointer-events-none bg-neutral-300 border-neutral-300 text-neutral-500' : '',
-        // 加载状态
-        props.loading ? 'relative cursor-wait' : '',
-        // 块级按钮
-        props.block ? 'w-full' : '',
-        // 无hover效果
-        props.noHover ? 'no-hover' : '',
-        
-        // 尺寸类
-        sizeClasses[props.size],
-        
-        // 圆角类
-        roundedClasses[props.rounded] || 'rounded-md',
-        
-        // 类型类
-        typeClasses[props.type]
-    ];
-    
-    return classes.filter(Boolean).join(' ');
+// 简化的类名计算
+const buttonClass = computed(() => {
+    return [
+        'y-button',
+        `y-button--${props.type}`,
+        `y-button--${props.size}`,
+        props.rounded && `y-button--rounded-${props.rounded}`,
+        props.block && 'y-button--block',
+        props.disabled && 'y-button--disabled',
+        props.loading && 'y-button--loading'
+    ].filter(Boolean).join(' ');
 });
-
-// 尺寸映射
-const sizeClasses = {
-    sm: 'px-2 py-1 text-xs gap-1',
-    md: 'px-3 py-2 text-sm gap-2', 
-    lg: 'px-4 py-3 text-base gap-2'
-};
-
-// 圆角映射
-const roundedClasses = {
-    '': 'rounded-md',
-    none: 'rounded-none',
-    sm: 'rounded-sm',
-    md: 'rounded-md', 
-    lg: 'rounded-lg',
-    xl: 'rounded-xl',
-    full: 'rounded-full'
-};
-
-// 类型映射 - 使用CSS变量
-const typeClasses = {
-    default: 'bg-neutral-100 border-neutral-200 text-neutral-900 hover:bg-neutral-200 hover:border-neutral-300',
-    primary: 'bg-primary border-primary text-white hover:bg-primary-active hover:border-primary-active focus-visible:ring-primary',
-    success: 'bg-success border-success text-white hover:bg-success-active hover:border-success-active focus-visible:ring-success',
-    error: 'bg-error border-error text-white hover:bg-error-active hover:border-error-active focus-visible:ring-error',
-    danger: 'bg-error border-error text-white hover:bg-error-active hover:border-error-active focus-visible:ring-error',
-    warning: 'bg-warning border-warning text-neutral-900 hover:bg-warning-active hover:border-warning-active focus-visible:ring-warning',
-    info: 'bg-info border-info text-white hover:bg-info-active hover:border-info-active focus-visible:ring-info',
-    secondary: 'bg-neutral-50 border-neutral-200 text-neutral-700 hover:bg-neutral-100 hover:border-neutral-300',
-    accent: 'bg-neutral-700 border-neutral-700 text-white hover:bg-neutral-800 hover:border-neutral-800',
-    outline: 'bg-transparent border-neutral-200 text-neutral-900 hover:bg-neutral-50 hover:border-neutral-300',
-    ghost: 'bg-transparent border-transparent text-neutral-900 hover:bg-neutral-100 hover:border-neutral-200',
-    link: 'bg-transparent border-transparent text-primary hover:bg-primary-10 hover:underline px-2 py-1'
-};
 
 const clickHandler = (e) => {
     if (!props.disabled && !props.loading) {
@@ -114,70 +56,180 @@ const clickHandler = (e) => {
 };
 </script>
 
-<style>
-/* 基础按钮样式 - 使用工具类补充 */
+<style scoped>
 .y-button {
-    font-family: var(--font-family);
+    /* 基础样式 */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid;
+    outline: none;
+    cursor: pointer;
+    font-family: inherit;
     font-weight: 500;
     line-height: 1.5;
-    box-sizing: border-box;
+    text-decoration: none;
+    transition: all 0.2s ease-in-out;
+    user-select: none;
+    position: relative;
     
-    /* 使用工具类定义的过渡 */
-    transition: background-color var(--transition-duration), 
-                border-color var(--transition-duration), 
-                color var(--transition-duration), 
-                box-shadow var(--transition-duration);
+    /* 默认样式 - 使用100-900色阶 */
+    background-color: var(--neutral-100);
+    border-color: var(--neutral-300);
+    color: var(--text-900);
 }
 
-/* 聚焦样式 - 使用工具类补充 */
-.y-button:focus-visible {
-    outline: none;
-    box-shadow: 0 0 0 2px var(--neutral-100), 0 0 0 4px rgba(var(--primary-rgb), 0.3);
+/* 按钮类型 - 使用正确的色阶变量 */
+.y-button--default {
+    background-color: var(--neutral-100);
+    border-color: var(--neutral-300);
+    color: var(--text-900);
+}
+.y-button--default:hover:not(.y-button--disabled) {
+    background-color: var(--neutral-200);
+    border-color: var(--neutral-400);
 }
 
-/* 无hover效果自定义样式 */
-.y-button.no-hover {
-    transition: none;
+.y-button--primary {
+    background-color: var(--primary-600);
+    border-color: var(--primary-600);
+    color: white;
 }
-.y-button.no-hover:not(:disabled):hover {
-    background-color: inherit !important;
-    border-color: inherit !important;
-    color: inherit !important;
-    box-shadow: none !important;
-}
-
-/* 图标样式 */
-.y-button__icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: inherit;
+.y-button--primary:hover:not(.y-button--disabled) {
+    background-color: var(--primary-700);
+    border-color: var(--primary-700);
 }
 
-/* 文本样式 */
-.y-button__text {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+.y-button--success {
+    background-color: var(--success-600);
+    border-color: var(--success-600);
+    color: white;
+}
+.y-button--success:hover:not(.y-button--disabled) {
+    background-color: var(--success-700);
+    border-color: var(--success-700);
+}
+
+.y-button--error,
+.y-button--danger {
+    background-color: var(--error-600);
+    border-color: var(--error-600);
+    color: white;
+}
+.y-button--error:hover:not(.y-button--disabled),
+.y-button--danger:hover:not(.y-button--disabled) {
+    background-color: var(--error-700);
+    border-color: var(--error-700);
+}
+
+.y-button--warning {
+    background-color: var(--warning-500);
+    border-color: var(--warning-500);
+    color: var(--text-900);
+}
+.y-button--warning:hover:not(.y-button--disabled) {
+    background-color: var(--warning-600);
+    border-color: var(--warning-600);
+}
+
+.y-button--info {
+    background-color: var(--info-600);
+    border-color: var(--info-600);
+    color: white;
+}
+.y-button--info:hover:not(.y-button--disabled) {
+    background-color: var(--info-700);
+    border-color: var(--info-700);
+}
+
+.y-button--outline {
+    background-color: transparent;
+    border-color: var(--neutral-300);
+    color: var(--text-900);
+}
+.y-button--outline:hover:not(.y-button--disabled) {
+    background-color: var(--neutral-50);
+    border-color: var(--neutral-400);
+}
+
+.y-button--ghost {
+    background-color: transparent;
+    border-color: transparent;
+    color: var(--text-900);
+}
+.y-button--ghost:hover:not(.y-button--disabled) {
+    background-color: var(--neutral-100);
+}
+
+.y-button--link {
+    background-color: transparent;
+    border-color: transparent;
+    color: var(--primary-600);
+    text-decoration: underline;
+}
+.y-button--link:hover:not(.y-button--disabled) {
+    color: var(--primary-700);
+    text-decoration: none;
+}
+
+/* 按钮尺寸 */
+.y-button--sm {
+    padding: 4px 12px;
+    font-size: 12px;
+    gap: 4px;
+    min-height: 24px;
+}
+
+.y-button--md {
+    padding: 6px 16px;
+    font-size: 14px;
+    gap: 6px;
+    min-height: 32px;
+}
+
+.y-button--lg {
+    padding: 8px 20px;
+    font-size: 16px;
+    gap: 8px;
+    min-height: 40px;
+}
+
+/* 圆角 */
+.y-button--rounded-none { border-radius: 0; }
+.y-button--rounded-sm { border-radius: 2px; }
+.y-button--rounded-md { border-radius: 4px; }
+.y-button--rounded-lg { border-radius: 8px; }
+.y-button--rounded-xl { border-radius: 12px; }
+.y-button--rounded-full { border-radius: 9999px; }
+
+/* 块级按钮 */
+.y-button--block {
+    display: flex;
+    width: 100%;
+}
+
+/* 禁用状态 */
+.y-button--disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
 }
 
 /* 加载状态 */
-.y-button:has(.y-button--loading) {
-    position: relative;
-    color: transparent !important;
-}
-
 .y-button--loading {
+    color: transparent;
+}
+.y-button__loading {
     position: absolute;
-    left: 50%;
     top: 50%;
+    left: 50%;
     transform: translate(-50%, -50%);
     width: 16px;
     height: 16px;
-    border: 2px solid transparent;
-    border-top: 2px solid currentColor;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
     border-radius: 50%;
-    animation: y-button-spin 0.8s linear infinite;
+    animation: y-button-spin 1s linear infinite;
 }
 
 @keyframes y-button-spin {
@@ -185,42 +237,21 @@ const clickHandler = (e) => {
     100% { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
-/* 响应式适配 */
-@media (max-width: 640px) {
-    .y-button {
-        /* 移动端适当调整内边距 */
-        padding-left: calc(var(--spacing-unit) * 1.5);
-        padding-right: calc(var(--spacing-unit) * 1.5);
-    }
+/* 图标和文本 */
+.y-button__icon {
+    display: inline-flex;
+    align-items: center;
+    font-size: inherit;
 }
 
-/* 暗色模式适配 */
-@media (prefers-color-scheme: dark) {
-    .y-button[data-type="default"] {
-        background-color: var(--neutral-800);
-        border-color: var(--neutral-700);
-        color: var(--neutral-100);
-    }
-    .y-button[data-type="default"]:hover {
-        background-color: var(--neutral-700);
-        border-color: var(--neutral-600);
-    }
+.y-button__text {
+    display: inline-flex;
+    align-items: center;
 }
 
-/* 高对比度模式支持 */
-@media (prefers-contrast: high) {
-    .y-button {
-        border-width: 2px;
-    }
-}
-
-/* 减少动画模式 */
-@media (prefers-reduced-motion: reduce) {
-    .y-button {
-        transition: none;
-    }
-    .y-button--loading {
-        animation: none;
-    }
+/* 聚焦状态 */
+.y-button:focus-visible {
+    outline: 2px solid var(--primary-300);
+    outline-offset: 2px;
 }
 </style>

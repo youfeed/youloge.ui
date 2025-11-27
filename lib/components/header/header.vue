@@ -10,13 +10,13 @@ import { computed } from 'vue'
 const props = defineProps({
   height: {
     type: [String, Number],
-    default: 56
+    default: 60
   },
   bgColor: {
     type: String,
     default: 'var(--y-bg)'
   }
-})
+});
 
 const headerStyle = computed(() => ({
   height: typeof props.height === 'number' ? `${props.height}px` : props.height,
@@ -29,7 +29,9 @@ const headerStyle = computed(() => ({
   width: 100%;
   display: flex;
   align-items: center;
-  padding: 0 16px;
   box-sizing: border-box;
+  /* backdrop-filter:saturate(50%) blur(4px);
+  background-image: radial-gradient(transparent 1px, var(--white) 1px);
+  background-size: 4px 4px; */
 }
 </style>

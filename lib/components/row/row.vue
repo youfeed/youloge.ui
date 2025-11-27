@@ -97,8 +97,4 @@ const rowStyle = computed(() => {
   }
 }
 
-// 注入行间距 CSS 变量（关联 props.gutter）
-:root {
-  --y-row-gutter: @spacing-2; // 默认 16px
-}
 </style>

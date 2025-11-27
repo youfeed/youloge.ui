@@ -37,7 +37,7 @@ export default defineConfig({
         strictUnits: true,
         // javascriptEnabled: true,
         dumpLineNumbers: 'comments', // 辅助调试，可选
-        additionalData: `@import "./lib/styles/index.less";`
+        // additionalData: `@import "./lib/styles/index.less";`
       },
       minify: false,
     },

@@ -2,8 +2,14 @@
     <y-layout direction="vertical">
         <!-- 头部导航 -->
         <y-header>
-            <y-menu mode="horizontal" :options="menuOptions" v-model:active-key="activeKey"
-                    v-model:open-keys="openKeys" width="240px" theme="dark" @select="handleSelect" position="end" />
+            <y-navbar :options="menuOptions" theme="dark">
+                <template #header>
+                    <div class="m-r-4">Youloge</div>
+                </template>
+                <template #footer>
+                    <y-button>++++</y-button>
+                </template>
+            </y-navbar>
         </y-header>
         <y-header padding="0 24px" justify="space-between" bgColor="#ffffff">
             <div class="flex items-center justify-between w-full">
@@ -22,8 +28,13 @@
         <y-layout direction="horizontal">
             <y-aside bgColor="white" :width="240" :collapsed="asideCollapsed" style="height:100vh;">
                 <!-- 侧边栏菜单 -->
-                <y-menu mode="vertical" :options="menuOptions"  v-model:active-key="activeKey" style="height:100vh;"
-                    v-model:open-keys="openKeys" width="240px" theme="dark" @select="handleSelect" />
+                <y-menu mode="vertical" :options="menuOptions" v-model:active-key="activeKey" style="height:100vh;"
+                    v-model:open-keys="openKeys" width="240px" theme="dark" @select="handleSelect">
+
+                    <template #footer>
+                        <y-button>999</y-button>
+                    </template>
+                </y-menu>
             </y-aside>
             <!-- 主体内容 -->
             <y-content :asideWidth="240" :asideCollapsed="asideCollapsed">
@@ -71,7 +82,7 @@
                                 <!-- 基础用法：按钮触发下拉菜单 -->
                                 <y-dropdown>
                                     <template #trigger>
-                                        <y-button type="secondary">基础下拉菜单</y-button>
+                                        <y-button type="link">基础下拉菜单</y-button>
                                     </template>
 
                                     <y-dropdown-item @click="handleItemClick('新建文件')">新建文件</y-dropdown-item>
@@ -220,14 +231,15 @@
         <!-- 底部版权 -->
         <y-footer>
             © 2025 GitHub Style Component Library. All riyts reserved.
+            <y-qrcode text="2333"></y-qrcode>
         </y-footer>
     </y-layout>
 </template>
 <script setup>
 import { exported } from '../lib/index.js'
-import { inject, reactive, ref, toRefs } from 'vue'
+import { inject, onMounted, reactive, ref, toRefs } from 'vue'
 import useYouloge from './composables/useYouloge'
-const { useBytes, useLoading, useMessage, useMaterial, useTheme } = useYouloge();
+const { useBytes, useLoading, useMessage, useMaterial,useSetup, useTheme } = useYouloge();
 
 
 const collapsed = ref(false)
@@ -296,7 +308,7 @@ const menuOptions = ref([
         ]
     },
     {
-        key: '4',
+        link: '/drive/info',
         label: '系统设置',
         icon: 'mdi:cog',
         disabled: true
@@ -625,7 +637,12 @@ const formRules = ref({
         }
     ]
 })
-
+onMounted(()=>{
+    useSetup().then(res=>{
+        console.log(999999999999999,res)
+        // res.destroy()
+    })
+})
 // ----------
 const { label_data, rich_data, gallery_list, navbar, form } = toRefs(state)
 
