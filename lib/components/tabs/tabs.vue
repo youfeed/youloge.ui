@@ -1,14 +1,14 @@
 <template>
-  <div class="y-tabs" :class="tabsClasses">
+  <div class="tabs" :class="tabsClasses">
     <!-- 标签容器（支持滚动 + 样式适配） -->
-    <div class="y-tabs__list-container">
-      <div class="y-tabs__list" :class="tabListClasses">
+    <div class="list-container">
+      <div class="list" :class="tabListClasses">
         <slot name="tab"></slot> <!-- 嵌套 y-tab 子组件 -->
       </div>
     </div>
     <!-- 内容容器（优化过渡动画） -->
-    <div class="y-tabs__content-container">
-      <transition-group name="y-tab-fade" mode="out-in" tag="div">
+    <div class="content-container">
+      <transition-group name="tab-fade" mode="out-in" tag="div">
         <slot :key="activeKey"></slot> <!-- 嵌套 y-tab-pane 子组件 -->
       </transition-group>
     </div>
@@ -16,15 +16,23 @@
 </template>
 
 <script setup>
-import { ref, provide, computed, watch, onMounted } from 'vue'
+import { ref, provide, computed, watch, onMounted, nextTick } from 'vue'
 
 defineOptions({ name: 'y-tabs' })
 
 // Props 定义：保留功能，默认值贴合 GitHub 风格
 const props = defineProps({
   defaultActive: { type: [String, Number], default: '' },
-  align: { type: String, default: 'left', validator: val => ['left', 'center', 'right'].includes(val) },
-  type: { type: String, default: 'line', validator: val => ['line', 'card'].includes(val) },
+  align: { 
+    type: String, 
+    default: 'left', 
+    validator: val => ['left', 'center', 'right'].includes(val) 
+  },
+  type: { 
+    type: String, 
+    default: 'line', 
+    validator: val => ['line', 'card'].includes(val) 
+  },
   activeTextColor: { type: String, default: '#0969da' }, // GitHub 链接蓝
   activeBorderColor: { type: String, default: '' },
   borderColor: { type: String, default: '#e5e7eb' }, // 浅灰边框
@@ -52,13 +60,23 @@ const finalActiveBorderColor = computed(() => props.activeBorderColor || props.a
 
 // 计算样式类
 const tabListClasses = computed(() => {
-  const alignClass = `y-tabs__list--${props.align}`
-  const typeClass = `y-tabs__list--${props.type}`
-  const scrollClass = props.scrollable ? 'y-tabs__list--scrollable' : ''
-  return `${alignClass} ${typeClass} ${scrollClass}`
+  const classes = []
+  
+  // 对齐方式
+  if (props.align === 'left') classes.push('justify-start')
+  else if (props.align === 'center') classes.push('justify-center')
+  else if (props.align === 'right') classes.push('justify-end')
+  
+  // 类型样式
+  if (props.type === 'line') classes.push('border-b', 'border-gray-200')
+  else if (props.type === 'card') classes.push('border-b', 'border-gray-200', 'bg-gray-50')
+  
+  return classes.join(' ')
 })
 
-const tabsClasses = computed(() => props.type === 'card' ? 'y-tabs--card' : '')
+const tabsClasses = computed(() => {
+  return props.type === 'card' ? 'border border-gray-200 rounded-md overflow-hidden' : ''
+})
 
 // 切换标签逻辑
 const changeTab = (key, fromChild = true) => {
@@ -80,6 +98,7 @@ provide('yTabsContext', {
   activeBorderColor: finalActiveBorderColor,
   borderColor: props.borderColor,
   tabPadding: formatUnit(props.tabPadding),
+  tabKeys: allTabNames,
   registerTab: (name, disabled = false) => {
     if (!allTabNames.value.includes(name)) allTabNames.value.push(name)
     if (!disabled && !tabNames.value.includes(name)) tabNames.value.push(name)
@@ -125,71 +144,37 @@ defineExpose({
 })
 </script>
 
-<style lang="less" scoped>
-// 完全无 Less 变量，所有值为固定原生值
-.y-tabs {
-  width: 100%;
-  box-sizing: border-box;
-  transition: all 0.2s ease;
-
-  // 卡片式整体样式
-  &--card {
-    border: 1px solid #e5e7eb; // 固定浅灰边框
-    border-radius: 6px;
-    overflow: hidden;
-  }
-
-  // 标签容器（支持滚动）
-  &__list-container {
-    width: 100%;
-    overflow-x: auto;
-    overflow-y: hidden;
-    &::-webkit-scrollbar { display: none; }
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-
-  // 标签列表：flex 布局
-  &__list {
-    display: flex;
-    box-sizing: border-box;
-    padding: 0;
-    margin: 0;
-    list-style: none;
-
-    // 对齐方式
-    &--left { justify-content: flex-start; }
-    &--center { justify-content: center; }
-    &--right { justify-content: flex-end; }
-
-    // 滚动模式
-    &--scrollable { flex-wrap: nowrap; }
-
-    // 下划线式样式
-    &--line { border-bottom: 1px solid #e5e7eb; } // 固定边框色
-
-    // 卡片式样式
-    &--card {
-      border-bottom: 1px solid #e5e7eb; // 固定边框色
-      background-color: #f9fafb; // 固定浅背景
-    }
-  }
-
-  // 内容容器
-  &__content-container {
-    padding: 16px;
-    box-sizing: border-box;
-  }
+<style scoped>
+@reference "tailwindcss";
+/* 使用 Tailwind 类实现所有样式 */
+.tabs {
+  @apply w-full box-border transition-all duration-200 ease-in-out;
 }
 
-// 过渡动画
-.y-tab-fade-enter-from,
-.y-tab-fade-leave-to {
+.list-container {
+  @apply w-full overflow-x-auto overflow-y-auto;
+}
+
+.list {
+  @apply flex box-border p-0 m-0 list-none flex-nowrap;
+}
+
+.content-container {
+  @apply p-4 box-border;
+}
+/* 兼容 WebKit 内核的额外处理（可选） */
+.list-container::-webkit-scrollbar {
+  display: none;
+}
+/* 过渡动画 */
+.tab-fade-enter-from,
+.tab-fade-leave-to {
   opacity: 0;
   transform: translateY(3px);
 }
-.y-tab-fade-enter-active,
-.y-tab-fade-leave-active {
+
+.tab-fade-enter-active,
+.tab-fade-leave-active {
   transition: opacity 0.25s ease-in-out, transform 0.25s ease-in-out;
 }
 </style>

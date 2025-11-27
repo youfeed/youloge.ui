@@ -1,11 +1,11 @@
 <template>
-  <div class="y-tab-pane" v-if="isActive">
+  <div class="w-full box-border transition-opacity duration-300 ease-in-out" v-if="isActive">
     <slot />
   </div>
 </template>
 
 <script setup>
-import { defineProps, computed, inject, ref,watch } from 'vue'
+import { defineProps, computed, inject, ref, watch } from 'vue'
 
 defineOptions({ name: 'y-tab-pane' })
 
@@ -37,16 +37,6 @@ watch(isActive, (val) => {
 })
 </script>
 
-<style lang="less" scoped>
-// 完全无 Less 变量
-.y-tab-pane {
-  width: 100%;
-  box-sizing: border-box;
-  animation: fadeIn 0.25s ease-in-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
+<style scoped>
+/* 所有样式都已通过 Tailwind 类实现 */
 </style>

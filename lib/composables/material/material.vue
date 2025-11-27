@@ -43,6 +43,7 @@
 <script setup>
 import { ref, reactive,toRefs, onMounted,computed } from 'vue';
 import useFetch from '../fetch'
+import useMessage from '../message'
 const props = defineProps({
     'type': {
         type: String,
@@ -151,7 +152,7 @@ onMounted(() => {
 })
 </script>
 
-<style lang="less">
+<style>
 .y-material-container {
     user-select: none;
     position: fixed;
@@ -161,25 +162,23 @@ onMounted(() => {
     bottom: 0;
     z-index: 999999999;
 
-    // background-color: rgba(0, 0, 0, .5);
-    .y-material {
-        position: fixed;
-        top: 40px;
-        left: 50%;
-        transform: translate(-50%);
-        z-index: 999999999;
-        background-color: #fff;
-        width: 600px;
-        // height: 100%;
-        overflow-y: auto;
-        margin: 5px;
-        padding: 10px;
-        border: 0;
-    }
+}
+.y-material {
+    position: fixed;
+    top: 40px;
+    left: 50%;
+    transform: translate(-50%);
+    z-index: 999999999;
+    background-color: #fff;
+    width: 600px;
+    height: 100%;
+    overflow-y: auto;
+    margin: 5px;
+    padding: 10px;
+    border: 0;
 }
 
 dialog::backdrop {
     background-color: rgba(0, 0, 0, .1);
-    // opacity: 0.75;
 }
 </style>

@@ -68,7 +68,6 @@ const create = (option) => {
         timer,
         timestamp: Date.now()
     }
-    console.log(5555555555555, messageItem)
     state.messages.push(messageItem)
 
     // 限制最大消息数量
@@ -144,38 +143,7 @@ defineExpose({
     transform: translateY(60px) translateX(-50%);
 }
 
-/* 暗色模式覆盖 */
-@media (prefers-color-scheme: dark) {
-    .y-message {
-        background: var(--y-bg-primary-dark, #1f2937);
-        border-color: var(--y-border-dark, #374151);
-    }
 
-    .y-message__content {
-        color: var(--y-text-primary-dark, #f3f4f6);
-        /* color: var(--y-text-primary-dark, #f3f4f6); */
-    }
-
-    .y-message-success {
-        border-color: var(--y-success-dark, #065f46);
-        background: rgba(16, 185, 129, 0.1);
-    }
-
-    .y-message-warning {
-        border-color: var(--y-warning-dark, #92400e);
-        background: rgba(245, 158, 11, 0.1);
-    }
-
-    .y-message-error {
-        border-color: var(--y-danger-dark, #991b1b);
-        background: rgba(239, 68, 68, 0.1);
-    }
-
-    .y-message-info {
-        border-color: var(--y-info-dark, #075985);
-        background: rgba(6, 182, 212, 0.1);
-    }
-}
 
 /* 响应式覆盖 */
 @media (max-width: 768px) {

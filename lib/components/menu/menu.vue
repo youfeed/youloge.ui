@@ -26,8 +26,7 @@
 </template>
 
 <script setup>
-import { watch } from 'less'
-import { computed, useSlots } from 'vue'
+import { computed, useSlots, watch } from 'vue'
 
 const slots = useSlots()
 
@@ -132,10 +131,10 @@ defineExpose({
 .y-menu {
     display: flex;
     flex-direction: column;
-    background-color: var(--white);
+    background-color: white;
     max-width: 100vw;
     transition: all 0.3s ease;
-    border-right: 1px solid var(--neutral-200);
+    border-right: 1px solid rgb(229 231 235);
     height: 100%;
 }
 
@@ -175,7 +174,7 @@ defineExpose({
 /* 头部和底部 */
 .y-menu__header {
     padding: 16px;
-    border-bottom: 1px solid var(--neutral-200);
+    border-bottom: 1px solid rgb(229 231 235);
 }
 
 .y-menu--dark .y-menu__header {
@@ -184,7 +183,7 @@ defineExpose({
 
 .y-menu__footer {
     padding: 16px;
-    border-top: 1px solid var(--neutral-200);
+    border-top: 1px solid rgb(229 231 235);
 }
 
 .y-menu--dark .y-menu__footer {
@@ -201,19 +200,19 @@ defineExpose({
 }
 
 .y-menu__content::-webkit-scrollbar-thumb {
-    background: var(--neutral-300);
+    background: rgb(209 213 219);
     border-radius: 3px;
 }
 
 .y-menu__content::-webkit-scrollbar-thumb:hover {
-    background: var(--neutral-400);
+    background: rgb(156 163 175);
 }
 
 .y-menu--dark .y-menu__content::-webkit-scrollbar-thumb {
-    background: var(--neutral-600);
+    background: rgb(75 85 99);
 }
 
 .y-menu--dark .y-menu__content::-webkit-scrollbar-thumb:hover {
-    background: var(--neutral-500);
+    background: rgb(107 114 128);
 }
 </style>

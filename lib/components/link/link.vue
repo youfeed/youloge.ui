@@ -1,16 +1,18 @@
 <template>
-    <component :is="href ? 'a' : 'span'" class="y-link" :href="href && !disabled ? href : undefined"
+    <component :is="href ? 'a' : 'span'" 
+        :class="linkClasses"
+        :href="href && !disabled ? href : undefined"
         :target="target && !disabled ? target : undefined"
-        :rel="target === '_blank' ? 'noopener noreferrer' : undefined" :data-type="type" :data-disabled="disabled"
-        :data-no-hover="noHover" :data-block="block" :data-underline="underline" @click="clickHandler">
-        <slot name="icon-left" class="y-link__icon y-link__icon--left" />
-        <slot class="y-link__text" />
-        <slot name="icon-right" class="y-link__icon y-link__icon--right" />
+        :rel="target === '_blank' ? 'noopener noreferrer' : undefined"
+        @click="clickHandler">
+        <slot name="icon-left" class="shrink-0 w-4 h-4 flex items-center justify-center" :class="iconLeftClass" />
+        <slot class="inline-flex items-center" />
+        <slot name="icon-right" class="shrink-0 w-4 h-4 flex items-center justify-center" :class="iconRightClass" />
     </component>
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from 'vue'
+import { defineProps, defineEmits, computed } from 'vue'
 
 defineOptions({ name: 'y-link' })
 
@@ -49,151 +51,84 @@ const clickHandler = (e) => {
         emit('click', e)
     }
 }
-</script>
 
-<style lang="less" scoped>
-// 终极方案：无任何全局变量，所有值均为固定值，100% 无报错
-.y-link {
-    // 基础样式：GitHub 原生字体 + 固定尺寸
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    font-size: 14px;
-    font-weight: 400;
-    text-decoration: none;
-    cursor: pointer;
-    box-sizing: border-box;
-    transition: color 0.2s ease, background-color 0.2s ease, text-decoration 0.2s ease;
-    color: inherit;
+// 基础样式
+const baseClasses = [
+    'inline-flex',
+    'items-center',
+    'justify-center',
+    'font-sans',
+    'text-sm',
+    'font-normal',
+    'no-underline',
+    'cursor-pointer',
+    'box-border',
+    'transition-all',
+    'duration-200',
+    'ease-in-out',
+    'focus:outline-none',
+    'focus-visible:ring-2',
+    'focus-visible:ring-gray-100',
+    'focus-visible:ring-offset-4',
+    'focus-visible:ring-offset-blue-500',
+    'focus-visible:ring-opacity-30',
+    'rounded'
+]
 
-    // 块级显示适配
-    &[data-block="true"] {
-        display: flex;
-        width: 100%;
-        justify-content: flex-start;
-    }
-
-    // ------------ 颜色核心：固定 GitHub 风格色，无任何变量 ------------
-    &[data-type="default"] {
-        color: #0969da !important; // GitHub 标准链接蓝
-    }
-
-    &[data-type="primary"] {
-        color: #0550ae !important; // 深一点的蓝
-    }
-
-    &[data-type="secondary"] {
-        color: #6b7280 !important; // 灰色（辅助链接）
-    }
-
-    &[data-type="danger"] {
-        color: #cf222e !important; // GitHub 危险红
-    }
-
-    &[data-type="success"] {
-        color: #1a7f37 !important; // GitHub 成功绿
-    }
-
-    &[data-type="info"] {
-        color: #2563eb !important; // 浅蓝（提示链接）
-    }
-
-    // ------------ 禁用状态：固定浅灰色，无变量 ------------
-    &[data-disabled="true"] {
-        color: #9ca3af !important; // 禁用浅灰
-        background-color: transparent !important;
-        cursor: not-allowed;
-        text-decoration: none !important;
-        pointer-events: none; // 彻底禁用交互
-    }
-
-    // ------------ Hover 状态：固定深色版，无变量 ------------
-    &:not([data-disabled="true"]):not([data-no-hover="true"]):hover {
-        &[data-type="default"] {
-            color: #064eaa !important; // 链接蓝 hover 深色
-        }
-
-        &[data-type="primary"] {
-            color: #044086 !important; // 深蓝 hover 深色
-        }
-
-        &[data-type="secondary"] {
-            color: #1f2937 !important; // 灰色 hover 深色
-        }
-
-        &[data-type="danger"] {
-            color: #a91c23 !important; // 危险红 hover 深色
-        }
-
-        &[data-type="success"] {
-            color: #14632f !important; // 成功绿 hover 深色
-        }
-
-        &[data-type="info"] {
-            color: #1d4ed8 !important; // 浅蓝 hover 深色
-        }
-
-        // GitHub 风格浅背景（固定透明色）
-        background-color: rgba(229, 231, 235, 0.2) !important;
-        border-radius: 3px !important; // 固定小圆角
-    }
-
-    // ------------ 下划线策略：固定样式，无变量 ------------
-    &[data-underline="always"] {
-        text-decoration: underline !important;
-        text-underline-offset: 2px;
-    }
-
-    &[data-underline="hover"]:not([data-disabled="true"]):hover {
-        text-decoration: underline !important;
-        text-underline-offset: 2px;
-    }
-
-    &[data-underline="none"] {
-        text-decoration: none !important;
-    }
-
-    // 聚焦样式：固定阴影色，无变量
-    &:focus-visible {
-        outline: none;
-        box-shadow: 0 0 0 2px #f3f4f6, 0 0 0 4px rgba(37, 99, 235, 0.3) !important;
-        border-radius: 3px !important;
-    }
-
-    // 图标样式：固定尺寸，继承颜色
-    &__icon {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 16px;
-        height: 16px;
-        color: inherit !important; // 强制继承链接颜色
-    }
-
-    &__icon--left {
-        margin-right: 4px !important; // 固定间距
-    }
-
-    &__icon--right {
-        margin-left: 4px !important; // 固定间距
-    }
-
-    &__text {
-        display: inline-flex;
-        align-items: center;
-    }
+// 颜色映射
+const colorClasses = {
+    default: 'text-blue-600',
+    primary: 'text-blue-700',
+    secondary: 'text-gray-500',
+    danger: 'text-red-600',
+    success: 'text-green-600',
+    info: 'text-blue-500'
 }
 
-// 响应式适配：固定断点 575px，无变量
+// Hover 颜色映射
+const hoverColorClasses = {
+    default: 'hover:text-blue-700 hover:bg-gray-100',
+    primary: 'hover:text-blue-800 hover:bg-gray-100',
+    secondary: 'hover:text-gray-800 hover:bg-gray-100',
+    danger: 'hover:text-red-700 hover:bg-gray-100',
+    success: 'hover:text-green-700 hover:bg-gray-100',
+    info: 'hover:text-blue-600 hover:bg-gray-100'
+}
+
+// 下划线样式
+const underlineClasses = {
+    always: 'underline underline-offset-2',
+    hover: 'hover:underline hover:underline-offset-2',
+    none: 'no-underline'
+}
+
+// 计算链接样式类
+const linkClasses = computed(() => {
+    return [
+        ...baseClasses,
+        colorClasses[props.type],
+        props.disabled ? 'text-gray-400 cursor-not-allowed pointer-events-none' : '',
+        props.noHover ? '' : hoverColorClasses[props.type],
+        props.block ? 'flex w-full justify-start' : '',
+        underlineClasses[props.underline]
+    ].filter(Boolean)
+})
+
+// 图标间距
+const iconLeftClass = computed(() => props.block ? 'mr-1' : 'mr-1')
+const iconRightClass = computed(() => props.block ? 'ml-1' : 'ml-1')
+</script>
+
+<style scoped>
+/* 自定义样式处理响应式设计 */
 @media (max-width: 575px) {
     .y-link {
-        font-size: 12px !important; // 小屏字体缩小
-
-        &__icon {
-            width: 14px;
-            height: 14px;
-        }
+        font-size: 12px;
+    }
+    
+    .y-link :deep(.y-link__icon) {
+        width: 14px;
+        height: 14px;
     }
 }
 </style>

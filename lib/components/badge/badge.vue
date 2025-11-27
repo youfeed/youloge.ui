@@ -118,7 +118,7 @@ const markClass = computed(() => [
   font-size: 12px;
   line-height: 18px;
   text-align: center;
-  color: var(--y-white, #ffffff);
+  color: #ffffff;
   font-weight: 500;
 }
 
@@ -128,7 +128,7 @@ const markClass = computed(() => [
   border-radius: 4px;
   font-size: 12px;
   line-height: 1;
-  color: var(--y-white, #ffffff);
+  color: #ffffff;
   white-space: nowrap;
   font-weight: 500;
 }
@@ -198,7 +198,7 @@ const markClass = computed(() => [
 
 /* 边框样式 */
 .y-badge__mark--bordered {
-  box-shadow: 0 0 0 2px var(--y-white, #ffffff);
+  box-shadow: 0 0 0 2px #ffffff;
 }
 
 /* 独立显示 */
@@ -213,33 +213,33 @@ const markClass = computed(() => [
 
 /* 类型样式 */
 .y-badge__mark--primary {
-  background: var(--y-primary, #3b82f6);
+  background: #3b82f6;
 }
 
 .y-badge__mark--success {
-  background: var(--y-success, #10b981);
+  background: #10b981;
 }
 
 .y-badge__mark--warning {
-  background: var(--y-warning, #f59e0b);
+  background: #f59e0b;
 }
 
 .y-badge__mark--danger {
-  background: var(--y-danger, #ef4444);
+  background: #ef4444;
 }
 
 .y-badge__mark--info {
-  background: var(--y-info, #06b6d4);
+  background: #06b6d4;
 }
 
 .y-badge__mark--default {
-  background: var(--y-text-secondary, #6b7280);
+  background: #6b7280;
 }
 
 /* 暗色模式 */
 @media (prefers-color-scheme: dark) {
   .y-badge__mark--bordered {
-    box-shadow: 0 0 0 2px var(--y-bg-primary-dark, #1f2937);
+    box-shadow: 0 0 0 2px #1f2937;
   }
 }
 
@@ -303,7 +303,7 @@ const markClass = computed(() => [
 
 /* 焦点样式 */
 .y-badge:focus-within .y-badge__mark {
-  outline: 2px solid var(--y-primary, #3b82f6);
+  outline: 2px solid #3b82f6;
   outline-offset: 2px;
   border-radius: 4px;
 }

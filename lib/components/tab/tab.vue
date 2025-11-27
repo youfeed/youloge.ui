@@ -1,6 +1,6 @@
 <template>
   <div
-    class="y-tab"
+    class="tab-base"
     :class="tabClasses"
     :style="tabStyle"
     :data-name="name"
@@ -28,17 +28,55 @@ const props = defineProps({
   disabled: { type: Boolean, default: false }
 })
 
+// 基础样式类
+const baseClasses = [
+  'inline-flex',
+  'items-center',
+  'justify-center',
+  'h-10',
+  'box-border',
+  'cursor-pointer',
+  'transition-all',
+  'duration-200',
+  'ease-in-out',
+  'text-sm',
+  'font-normal',
+  'text-gray-600',
+  'border-b-2',
+  'border-transparent'
+]
+
 // 计算样式类（简化逻辑，避免复杂嵌套）
 const tabClasses = computed(() => {
-  const base = ['y-tab']
-  if (tabsContext.activeKey.value === props.name) base.push('y-tab--active')
-  if (props.disabled) base.push('y-tab--disabled')
-  if (tabsContext.type === 'line') base.push('y-tab--line')
-  if (tabsContext.type === 'card') base.push('y-tab--card')
-  return base
+  const classes = [...baseClasses]
+  
+  // 激活状态
+  if (tabsContext.activeKey.value === props.name) {
+    classes.push('font-medium')
+  }
+  
+  // 禁用状态
+  if (props.disabled) {
+    classes.push('text-gray-400', 'cursor-not-allowed')
+  }
+  
+  // 标签类型样式
+  if (tabsContext.type === 'line') {
+    classes.push('-mb-px')
+  }
+  
+  if (tabsContext.type === 'card') {
+    classes.push('border-r', 'border-gray-200')
+    // 第一个标签添加左边框
+    if (props.name === tabsContext.tabKeys.value[0]) {
+      classes.push('border-l', 'border-gray-200')
+    }
+  }
+  
+  return classes
 })
 
-// 计算内联动态样式（保持动态性，无 Less 变量）
+// 计算内联动态样式（保持动态性）
 const tabStyle = computed(() => {
   const isActive = tabsContext.activeKey.value === props.name
   const style = { padding: `0 ${tabsContext.tabPadding}` }
@@ -75,58 +113,15 @@ onUnmounted(() => {
 })
 </script>
 
-<!-- 核心修复：Less 语法彻底纠错，简化嵌套，确保无解析错误 -->
-<style lang="less" scoped>
-// 基础样式：语法规范，无多余符号
-.y-tab {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 40px;
-  box-sizing: border-box;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 14px;
-  font-weight: 400;
-  color: #4b5563;
-  border-bottom: 2px solid transparent;
-}
-
-// 禁用态：独立选择器，语法简洁
-.y-tab--disabled {
-  color: #9ca3af !important;
-  cursor: not-allowed;
-  background-color: transparent !important;
-}
-
-// 激活态：独立选择器，统一加粗
-.y-tab--active {
-  font-weight: 500;
-}
-
-// 下划线式标签：单独定义，无嵌套歧义
-.y-tab--line {
-  margin-bottom: -1px;
-}
-
-// 下划线式 - 非禁用/非激活 hover 态
-.y-tab--line:not(.y-tab--disabled):not(.y-tab--active):hover {
+<style scoped>
+/* 下划线式标签 - 非禁用/非激活 hover 态 */
+.tab-base:not(.text-gray-400):not(.font-medium):hover {
   color: #0969da;
   border-bottom-color: rgba(9, 105, 218, 0.3);
 }
 
-// 卡片式标签：单独定义，无嵌套歧义
-.y-tab--card {
-  border-right: 1px solid #e5e7eb;
-}
-
-// 卡片式 - 第一个标签左边框
-.y-tab--card:first-child {
-  border-left: 1px solid #e5e7eb;
-}
-
-// 卡片式 - 非禁用/非激活 hover 态
-.y-tab--card:not(.y-tab--disabled):not(.y-tab--active):hover {
+/* 卡片式标签 - 非禁用/非激活 hover 态 */
+.tab-base.border-r:not(.text-gray-400):not(.font-medium):hover {
   color: #0969da;
   background-color: #f3f4f6;
 }

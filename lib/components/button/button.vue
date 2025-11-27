@@ -13,7 +13,7 @@
         </span>
         
         <!-- 文本 -->
-        <span class="inline-flex items-center">
+        <span class="inline-flex items-center" :class="{ 'opacity-0': loading }">
             <slot />
         </span>
     </button>
@@ -35,86 +35,79 @@ const props = defineProps({
 
 const emit = defineEmits(['click']);
 
-// UnoCSS类名计算
+// 使用 Tailwind CSS 配置计算按钮类名
 const buttonClass = computed(() => {
-    const baseClasses = [
-        'inline-flex',
-        'items-center',
-        'justify-center',
-        'border',
-        'outline-none',
-        'cursor-pointer',
-        'font-family-inherit',
-        'font-medium',
-        'leading-6',
-        'no-underline',
-        'transition-all',
-        'duration-200',
-        'ease-in-out',
-        'select-none',
-        'relative'
-    ];
-
-    // 类型样式
-    const typeClasses = getTypeClasses(props.type);
+    // 基础样式 - 使用我们定义的 btn 组件样式
+    const classes = ['btn'];
     
-    // 尺寸样式
-    const sizeClasses = getSizeClasses(props.size);
+    // 类型样式 - 使用 Tailwind 原生颜色
+    const typeClass = getTypeClass(props.type);
+    if (typeClass) classes.push(typeClass);
+    
+    // 尺寸样式 - 使用 Tailwind 原生类
+    const sizeClass = getSizeClass(props.size);
+    if (sizeClass) classes.push(sizeClass);
     
     // 圆角样式
-    const roundedClasses = props.rounded ? getRoundedClasses(props.rounded) : ['rounded'];
+    const roundedClass = getRoundedClass(props.rounded);
+    if (roundedClass) classes.push(roundedClass);
     
     // 状态样式
-    const stateClasses = [
-        props.block && 'w-full',
-        props.disabled && 'opacity-60 cursor-not-allowed pointer-events-none',
-        props.loading && 'text-transparent'
-    ].filter(Boolean);
-
-    return [...baseClasses, ...typeClasses, ...sizeClasses, ...roundedClasses, ...stateClasses].join(' ');
+    if (props.block) classes.push('w-full');
+    if (props.disabled) classes.push('disabled');
+    if (props.loading) classes.push('relative');
+    
+    // 添加交互反馈
+    if (!props.disabled && !props.loading) {
+        classes.push('btn-press');
+    }
+    
+    return classes.join(' ');
 });
 
-// 类型样式映射
-const getTypeClasses = (type) => {
+// 类型样式映射 - 使用 Tailwind 原生颜色
+const getTypeClass = (type) => {
     const typeMap = {
-        default: ['bg-neutral-100', 'border-neutral-300', 'text-neutral-900', 'hover:bg-neutral-200', 'hover:border-neutral-400'],
-        primary: ['bg-primary-600', 'border-primary-600', 'text-white', 'hover:bg-primary-700', 'hover:border-primary-700'],
-        success: ['bg-green-600', 'border-green-600', 'text-white', 'hover:bg-green-700', 'hover:border-green-700'],
-        error: ['bg-red-600', 'border-red-600', 'text-white', 'hover:bg-red-700', 'hover:border-red-700'],
-        danger: ['bg-red-600', 'border-red-600', 'text-white', 'hover:bg-red-700', 'hover:border-red-700'],
-        warning: ['bg-yellow-500', 'border-yellow-500', 'text-neutral-900', 'hover:bg-yellow-600', 'hover:border-yellow-600'],
-        info: ['bg-blue-600', 'border-blue-600', 'text-white', 'hover:bg-blue-700', 'hover:border-blue-700'],
-        outline: ['bg-transparent', 'border-neutral-300', 'text-neutral-900', 'hover:bg-neutral-50', 'hover:border-neutral-400'],
-        ghost: ['bg-transparent', 'border-transparent', 'text-neutral-900', 'hover:bg-neutral-100'],
-        link: ['bg-transparent', 'border-transparent', 'text-primary-600', 'underline', 'hover:text-primary-700', 'hover:no-underline']
+        default: 'bg-slate-100 border-slate-300 text-slate-900 hover:bg-slate-200 hover:border-slate-400',
+        primary: 'bg-blue-600 border-blue-600 text-white hover:bg-blue-700 hover:border-blue-700',
+        success: 'bg-green-600 border-green-600 text-white hover:bg-green-700 hover:border-green-700',
+        error: 'bg-red-600 border-red-600 text-white hover:bg-red-700 hover:border-red-700',
+        danger: 'bg-red-600 border-red-600 text-white hover:bg-red-700 hover:border-red-700',
+        warning: 'bg-amber-500 border-amber-500 text-slate-900 hover:bg-amber-600 hover:border-amber-600',
+        info: 'bg-cyan-600 border-cyan-600 text-white hover:bg-cyan-700 hover:border-cyan-700',
+        outline: 'bg-transparent border-slate-300 text-slate-900 hover:bg-slate-50 hover:border-slate-400',
+        ghost: 'bg-transparent border-transparent text-slate-900 hover:bg-slate-100',
+        link: 'bg-transparent border-transparent text-blue-600 underline hover:text-blue-700 hover:no-underline'
     };
     
     return typeMap[type] || typeMap.default;
 };
 
-// 尺寸样式映射
-const getSizeClasses = (size) => {
+// 尺寸样式映射 - 使用 Tailwind 原生类
+const getSizeClass = (size) => {
     const sizeMap = {
-        sm: ['px-3', 'py-1', 'text-xs', 'gap-1', 'min-h-6'],
-        md: ['px-4', 'py-1.5', 'text-sm', 'gap-1.5', 'min-h-8'],
-        lg: ['px-5', 'py-2', 'text-base', 'gap-2', 'min-h-10']
+        sm: 'px-3 py-1 text-xs gap-1 min-h-6',
+        md: 'px-4 py-1.5 text-sm gap-1.5 min-h-8',
+        lg: 'px-5 py-2 text-base gap-2 min-h-10'
     };
     
     return sizeMap[size] || sizeMap.md;
 };
 
-// 圆角样式映射
-const getRoundedClasses = (rounded) => {
+// 圆角样式映射 - 使用 Tailwind 原生类
+const getRoundedClass = (rounded) => {
+    if (!rounded) return 'rounded-md';
+    
     const roundedMap = {
-        none: ['rounded-none'],
-        sm: ['rounded-sm'],
-        md: ['rounded-md'],
-        lg: ['rounded-lg'],
-        xl: ['rounded-xl'],
-        full: ['rounded-full']
+        none: 'rounded-none',
+        sm: 'rounded-sm',
+        md: 'rounded-md',
+        lg: 'rounded-lg',
+        xl: 'rounded-xl',
+        full: 'rounded-full'
     };
     
-    return roundedMap[rounded] || ['rounded'];
+    return roundedMap[rounded] || 'rounded-md';
 };
 
 const clickHandler = (e) => {
@@ -124,29 +117,3 @@ const clickHandler = (e) => {
 };
 </script>
 
-<style scoped>
-/* 聚焦状态样式 */
-button:focus-visible {
-    outline: 2px solid theme('colors.primary.300');
-    outline-offset: 2px;
-}
-
-/* 禁用状态下的悬停效果需要禁用 */
-button:disabled {
-    pointer-events: none;
-}
-
-/* 确保加载状态下动画正常工作 */
-.animate-spin {
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    from {
-        transform: translate(-50%, -50%) rotate(0deg);
-    }
-    to {
-        transform: translate(-50%, -50%) rotate(360deg);
-    }
-}
-</style>

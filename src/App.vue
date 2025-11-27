@@ -230,8 +230,10 @@
 
         <!-- 底部版权 -->
         <y-footer>
-            © 2025 GitHub Style Component Library. All riyts reserved.
-            <y-qrcode text="2333"></y-qrcode>
+            <y-watermark content="Youloge.ui" type="text" :opacity="0.1" :rotate="-15" :gap-x="120" :gap-y="80">
+                © 2025 GitHub Style Component Library. All rights reserved.
+                <y-qrcode text="2333"></y-qrcode>
+            </y-watermark>
         </y-footer>
     </y-layout>
 </template>
