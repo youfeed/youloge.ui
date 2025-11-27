@@ -1,5 +1,5 @@
 <template>
-  <div class="y-select" :class="selectClass" ref="selectRef">
+  <div :class="selectClass" ref="selectRef">
     <!-- 选择框 -->
     <div class="y-select__trigger" @click="toggleDropdown">
       <!-- 标签显示区域 -->
@@ -8,7 +8,7 @@
         <div v-if="multiple" class="y-select__tags">
           <span v-for="(item, index) in selectedItems" :key="index" class="y-select__tag">
             {{ getOptionLabel(item) }}
-            <span v-if="!disabled" class="y-select__tag-close" @click.stop="removeTag(item)">×</span>
+            <span v-if="!isDisabled" class="y-select__tag-close" @click.stop="removeTag(item)">×</span>
           </span>
           
           <!-- 输入区域（多选时可输入） -->
@@ -49,9 +49,7 @@
       
       <!-- 操作图标区域 -->
       <div class="y-select__actions">
-        <span v-if="clearable && selectedItems.length > 0" class="y-select__clear" @click.stop="handleClear">
-          ×
-        </span>
+        <span v-if="clearable && selectedItems.length > 0" class="y-select__clear" @click.stop="handleClear">×</span>
         <span class="y-select__arrow" :class="{ 'y-select__arrow--open': showDropdown }">▼</span>
       </div>
     </div>
@@ -84,7 +82,7 @@
               type="checkbox"
               :checked="isSelected(option)"
               readonly
-              class="y-select__checkbox-input"
+              class="y-select__checkbox-input sr-only"
             />
             <span class="y-select__checkbox-inner"></span>
           </span>
@@ -110,9 +108,12 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
+import { ref, computed, nextTick, onMounted, onUnmounted, inject } from 'vue'
 
 defineOptions({ name: 'y-select' })
+
+// 注入表单上下文
+const formItemContext = inject('formItemContext', null)
 
 // 双向绑定
 const modelValue = defineModel({
@@ -142,17 +143,18 @@ const props = defineProps({
   },
   max: {
     type: Number,
-    default: 1
+    default: Infinity
   },
   min: {
     type: Number,
-    default: 1
+    default: 0
   },
   clearable: {
     type: Boolean,
     default: true
   },
   disabled: Boolean,
+  readonly: Boolean,
   valueKey: {
     type: String,
     default: 'value'
@@ -160,10 +162,15 @@ const props = defineProps({
   labelKey: {
     type: String,
     default: 'label'
+  },
+  size: {
+    type: String,
+    default: 'md',
+    validator: (val) => ['sm', 'md', 'lg'].includes(val)
   }
 })
 
-const emit = defineEmits(['change', 'create', 'search'])
+const emit = defineEmits(['change', 'create', 'search', 'focus', 'blur'])
 
 // 响应式数据
 const selectRef = ref(null)
@@ -176,13 +183,29 @@ const searchQuery = ref('')
 // 计算属性
 const selectClass = computed(() => [
   'y-select',
+  'relative',
+  'inline-block',
+  'w-full',
+  'text-sm',
   {
     'y-select--open': showDropdown.value,
-    'y-select--disabled': props.disabled,
+    'y-select--disabled': isDisabled.value,
+    'y-select--readonly': isReadonly.value,
     'y-select--multiple': props.multiple,
-    'y-select--filterable': props.filterable
+    'y-select--filterable': props.filterable,
+    'y-select--sm': props.size === 'sm',
+    'y-select--md': props.size === 'md',
+    'y-select--lg': props.size === 'lg'
   }
 ])
+
+const isDisabled = computed(() => {
+  return props.disabled || formItemContext?.disabled?.value || false
+})
+
+const isReadonly = computed(() => {
+  return props.readonly || formItemContext?.readonly?.value || false
+})
 
 // 工具函数
 const getOptionValue = (option) => {
@@ -250,7 +273,7 @@ const getOptionClass = (option) => ({
 
 // 事件处理
 const toggleDropdown = () => {
-  if (props.disabled) return
+  if (isDisabled.value || isReadonly.value) return
   showDropdown.value = !showDropdown.value
   if (showDropdown.value) {
     nextTick(() => {
@@ -265,6 +288,7 @@ const handleInputFocus = () => {
   if (!showDropdown.value) {
     showDropdown.value = true
   }
+  emit('focus')
 }
 
 const handleInput = () => {
@@ -278,7 +302,7 @@ const handleSearch = () => {
 }
 
 const handleOptionClick = (option) => {
-  if (option.disabled || props.disabled) return
+  if (option.disabled || isDisabled.value || isReadonly.value) return
   
   const value = getOptionValue(option)
   
@@ -296,7 +320,7 @@ const handleOptionClick = (option) => {
       }
     } else {
       // 添加选择
-      if (!props.max || selectedItems.value.length < props.max) {
+      if (selectedItems.value.length < props.max) {
         modelValue.value = [...selectedItems.value, option]
       }
     }
@@ -309,10 +333,15 @@ const handleOptionClick = (option) => {
   }
   
   emit('change', modelValue.value)
+  
+  // 触发表单验证
+  if (formItemContext?.validateTrigger === 'change') {
+    formItemContext.handleBlur?.()
+  }
 }
 
 const removeTag = (item) => {
-  if (props.disabled) return
+  if (isDisabled.value || isReadonly.value) return
   const value = getOptionValue(item)
   const currentValues = selectedItems.value.map(getOptionValue)
   const index = currentValues.indexOf(value)
@@ -322,11 +351,16 @@ const removeTag = (item) => {
     newValues.splice(index, 1)
     modelValue.value = newValues
     emit('change', modelValue.value)
+    
+    // 触发表单验证
+    if (formItemContext?.validateTrigger === 'change') {
+      formItemContext.handleBlur?.()
+    }
   }
 }
 
 const handleClear = () => {
-  if (props.disabled) return
+  if (isDisabled.value || isReadonly.value) return
   modelValue.value = props.multiple ? [] : null
   emit('change', modelValue.value)
 }
@@ -341,7 +375,7 @@ const handleKeydown = (event) => {
 }
 
 const createOption = () => {
-  if (!query.value || props.disabled) return
+  if (!query.value || isDisabled.value || isReadonly.value) return
   
   const newOption = {
     [props.valueKey]: query.value,
@@ -349,7 +383,7 @@ const createOption = () => {
   }
   
   if (props.multiple) {
-    if (!props.max || selectedItems.value.length < props.max) {
+    if (selectedItems.value.length < props.max) {
       modelValue.value = [...selectedItems.value, newOption]
     }
   } else {
@@ -361,6 +395,11 @@ const createOption = () => {
   emit('change', modelValue.value)
   query.value = ''
   searchQuery.value = ''
+  
+  // 触发表单验证
+  if (formItemContext?.validateTrigger === 'change') {
+    formItemContext.handleBlur?.()
+  }
 }
 
 // 点击外部关闭
@@ -369,6 +408,12 @@ const handleClickOutside = (event) => {
     showDropdown.value = false
     query.value = ''
     searchQuery.value = ''
+    emit('blur')
+    
+    // 触发表单验证
+    if (formItemContext?.validateTrigger === 'blur') {
+      formItemContext.handleBlur?.()
+    }
   }
 }
 
@@ -383,37 +428,44 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.y-select {
-  position: relative;
-  display: inline-block;
-  width: 100%;
-  font-size: 14px;
-}
-
 /* 触发区域 */
 .y-select__trigger {
   display: flex;
   align-items: center;
   padding: 4px 6px;
-  border: 1px solid #dcdfe6;
+  border: 1px solid var(--y-border, #d1d5db);
   border-radius: 4px;
-  background: white;
+  background: var(--y-white, #ffffff);
   cursor: pointer;
   transition: all 0.2s;
-  min-height: 20px;
+  min-height: 32px;
 }
 
-.y-select__trigger:hover:not(.y-select--disabled) {
-  border-color: #c0c4cc;
+/* 尺寸变体 */
+.y-select--sm .y-select__trigger {
+  padding: 2px 4px;
+  min-height: 28px;
+  font-size: 13px;
+}
+
+.y-select--lg .y-select__trigger {
+  padding: 6px 8px;
+  min-height: 36px;
+  font-size: 15px;
+}
+
+.y-select__trigger:hover:not(.y-select--disabled):not(.y-select--readonly) {
+  border-color: var(--y-border-hover, #9ca3af);
 }
 
 .y-select--open .y-select__trigger {
-  border-color: #409eff;
-  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
+  border-color: var(--y-primary, #3b82f6);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
 }
 
-.y-select--disabled .y-select__trigger {
-  background: #f5f7fa;
+.y-select--disabled .y-select__trigger,
+.y-select--readonly .y-select__trigger {
+  background: var(--y-bg-tertiary, #f3f4f6);
   cursor: not-allowed;
   opacity: 0.6;
 }
@@ -439,11 +491,11 @@ onUnmounted(() => {
   display: inline-flex;
   align-items: center;
   padding: 2px 6px;
-  background: #f0f9ff;
-  border: 1px solid #c6e2ff;
+  background: var(--y-primary-light, #dbeafe);
+  border: 1px solid var(--y-primary-lighter, #bfdbfe);
   border-radius: 2px;
   font-size: 12px;
-  color: #409eff;
+  color: var(--y-primary, #3b82f6);
 }
 
 .y-select__tag-close {
@@ -453,7 +505,7 @@ onUnmounted(() => {
 }
 
 .y-select__tag-close:hover {
-  color: #0678ff;
+  color: var(--y-primary-dark, #1d4ed8);
 }
 
 /* 单选显示 */
@@ -464,11 +516,11 @@ onUnmounted(() => {
 }
 
 .y-select__value {
-  color: #606266;
+  color: var(--y-text-primary, #374151);
 }
 
 .y-select__placeholder {
-  color: #c0c4cc;
+  color: var(--y-text-placeholder, #9ca3af);
 }
 
 /* 输入区域 */
@@ -478,11 +530,11 @@ onUnmounted(() => {
   background: transparent;
   flex: 1;
   min-width: 60px;
-  color: #606266;
+  color: var(--y-text-primary, #374151);
 }
 
 .y-select__input::placeholder {
-  color: #c0c4cc;
+  color: var(--y-text-placeholder, #9ca3af);
 }
 
 /* 操作区域 */
@@ -495,18 +547,18 @@ onUnmounted(() => {
 
 .y-select__clear {
   cursor: pointer;
-  color: #c0c4cc;
+  color: var(--y-text-placeholder, #9ca3af);
   padding: 2px;
   font-size: 16px;
 }
 
 .y-select__clear:hover {
-  color: #909399;
+  color: var(--y-text-secondary, #6b7280);
 }
 
 .y-select__arrow {
   transition: transform 0.2s;
-  color: #c0c4cc;
+  color: var(--y-text-placeholder, #9ca3af);
   font-size: 12px;
 }
 
@@ -520,10 +572,10 @@ onUnmounted(() => {
   top: 100%;
   left: 0;
   right: 0;
-  background: white;
-  border: 1px solid #e4e7ed;
+  background: var(--y-white, #ffffff);
+  border: 1px solid var(--y-border, #e5e7eb);
   border-radius: 4px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   margin-top: 4px;
   z-index: 1000;
   max-height: 200px;
@@ -533,19 +585,21 @@ onUnmounted(() => {
 /* 过滤区域 */
 .y-select__filter {
   padding: 8px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--y-border-light, #f3f4f6);
 }
 
 .y-select__filter-input {
   width: 100%;
   padding: 6px 8px;
-  border: 1px solid #dcdfe6;
+  border: 1px solid var(--y-border, #d1d5db);
   border-radius: 2px;
   outline: none;
+  background: var(--y-white, #ffffff);
 }
 
 .y-select__filter-input:focus {
-  border-color: #409eff;
+  border-color: var(--y-primary, #3b82f6);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
 }
 
 /* 选项区域 */
@@ -563,12 +617,12 @@ onUnmounted(() => {
 }
 
 .y-select__option:hover:not(.y-select__option--disabled) {
-  background: #f5f7fa;
+  background: var(--y-bg-secondary, #f3f4f6);
 }
 
 .y-select__option--selected {
-  background: #f0f9ff;
-  color: #409eff;
+  background: var(--y-primary-light, #dbeafe);
+  color: var(--y-primary, #3b82f6);
 }
 
 .y-select__option--disabled {
@@ -591,14 +645,14 @@ onUnmounted(() => {
   display: block;
   width: 14px;
   height: 14px;
-  border: 1px solid #dcdfe6;
+  border: 1px solid var(--y-border, #d1d5db);
   border-radius: 2px;
   position: relative;
 }
 
 .y-select__option--selected .y-select__checkbox-inner {
-  background: #409eff;
-  border-color: #409eff;
+  background: var(--y-primary, #3b82f6);
+  border-color: var(--y-primary, #3b82f6);
 }
 
 .y-select__option--selected .y-select__checkbox-inner::after {
@@ -608,7 +662,7 @@ onUnmounted(() => {
   top: 1px;
   width: 4px;
   height: 8px;
-  border: solid white;
+  border: solid var(--y-white, #ffffff);
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
 }
@@ -621,18 +675,58 @@ onUnmounted(() => {
 .y-select__empty {
   padding: 16px;
   text-align: center;
-  color: #909399;
+  color: var(--y-text-secondary, #6b7280);
 }
 
 /* 创建选项 */
 .y-select__create {
   padding: 8px 12px;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid var(--y-border-light, #f3f4f6);
   cursor: pointer;
-  color: #409eff;
+  color: var(--y-primary, #3b82f6);
 }
 
 .y-select__create:hover {
-  background: #f5f7fa;
+  background: var(--y-bg-secondary, #f3f4f6);
+}
+
+/* 暗色模式 */
+@media (prefers-color-scheme: dark) {
+  .y-select__trigger {
+    background: var(--y-bg-primary-dark, #1f2937);
+    border-color: var(--y-border-dark, #4b5563);
+  }
+  
+  .y-select__dropdown {
+    background: var(--y-bg-primary-dark, #1f2937);
+    border-color: var(--y-border-dark, #4b5563);
+  }
+  
+  .y-select__filter-input {
+    background: var(--y-bg-primary-dark, #1f2937);
+    border-color: var(--y-border-dark, #4b5563);
+  }
+  
+  .y-select__option:hover:not(.y-select__option--disabled) {
+    background: var(--y-bg-secondary-dark, #374151);
+  }
+  
+  .y-select__option--selected {
+    background: rgba(59, 130, 246, 0.2);
+  }
+  
+  .y-select__filter {
+    border-bottom-color: var(--y-border-dark, #4b5563);
+  }
+  
+  .y-select__create {
+    border-top-color: var(--y-border-dark, #4b5563);
+  }
+}
+
+/* 焦点无障碍 */
+.y-select__trigger:focus-within {
+  outline: 2px solid var(--y-primary, #3b82f6);
+  outline-offset: 2px;
 }
 </style>

@@ -492,10 +492,10 @@ const toggleAside = () => {
 
 
 const onMessage = () => {
-    useMessage().success(999);
+    useMessage().success('成功消息 - 999');
     useMessage().warning('warning');
     useMessage().error('error');
-    useMessage().info(999);
+    useMessage().info('信息提示 - 999');
     console.log('onMessage', useMessage('success', 5266))
 }
 // 素材选则

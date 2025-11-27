@@ -1,100 +1,79 @@
 <template>
-  <div 
-    class="y-row"
-    :style="rowStyle"
-    :data-justify="justify"
-    :data-align="align"
-    :data-wrap="wrap"
-  >
-    <slot /> <!-- 直接包裹 y-col 子组件 -->
+  <div :class="rowClass" :style="rowStyle">
+    <slot />
   </div>
 </template>
 
 <script setup>
-import { defineProps, computed } from 'vue'
+import { computed } from 'vue'
 
 defineOptions({ name: 'y-row' })
 
 const props = defineProps({
-  // 列间距（支持数字/带单位字符串，默认 @spacing-2=16px，贴合 GitHub 紧凑风格）
+  // 间距
   gutter: {
     type: [String, Number],
-    default: 16,
-    validator: val => typeof val === 'number' ? (val >= 0 && val <= 48) : /^\d+(px|rem|em)$/.test(val)
+    default: 16
   },
-  // 水平对齐方式（flex 布局属性）
+  // 水平对齐
   justify: {
     type: String,
-    default: 'flex-start',
-    validator: val => ['flex-start', 'center', 'flex-end', 'space-between', 'space-around', 'space-evenly'].includes(val)
+    default: 'flex-start'
   },
-  // 垂直对齐方式（flex 布局属性）
+  // 垂直对齐
   align: {
     type: String,
-    default: 'stretch',
-    validator: val => ['stretch', 'flex-start', 'center', 'flex-end', 'baseline'].includes(val)
+    default: 'stretch'
   },
-  // 是否换行（默认换行，避免溢出）
+  // 是否换行
   wrap: {
     type: Boolean,
     default: true
   }
 })
 
-// 处理带单位属性（Vue 原生写法，统一单位格式）
-const formatUnit = (val) => typeof val === 'number' ? `${val}px` : val
+// 基础类名
+const rowClass = computed(() => {
+  const classes = ['flex', 'w-full', 'box-border']
+  
+  // 对齐方式映射
+  const justifyMap = {
+    'flex-start': 'justify-start',
+    'center': 'justify-center', 
+    'flex-end': 'justify-end',
+    'space-between': 'justify-between',
+    'space-around': 'justify-around',
+    'space-evenly': 'justify-evenly'
+  }
+  
+  const alignMap = {
+    'stretch': 'items-stretch',
+    'flex-start': 'items-start',
+    'center': 'items-center',
+    'flex-end': 'items-end',
+    'baseline': 'items-baseline'
+  }
+  
+  classes.push(justifyMap[props.justify] || 'justify-start')
+  classes.push(alignMap[props.align] || 'items-stretch')
+  classes.push(props.wrap ? 'flex-wrap' : 'flex-nowrap')
+  
+  return classes.join(' ')
+})
 
-// 行样式：主要处理间距（gutter）
+// 样式计算
 const rowStyle = computed(() => {
-  const gutter = formatUnit(props.gutter)
-  // 行内边距 = 间距/2，列外边距 = -间距/2，实现列之间的间距
+  const gutter = typeof props.gutter === 'number' ? `${props.gutter}px` : props.gutter
   return {
-    paddingLeft: `calc(${gutter} / 2)`,
-    paddingRight: `calc(${gutter} / 2)`,
-    boxSizing: 'border-box',
-    width: '100%'
+    margin: `calc(-${gutter} / 2)`
   }
 })
 </script>
 
-<style lang="less" scoped>
-// 依赖全局注入的 Less 变量
-.y-row {
-  display: flex;
-  flex-direction: row;
+<style scoped>
+/* 列组件间距补偿 */
+:deep(y-col) {
+  padding: calc(var(--y-row-gutter, 16px) / 2);
   box-sizing: border-box;
-  width: 100%;
-
-  // 水平对齐方式（通过 data-justify 绑定）
-  &[data-justify="flex-start"] { justify-content: flex-start; }
-  &[data-justify="center"] { justify-content: center; }
-  &[data-justify="flex-end"] { justify-content: flex-end; }
-  &[data-justify="space-between"] { justify-content: space-between; }
-  &[data-justify="space-around"] { justify-content: space-around; }
-  &[data-justify="space-evenly"] { justify-content: space-evenly; }
-
-  // 垂直对齐方式（通过 data-align 绑定）
-  &[data-align="stretch"] { align-items: stretch; }
-  &[data-align="flex-start"] { align-items: flex-start; }
-  &[data-align="center"] { align-items: center; }
-  &[data-align="flex-end"] { align-items: flex-end; }
-  &[data-align="baseline"] { align-items: baseline; }
-
-  // 是否换行（通过 data-wrap 绑定）
-  &[data-wrap="false"] { flex-wrap: nowrap; }
-  &[data-wrap="true"] { flex-wrap: wrap; }
-
-  // 直接子组件仅允许 y-col，统一样式重置
-  > y-col {
-    display: flex;
-    flex-direction: column;
-    box-sizing: border-box;
-    // 列外边距抵消行内边距，实现真实间距
-    margin-left: calc(var(--y-row-gutter) / 2);
-    margin-right: calc(var(--y-row-gutter) / 2);
-    margin-top: calc(var(--y-row-gutter) / 2);
-    margin-bottom: calc(var(--y-row-gutter) / 2);
-  }
 }
-
 </style>

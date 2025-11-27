@@ -1,5 +1,5 @@
 <template>
-  <div class="y-skeleton-group" :class="groupClass">
+  <div v-if="showGroup" class="y-skeleton-group w-full">
     <slot>
       <!-- 默认内容：3行文本骨架 -->
       <y-skeleton :rows="3" :animated="animated" />
@@ -7,7 +7,7 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { computed } from 'vue'
 
 defineOptions({ name: 'y-skeleton-group' })
@@ -25,20 +25,6 @@ const props = defineProps({
   }
 })
 
-const groupClass = computed(() => [
-  'y-skeleton-group',
-  {
-    'y-skeleton-group--loading': props.loading
-  }
-])
+// 计算是否显示骨架屏组
+const showGroup = computed(() => props.loading)
 </script>
-
-<style scoped>
-.y-skeleton-group {
-  width: 100%;
-}
-
-.y-skeleton-group:not(.y-skeleton-group--loading) {
-  display: none;
-}
-</style>

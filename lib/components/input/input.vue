@@ -1,341 +1,425 @@
 <template>
-    <!-- 输入框容器：适配表单布局，支持错误态 -->
-    <div :class="inputClass" :style="inputStyle">
-        <div class="y-input__prefix" v-if="props.prefix">{{ props.prefix }}</div>
-        <!-- 输入框核心：支持多种类型，双向绑定 -->
-        <input :name="name" :type="type" :value="model" :placeholder="placeholder || `请输入${label || '内容'}`"
-            :disabled="context.disabled" :maxlength="maxlength" :minlength="minlength"
-            @input="handleInput" @blur="handleBlur" @change="handleChange" />
-        <span class="y-input__clearable" v-if="props.clearable" @click="onClearable">×</span>
-        <div class="y-input__suffix" v-if="props.suffix">{{ props.suffix }}</div>
-        <div class="y-input__wordCount" v-if="props.wordCount">{{ model.length }}/ {{ props.maxlength }}</div>
-        <!-- <div class="">
-        </div> -->
+  <div :class="inputClass">
+    <!-- 前缀 -->
+    <div v-if="prefix" class="y-input__prefix">
+      {{ prefix }}
     </div>
+    
+    <!-- 输入框 -->
+    <input
+      ref="inputRef"
+      v-model="inputValue"
+      :class="inputElementClass"
+      :type="type"
+      :name="name"
+      :placeholder="placeholder"
+      :disabled="isDisabled"
+      :readonly="isReadonly"
+      :maxlength="maxlength"
+      :minlength="minlength"
+      :inputmode="inputMode"
+      @input="handleInput"
+      @blur="handleBlur"
+      @focus="handleFocus"
+      @change="handleChange"
+    />
+    
+    <!-- 清空按钮 -->
+    <button
+      v-if="clearable && inputValue && !isDisabled && !isReadonly"
+      type="button"
+      class="y-input__clear"
+      @click="handleClear"
+      @mousedown.prevent
+    >
+      <svg class="y-input__clear-icon" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+      </svg>
+    </button>
+    
+    <!-- 后缀 -->
+    <div v-if="suffix" class="y-input__suffix">
+      {{ suffix }}
+    </div>
+    
+    <!-- 字数统计 -->
+    <div v-if="showWordCount" class="y-input__count">
+      {{ currentLength }}{{ maxlength ? `/${maxlength}` : '' }}
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { defineProps, defineModel, inject, watch, onUnmounted, computed } from 'vue'
+import { ref, computed, inject, nextTick } from 'vue'
 
 defineOptions({ name: 'y-input' })
 
-// 注入表单项目上下文（与 y-form-item 联动）
-const context = inject('yFormItemContext', { disabled: false })
-// 注入表单全局上下文（验证相关）
-const formContext = inject('formContext', null)
-const model = defineModel({
-    type: [String, Number],
-    default: ''
-});
-// 核心功能
-const props = defineProps({
-    // 输入框类型（文本/密码/数字等）
-    type: {
-        type: String,
-        default: 'text',
-        validator: val => ['text', 'password', 'number', 'email', 'tel', 'url', 'search', 'submit', 'hidden'].includes(val)
-    },
-    // 输入框状态
-    status: {
-        type: String,
-        default: 'default',
-        validator: val => ['default', 'success', 'warning', 'error'].includes(val)
-    },
-    // 输入框状态
-    size: {
-        type: String,
-        default: 'medium',
-        validator: val => ['large', 'medium', 'small'].includes(val)
-    },
-    // 输入框状态
-    align: {
-        type: String,
-        default: 'left',
-        validator: val => ['left', 'center', 'right'].includes(val)
-    },
-    name: {
-        type: String,
-        default: ''
-    },
-    format: {},
-    // 标签文本（用于占位符默认值，实际标签由 y-form-item 控制）
-    label: {
-        type: String,
-        default: ''
-    },
-    // 占位提示文本
-    placeholder: {
-        type: String,
-        default: ''
-    },
-    // 最大长度
-    maxlength: {
-        type: [Number, String],
-        default: ''
-    },
-    // 最小长度
-    minlength: {
-        type: [Number, String],
-        default: ''
-    },
-    prefix: { type: String,default: '' },
-    suffix: { type: String, default: '' },
-    readonly: { type: Boolean, default: false },
-    clearable: { type: Boolean, default: false },
-    autoWidth: { type: Boolean, default: false },
-    wordCount: { type: Boolean, default: false },
-    // 验证规则（支持字符串/数组/函数，与 form 联动）
-    rules: {
-        type: [String, Array, Function],
-        default: () => []
-    },
-    // 自定义错误状态（由 form-item 传递，控制输入框错误样式）
-    error: {
-        type: Boolean,
-        default: false
-    }
+// 使用 defineModel
+const inputValue = defineModel({
+  type: [String, Number],
+  default: ''
 })
-// 事件派发：透传常用事件
-const emits = defineEmits(['input', 'change', 'blur', 'focus'])
 
-// 4. 表单验证：正确注册/注销规则（与 formContext 联动）
-const validatorKey = Symbol('y-input-validator') // 唯一标识，避免冲突
+const props = defineProps({
+  // 基础属性
+  type: {
+    type: String,
+    default: 'text',
+    validator: (val) => ['text', 'password', 'number', 'email', 'tel', 'url', 'search'].includes(val)
+  },
+  name: { type: String, default: '' },
+  placeholder: { type: String, default: '' },
+  
+  // 尺寸
+  size: {
+    type: String,
+    default: 'md',
+    validator: (val) => ['sm', 'md', 'lg'].includes(val)
+  },
+  
+  // 状态
+  disabled: { type: Boolean, default: false },
+  readonly: { type: Boolean, default: false },
+  
+  // 功能
+  clearable: { type: Boolean, default: false },
+  showWordCount: { type: Boolean, default: false },
+  
+  // 限制
+  maxlength: [String, Number],
+  minlength: [String, Number],
+  
+  // 装饰
+  prefix: { type: String, default: '' },
+  suffix: { type: String, default: '' },
+  
+  // 对齐
+  align: {
+    type: String,
+    default: 'left',
+    validator: (val) => ['left', 'center', 'right'].includes(val)
+  }
+})
 
-// 构建验证函数（支持自定义 rules）
-const validator = (value) => {
-    const rules = Array.isArray(props.rules) ? props.rules : [props.rules]
-    let valid = true
-    let message = ''
+const emit = defineEmits(['input', 'change', 'blur', 'focus', 'clear'])
 
-    for (const rule of rules) {
-        if (typeof rule === 'function') {
-            // 自定义验证函数
-            const result = rule(value, model.value)
-            valid = result.valid
-            message = result.message || ''
-            if (!valid) break
-        } else if (rule === 'required') {
-            // 必填规则
-            if (value === '' || value === undefined || value === null) {
-                valid = false
-                message = `${props.label || '输入框'} 为必填项`
-                break
-            }
-        } else if (rule.includes('min:')) {
-            // 最小长度/数值规则
-            const minVal = Number(rule.split(':')[1])
-            const length = type === 'number' ? Number(value) : String(value).length
-            if (length < minVal) {
-                valid = false
-                message = `${props.label || '输入框'} 不能小于 ${minVal}`
-                break
-            }
-        } else if (rule.includes('max:')) {
-            // 最大长度/数值规则
-            const maxVal = Number(rule.split(':')[1])
-            const length = type === 'number' ? Number(value) : String(value).length
-            if (length > maxVal) {
-                valid = false
-                message = `${props.label || '输入框'} 不能大于 ${maxVal}`
-                break
-            }
-        } else if (rule === 'email') {
-            // 邮箱格式规则
-            const reg = /^[\w.-]+@[a-zA-Z0-9-]+\.[a-zA-Z]+$/
-            if (!reg.test(value)) {
-                valid = false
-                message = '邮箱格式不正确'
-                break
-            }
-        }
-    }
+// 注入表单上下文
+const formItemContext = inject('formItemContext', null)
+const formContext = inject('formContext', null)
 
-    return { valid, message }
-}
+// 响应式数据
+const inputRef = ref()
+const isFocused = ref(false)
 
-// 注册验证规则（监听 rules 变化）
-watch(
-    () => props.rules,
-    (newRules) => {
-        if (formContext && newRules && newRules.length > 0) {
-            formContext.setRules?.(validatorKey, validator)
-        } else {
-            formContext.deleteRules?.(validatorKey)
-        }
-    },
-    { immediate: true, deep: true }
-);
+// 计算属性
+const isDisabled = computed(() => {
+  return props.disabled || formContext?.disabled?.value || false
+})
 
-// 销毁时移除验证规则
-onUnmounted(() => {
-    formContext.deleteRules?.(validatorKey)
-});
+const isReadonly = computed(() => {
+  return props.readonly || formContext?.readonly?.value || false
+})
 
-// 5. 事件处理：同步值与表单状态
+const currentLength = computed(() => {
+  return String(inputValue.value).length
+})
+
+const inputMode = computed(() => {
+  const modeMap = {
+    number: 'numeric',
+    email: 'email',
+    tel: 'tel',
+    url: 'url'
+  }
+  return modeMap[props.type] || 'text'
+})
+
+const inputClass = computed(() => {
+  const classes = [
+    'y-input',
+    'y-input--' + props.size,
+    'y-input--' + props.align
+  ]
+  
+  // 状态
+  if (isDisabled.value) classes.push('y-input--disabled')
+  if (isReadonly.value) classes.push('y-input--readonly')
+  if (isFocused.value) classes.push('y-input--focused')
+  
+  // 错误状态
+  if (formItemContext?.hasError?.value) {
+    classes.push('y-input--error')
+  }
+  
+  // 功能
+  if (props.clearable) classes.push('y-input--clearable')
+  if (props.showWordCount) classes.push('y-input--countable')
+  if (props.prefix) classes.push('y-input--prefix')
+  if (props.suffix) classes.push('y-input--suffix')
+  
+  return classes.join(' ')
+})
+
+const inputElementClass = computed(() => {
+  const classes = ['y-input__inner']
+  
+  if (props.align !== 'left') {
+    classes.push('y-input__inner--' + props.align)
+  }
+  
+  return classes.join(' ')
+})
+
+// 事件处理
 const handleInput = (e) => {
-    let value = e.target.value
-    // 数字类型特殊处理（空值保留空字符串，避免出现 0）
-    if (props.type === 'number') {
-        value = value === '' ? '' : Number(value)
-    }
-    model.value = value
-    emits('input', value)
+  const value = e.target.value
+  inputValue.value = value
+  emit('input', value)
+  
+  // 触发表单验证
+  if (formItemContext?.validateTrigger === 'change') {
+    formItemContext.handleBlur?.()
+  }
 }
 
 const handleBlur = (e) => {
-    emits('blur', e)
-    // 失焦时触发表单单项验证
-    formContext?.validateField?.(formContext.currentProp)
+  isFocused.value = false
+  emit('blur', e)
+  
+  // 触发表单验证
+  if (formItemContext?.validateTrigger === 'blur') {
+    formItemContext.handleBlur?.()
+  }
 }
+
+const handleFocus = (e) => {
+  isFocused.value = true
+  emit('focus', e)
+}
+
 const handleChange = (e) => {
-    emits('change', e.target.value)
+  emit('change', e.target.value)
 }
-// 清空输入
-const onClearable = ()=>{
-    console.log('onClearable')
-    model.value = ''
+
+const handleClear = () => {
+  inputValue.value = ''
+  emit('clear')
+  nextTick(() => {
+    inputRef.value?.focus()
+  })
 }
-//
-const inputStyle = computed(() => [])
-const inputClass = computed(() => [
-    'y-input',
-    `y-input-type-${props.type}`,
-    `y-input-align-${props.align}`,
-    `y-input-size-${props.size}`,
-    `y-input-status-${props.status}`,
-    {
-        'y-input-clearable': props.clearable,
-        'y-input-autowidth': props.autoWidth,
-        'y-input-borderless': props.borderless,
-        'y-input-disabled': props.disabled,
-        'y-input-readonly': props.readonly,
-    }
-])
+
+// 暴露方法
+defineExpose({
+  focus: () => inputRef.value?.focus(),
+  blur: () => inputRef.value?.blur(),
+  select: () => inputRef.value?.select(),
+  inputRef
+})
 </script>
 
-<style lang="less" scoped>
-// 输入框容器：适配表单间距，统一对齐
+<style scoped>
 .y-input {
-    display: flex;
-    position: relative;
-    align-items: center;
-    gap: 4px;
-    width: 100%;
-    box-sizing: border-box;
-    overflow: hidden;
-    margin: 0;
-    padding: 0 4px;
-    outline: 0;
-    border-width: 1px;
-    border-style: solid;
-    border-color: var(--primary);
-    min-width: 0;
-    max-width: 100%;
-    text-overflow: ellipsis;
-    border-radius: var(--border-radius);
-    font-size: var(--font-size-base);
-    color: var(--neutral-700);
-    background-color: var(--white);
-    transition: all 0.2s ease;
-    &:focus-within {
-        padding: 10px;
-        border-color: var(--primary) !important;
-        box-shadow: 0 0 0 px var(--primary) !important;
-    }
-    &:hover {
-        border-color: var(--primary-hover) !important;
-    }
-    &:hover .y-input__clearable{
-        visibility: inherit;
-    }
-    // 占位符样式：浅灰，不抢眼
-    &::placeholder {
-        color: var(--neutral-400);
-        font-size: 14px;
-    }
-    &.y-input-size-large{
-        padding: 6px 10px;
-        font-size:large;
-    }
-    &.y-input-size-medium{
-        padding: 4px 8px;
-        font-size: medium;
-    }
-    &.y-input-size-small{
-        padding: 2px 4px;
-        font-size:small;
-    }
-    &.y-input-status-default{
-        border-color: var(--neutral-200);
-    }
-    &.y-input-status-success{
-        border-color: var(--success);
-    }
-    &.y-input-status-warning{
-        border-color: var(--warning);
-    }
-    &.y-input-status-error{
-        border-color: var(--error);
-    }
-    &.y-input-borderless{
-        border: 0;
-    }
-    &.y-input-align-center input{
-        text-align: center;
-    }
-    &.y-input-align-right{
-        text-align: right;
-    }
-    
-    .y-input__clearable{
-        visibility: hidden;
-        cursor: pointer;
-    }
-    > input {
-        flex: 1;
-        border: none;
-        outline: none;
-        padding: 0;
-        max-width: 100%;
-        min-width: 0;
-        color: var(--neutral-800);
-        font: inherit;
-        background-color: transparent;
-        box-sizing: border-box;
-        white-space: nowrap;
-        word-wrap: normal;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        
-    }
+  display: inline-flex;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: var(--y-bg-primary);
+  border: 1px solid var(--y-border);
+  border-radius: 4px;
+  transition: all 0.2s ease-in-out;
+  position: relative;
 }
 
-.y-input__autowidth {
-    width: fit-content;
-    min-width: 60px;
+.y-input:hover {
+  border-color: var(--y-border-dark);
 }
 
-.y-input-borderless {
-    border: 0;
+.y-input--focused {
+  border-color: var(--y-primary);
+  box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1);
 }
 
-// 禁用态：浅灰背景 + 淡色文本，无交互感
-.y-input__container--disabled .y-input {
-    background-color: #f9fafb;
-    color: #9ca3af;
-    border-color: #f3f4f6;
-    cursor: not-allowed;
-
-    &::placeholder {
-        color: #d1d5db;
-    }
+.y-input--error {
+  border-color: var(--y-error);
 }
 
-// 数字输入框去掉默认箭头（可选，更简洁）
-.y-input[type="number"]::-webkit-inner-spin-button,
-.y-input[type="number"]::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    appearance: none;
-    margin: 0;
+.y-input--error.y-input--focused {
+  box-shadow: 0 0 0 2px rgba(227, 77, 89, 0.1);
+}
+
+/* 尺寸变体 */
+.y-input--sm {
+  height: 28px;
+  padding: 0 8px;
+  font-size: 12px;
+}
+
+.y-input--md {
+  height: 32px;
+  padding: 0 12px;
+  font-size: 14px;
+}
+
+.y-input--lg {
+  height: 40px;
+  padding: 0 16px;
+  font-size: 16px;
+}
+
+/* 输入框核心 */
+.y-input__inner {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--y-text-primary);
+  font-family: inherit;
+  font-size: inherit;
+  line-height: 1.5;
+}
+
+.y-input__inner::placeholder {
+  color: var(--y-text-placeholder);
+}
+
+.y-input__inner--center {
+  text-align: center;
+}
+
+.y-input__inner--right {
+  text-align: right;
+}
+
+/* 前缀 */
+.y-input__prefix {
+  margin-right: 8px;
+  color: var(--y-text-secondary);
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.y-input--prefix .y-input__inner {
+  padding-left: 0;
+}
+
+/* 后缀 */
+.y-input__suffix {
+  margin-left: 8px;
+  color: var(--y-text-secondary);
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.y-input--suffix .y-input__inner,
+.y-input--clearable .y-input__inner,
+.y-input--countable .y-input__inner {
+  padding-right: 0;
+}
+
+/* 清空按钮 */
+.y-input__clear {
+  margin-left: 8px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--y-text-tertiary);
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.y-input__clear:hover {
+  color: var(--y-text-secondary);
+  background-color: var(--y-bg-tertiary);
+}
+
+.y-input__clear-icon {
+  width: 14px;
+  height: 14px;
+}
+
+/* 字数统计 */
+.y-input__count {
+  margin-left: 8px;
+  font-size: 12px;
+  color: var(--y-text-tertiary);
+  flex-shrink: 0;
+  min-width: 30px;
+  text-align: right;
+}
+
+/* 状态样式 */
+.y-input--disabled {
+  background-color: var(--y-bg-tertiary);
+  border-color: var(--y-border-light);
+  cursor: not-allowed;
+  color: var(--y-text-disabled);
+}
+
+.y-input--disabled .y-input__inner {
+  cursor: not-allowed;
+}
+
+.y-input--disabled .y-input__inner::placeholder {
+  color: var(--y-text-disabled);
+}
+
+.y-input--readonly {
+  background-color: var(--y-bg-tertiary);
+  color: var(--y-text-secondary);
+}
+
+.y-input--readonly .y-input__inner {
+  cursor: default;
+}
+
+/* 无障碍 */
+.y-input:focus-within {
+  outline: 2px solid var(--y-primary);
+  outline-offset: 2px;
+}
+
+/* 数字输入框隐藏箭头 */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* 密码输入框隐藏眼睛图标 */
+input[type="password"]::-webkit-credentials-auto-fill-button {
+  display: none;
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+  .y-input--lg {
+    height: 36px;
+    font-size: 14px;
+  }
+}
+
+/* 暗色模式 */
+@media (prefers-color-scheme: dark) {
+  .y-input {
+    background-color: var(--y-bg-dark);
+  }
+  
+  .y-input--disabled,
+  .y-input--readonly {
+    background-color: var(--y-bg-tertiary-dark);
+  }
 }
 </style>

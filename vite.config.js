@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import {resolve} from 'path'
+import UnoCSS from 'unocss/vite'
 import vue from '@vitejs/plugin-vue'
 
 export default defineConfig({
@@ -7,6 +8,7 @@ export default defineConfig({
     __APP_VERSION__: JSON.stringify('v1.0.0'),
   },
   build:{
+    minify: 'esbuild',
     sourcemap:false,
     lib: {
       format: 'umd',
@@ -21,6 +23,7 @@ export default defineConfig({
         globals: {
           vue: 'Vue',
         },
+        // assetFileNames:()=>{}
       },
     }
   },
@@ -29,7 +32,7 @@ export default defineConfig({
       '@lib':resolve(__dirname, './lib')
     }
   },
-  plugins: [vue()],
+  plugins: [vue(),UnoCSS()],
   css:{
     preprocessorOptions:{
       less:{

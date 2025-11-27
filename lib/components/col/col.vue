@@ -1,77 +1,123 @@
 <template>
-  <div 
-    class="y-col"
-    :style="colStyle"
-  >
+  <div :class="colClass" :style="colStyle">
     <slot />
   </div>
 </template>
 
 <script setup>
-import { defineProps, computed } from 'vue'
+import { computed } from 'vue'
 
 defineOptions({ name: 'y-col' })
 
-// 核心修复：JS 计算所有断点的 span/offset，注入为 CSS 变量
 const props = defineProps({
-  span: { type: [Number, Object], default: 24, validator: val => val === 0 || (val >= 1 && val <= 24) },
-  offset: { type: [Number, Object], default: 0, validator: val => val >= 0 && val <= 23 },
-  xs: { type: [Number, Object], default: undefined }, // ≤359px
-  sm: { type: [Number, Object], default: undefined }, // ≤575px
-  md: { type: [Number, Object], default: undefined }, // ≤767px
-  lg: { type: [Number, Object], default: undefined }, // ≤1023px
-  xl: { type: [Number, Object], default: undefined }  // ≤1279px
+  // 默认栅格值
+  span: { 
+    type: Number, 
+    default: 24, 
+    validator: val => val >= 0 && val <= 24 
+  },
+  // 偏移量
+  offset: { 
+    type: Number, 
+    default: 0, 
+    validator: val => val >= 0 && val <= 23 
+  },
+  // 响应式栅格
+  xs: Number,
+  sm: Number, 
+  md: Number,
+  lg: Number,
+  xl: Number
 })
 
-// 解析单个断点的 span 和 offset
-const parseBreakpoint = (val) => {
-  if (!val) return { span: undefined, offset: 0 }
-  if (typeof val === 'number') return { span: val, offset: 0 }
-  return { span: val.span, offset: val.offset || 0 }
-}
-
-// 计算所有 CSS 变量（包括基础样式和响应式断点）
-const colStyle = computed(() => {
-  const base = {
-    // 基础样式
-    width: `${(props.span / 24) * 100}%`,
-    marginLeft: `${(props.offset / 24) * 100}%`,
-    display: props.span === 0 ? 'none' : 'block',
-    boxSizing: 'border-box',
-    transition: 'width 0.2s ease, margin-left 0.2s ease',
-    // 注入响应式 CSS 变量（--y-[断点]-span/offset）
-    '--y-xs-span': parseBreakpoint(props.xs).span,
-    '--y-xs-offset': parseBreakpoint(props.xs).offset,
-    '--y-sm-span': parseBreakpoint(props.sm).span,
-    '--y-sm-offset': parseBreakpoint(props.sm).offset,
-    '--y-md-span': parseBreakpoint(props.md).span,
-    '--y-md-offset': parseBreakpoint(props.md).offset,
-    '--y-lg-span': parseBreakpoint(props.lg).span,
-    '--y-lg-offset': parseBreakpoint(props.lg).offset,
-    '--y-xl-span': parseBreakpoint(props.xl).span,
-    '--y-xl-offset': parseBreakpoint(props.xl).offset
+// 基础类名
+const colClass = computed(() => {
+  const classes = ['box-border']
+  
+  // 隐藏状态
+  if (props.span === 0) {
+    classes.push('hidden')
+  } else {
+    classes.push('block')
   }
+  
+  return classes.join(' ')
+})
 
-  // 处理断点为 0 时的隐藏逻辑
-  Object.keys(base).forEach(key => {
-    if (key.startsWith('--y-') && key.endsWith('-span') && base[key] === 0) {
-      base[`${key.replace('span', 'display')}`] = 'none'
+// 样式计算
+const colStyle = computed(() => {
+  const style = {}
+  
+  // 基础样式
+  if (props.span > 0) {
+    style.width = `${(props.span / 24) * 100}%`
+  }
+  
+  if (props.offset > 0) {
+    style.marginLeft = `${(props.offset / 24) * 100}%`
+  }
+  
+  // 响应式样式 - 使用CSS变量
+  const breakpoints = ['xs', 'sm', 'md', 'lg', 'xl']
+  breakpoints.forEach(bp => {
+    if (props[bp] !== undefined) {
+      style[`--y-${bp}-span`] = props[bp]
     }
   })
-
-  return base
+  
+  return style
 })
 </script>
 
-<style lang="less" scoped>
-// 纯原生 Less，无任何复杂函数，仅用简单计算
+<style scoped>
 .y-col {
   box-sizing: border-box;
-  float: left;
+  transition: all 0.2s ease-in-out;
+}
 
-  // 列内边距（紧凑风格）
-  > * {
-    box-sizing: border-box;
+/* 响应式断点样式 */
+@media (max-width: 359px) {
+  .y-col {
+    width: var(--y-xs-span) !important;
+  }
+  .y-col[style*="--y-xs-span:0"] {
+    display: none !important;
+  }
+}
+
+@media (max-width: 575px) {
+  .y-col {
+    width: var(--y-sm-span) !important;
+  }
+  .y-col[style*="--y-sm-span:0"] {
+    display: none !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .y-col {
+    width: var(--y-md-span) !important;
+  }
+  .y-col[style*="--y-md-span:0"] {
+    display: none !important;
+  }
+}
+
+@media (max-width: 1023px) {
+  .y-col {
+    width: var(--y-lg-span) !important;
+  }
+  .y-col[style*="--y-lg-span:0"] {
+    display: none !important;
+  }
+}
+
+@media (max-width: 1279px) {
+  .y-col {
+    width: var(--y-xl-span) !important;
+  }
+  .y-col[style*="--y-xl-span:0"] {
+    display: none !important;
   }
 }
 </style>

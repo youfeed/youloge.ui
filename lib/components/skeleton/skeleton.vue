@@ -1,8 +1,8 @@
 <template>
   <!-- 骨架屏容器 -->
-  <div v-if="showSkeleton" class="y-skeleton" :class="skeletonClass">
+  <div v-if="showSkeleton" :class="skeletonClass">
     <!-- 头像骨架 -->
-    <div v-if="avatar" class="y-skeleton__avatar" :class="avatarClass"></div>
+    <div v-if="avatar" :class="avatarClass" :style="avatarStyle"></div>
     
     <!-- 内容区域 -->
     <div class="y-skeleton__content">
@@ -14,7 +14,7 @@
         v-for="i in rows"
         :key="i"
         class="y-skeleton__row"
-        :class="rowClass(i)"
+        :class="{ 'y-skeleton__row--last': i === rows }"
         :style="rowStyle(i)"
       ></div>
     </div>
@@ -26,8 +26,8 @@
   </div>
 </template>
 
-<script>
-import { ref, computed, watch, onMounted } from 'vue'
+<script setup>
+import { computed } from 'vue'
 
 defineOptions({ name: 'y-skeleton' })
 
@@ -66,201 +66,74 @@ const props = defineProps({
   loading: {
     type: Boolean,
     default: true
-  },
-  // 加载Promise
-  loadPromise: {
-    type: [Promise, Function],
-    default: null
-  },
-  // 延迟显示时间（毫秒）
-  delay: {
-    type: Number,
-    default: 0
-  },
-  // 错误时是否显示内容
-  showOnError: {
-    type: Boolean,
-    default: false
   }
 })
 
-const emit = defineEmits(['loading', 'success', 'error', 'finish'])
+// 计算是否显示骨架屏
+const showSkeleton = computed(() => props.loading)
 
-// 响应式状态
-const internalLoading = ref(props.loading)
-const showSkeleton = ref(false)
-const loadError = ref(null)
-
-// 计算属性
+// 骨架屏样式类
 const skeletonClass = computed(() => [
   'y-skeleton',
+  'flex',
+  'w-full',
+  'p-4',
   {
-    'y-skeleton--animated': props.animated,
-    'y-skeleton--loading': internalLoading.value
+    'y-skeleton--animated': props.animated
   }
 ])
 
+// 头像样式类
 const avatarClass = computed(() => [
   'y-skeleton__avatar',
-  `y-skeleton__avatar--${props.avatarShape}`
+  'flex-shrink-0',
+  'mr-4',
+  {
+    'rounded-full': props.avatarShape === 'circle',
+    'rounded': props.avatarShape === 'square'
+  }
 ])
 
-const titleStyle = computed(() => ({
-  width: typeof props.titleWidth === 'number' ? `${props.titleWidth}px` : props.titleWidth
-}))
+// 头像大小样式
+const avatarStyle = computed(() => {
+  const size = typeof props.avatarSize === 'number' ? `${props.avatarSize}px` : props.avatarSize
+  return {
+    width: size,
+    height: size,
+    backgroundColor: 'var(--y-skeleton-bg, #f3f4f6)'
+  }
+})
 
-// 段落样式
-const rowClass = (index) => {
-  return [
-    'y-skeleton__row',
-    {
-      'y-skeleton__row--last': index === props.rows
-    }
-  ]
-}
 
+
+// 标题样式
+const titleStyle = computed(() => {
+  const width = typeof props.titleWidth === 'number' ? `${props.titleWidth}px` : props.titleWidth
+  return {
+    width: width,
+    height: '16px'
+  }
+})
+
+// 段落行样式
 const rowStyle = (index) => {
-  if (index === props.rows) {
-    return { width: '60%' }
-  }
-  return {}
-}
-
-// 处理加载状态
-const handleLoading = (isLoading) => {
-  internalLoading.value = isLoading
-  showSkeleton.value = isLoading
-  emit('loading', isLoading)
-}
-
-// 处理加载完成
-const handleSuccess = () => {
-  handleLoading(false)
-  emit('success')
-  emit('finish', { success: true, error: null })
-}
-
-// 处理加载错误
-const handleError = (error) => {
-  loadError.value = error
-  handleLoading(false)
-  emit('error', error)
-  emit('finish', { success: false, error })
-  
-  // 根据配置决定是否显示内容
-  showSkeleton.value = !props.showOnError
-}
-
-// 执行加载Promise
-const executeLoadPromise = async () => {
-  if (!props.loadPromise) return
-  
-  try {
-    handleLoading(true)
-    
-    // 延迟显示
-    if (props.delay > 0) {
-      await new Promise(resolve => setTimeout(resolve, props.delay))
-    }
-    
-    // 执行Promise
-    const promise = typeof props.loadPromise === 'function' 
-      ? props.loadPromise() 
-      : props.loadPromise
-    
-    await promise
-    handleSuccess()
-  } catch (error) {
-    handleError(error)
+  const width = index === props.rows ? '60%' : '100%'
+  return {
+    width: width,
+    height: '14px'
   }
 }
-
-// 监听props变化
-watch(() => props.loading, (newVal) => {
-  if (!props.loadPromise) {
-    internalLoading.value = newVal
-    showSkeleton.value = newVal
-  }
-})
-
-watch(() => props.loadPromise, (newPromise) => {
-  if (newPromise) {
-    executeLoadPromise()
-  }
-})
-
-// 生命周期
-onMounted(() => {
-  if (props.loadPromise) {
-    // 有Promise，自动执行
-    executeLoadPromise()
-  } else {
-    // 没有Promise，使用loading状态
-    internalLoading.value = props.loading
-    showSkeleton.value = props.loading
-  }
-})
-
-// 暴露方法
-defineExpose({
-  // 重新加载
-  reload: () => {
-    if (props.loadPromise) {
-      executeLoadPromise()
-    } else {
-      handleLoading(true)
-      setTimeout(() => handleLoading(false), 1000)
-    }
-  },
-  // 手动设置加载状态
-  setLoading: (isLoading) => {
-    handleLoading(isLoading)
-  },
-  // 获取当前状态
-  getState: () => ({
-    loading: internalLoading.value,
-    showSkeleton: showSkeleton.value,
-    error: loadError.value
-  })
-})
 </script>
 
 <style scoped>
-.y-skeleton {
-  display: flex;
-  width: 100%;
-  padding: 16px;
-}
-
-.y-skeleton__avatar {
-  flex-shrink: 0;
-  background: #f0f0f0;
-  margin-right: 16px;
-}
-
-.y-skeleton__avatar--circle {
-  border-radius: 50%;
-}
-
-.y-skeleton__avatar--square {
-  border-radius: 4px;
-}
-
-.y-skeleton__content {
-  flex: 1;
-  width: 0;
-}
-
 .y-skeleton__title {
-  height: 16px;
-  background: #f0f0f0;
+  background-color: var(--y-skeleton-bg, #f3f4f6);
   border-radius: 4px;
   margin-bottom: 16px;
 }
 
 .y-skeleton__row {
-  height: 14px;
-  background: #f0f0f0;
+  background-color: var(--y-skeleton-bg, #f3f4f6);
   border-radius: 4px;
   margin-bottom: 12px;
 }
@@ -273,17 +146,31 @@ defineExpose({
 .y-skeleton--animated .y-skeleton__avatar,
 .y-skeleton--animated .y-skeleton__title,
 .y-skeleton--animated .y-skeleton__row {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
   background-size: 400% 100%;
-  animation: y-skeleton-loading 1.5s ease-in-out infinite;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
 }
 
-@keyframes y-skeleton-loading {
+@keyframes skeleton-loading {
   0% {
     background-position: 100% 50%;
   }
   100% {
     background-position: 0 50%;
+  }
+}
+
+/* 暗色模式 */
+@media (prefers-color-scheme: dark) {
+  .y-skeleton__title,
+  .y-skeleton__row {
+    background-color: var(--y-skeleton-bg-dark, #374151);
+  }
+  
+  .y-skeleton--animated .y-skeleton__avatar,
+  .y-skeleton--animated .y-skeleton__title,
+  .y-skeleton--animated .y-skeleton__row {
+    background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
   }
 }
 </style>

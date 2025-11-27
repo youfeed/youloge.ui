@@ -1,126 +1,193 @@
 <template>
-    <div class="y-message-container" v-if="messaged.length > 0">
-        <TransitionGroup tag="div" mode="out-in">
-            <div v-for="item in messaged" :key="item.uuid" :class="['y-message', `y-message-${item.type}`]"
+    <div v-if="messages.length > 0"
+        class="y-message-container fixed top-12 left-1/2 transform -translate-x-1/2 flex flex-col items-center justify-center z-50 select-none pointer-events-none">
+        <TransitionGroup tag="div" name="message" mode="out-in">
+            <div v-for="item in messages" :key="item.uuid" :class="messageClass(item)"
+                class="pointer-events-auto cursor-pointer relative mb-1.5 transform -translate-x-1/2"
                 @click="onClose(item)">
-                <div v-html="item.content || 'unknown'"></div>
+                <!-- 左侧颜色条 -->
+                <div class="y-message__indicator"></div>
+
+                <!-- 消息内容 -->
+                <div class="y-message__content" v-html="item.content || 'unknown'"></div>
+
+                <!-- 关闭按钮 -->
+                <button v-if="item.closable !== false" class="y-message__close" @click.stop="onClose(item)">
+                    <svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                    </svg>
+                </button>
             </div>
         </TransitionGroup>
     </div>
 </template>
+
 <script setup>
 import { computed, reactive } from 'vue'
-defineOptions({ name: 'y-message' });
-const state = reactive({
-    message: []
-});
-// 动态计算条数
-const messaged = computed(() => state.message.filter(Boolean));
-// 主动点击销毁
-const onClose = ({ timer, uuid }) => (clearTimeout(timer), close(uuid));
 
-// 创建消息{uuid,type,content,duration } = option
+defineOptions({ name: 'y-message' })
+
+const state = reactive({
+    messages: []
+})
+
+// 动态计算消息条数
+const messages = computed(() => state.messages.filter(Boolean))
+
+// 获取消息样式类
+const messageClass = (item) => [
+    `y-message-${item.type || 'info'}`,
+    'y-message-md',
+    {
+        'y-message__close-visible': item.closable !== false
+    }
+]
+
+// 主动点击销毁
+const onClose = ({ timer, uuid }) => {
+    clearTimeout(timer)
+    close(uuid)
+}
+
+// 创建消息 {uuid, type, content, duration, closable } = option
 const create = (option) => {
-    let uuid = crypto.randomUUID();
-    let timer = setTimeout(() => close(uuid), option.duration || 8000)
-    // 添加到表
-    option.uuid = uuid;
-    option.timer = timer;
-    state.message.push(option);
-    return uuid;
+    
+    const uuid = crypto.randomUUID()
+    const duration = option.duration !== undefined ? option.duration : 3000
+
+    const timer = setTimeout(() => close(uuid), duration)
+
+    // 添加到列表
+    const messageItem = {
+        uuid,
+        type: option.type || 'info',
+        content: option.content || '',
+        duration,
+        closable: option.closable !== false,
+        timer,
+        timestamp: Date.now()
+    }
+    console.log(5555555555555, messageItem)
+    state.messages.push(messageItem)
+
+    // 限制最大消息数量
+    if (state.messages.length > 10) {
+        state.messages.shift()
+    }
+
+    return uuid
 }
-// 移除单条
+
+// 移除单条消息
 const close = (uuid) => {
-    let findIndex = state.message.findIndex(is => is.uuid == uuid);
-    findIndex == -1 || state.message.splice(findIndex, 1);
+    const findIndex = state.messages.findIndex(msg => msg.uuid === uuid)
+    if (findIndex !== -1) {
+        state.messages.splice(findIndex, 1)
+    }
 }
-// 销毁全部
+
+// 销毁全部消息
 const destroy = () => {
-    state.message = [];
+    state.messages = []
 }
-defineExpose({ create, close, destroy });
+
+// 根据类型创建便捷方法
+const success = (content, duration) => create({ type: 'success', content, duration })
+const warning = (content, duration) => create({ type: 'warning', content, duration })
+const error = (content, duration) => create({ type: 'error', content, duration })
+const info = (content, duration) => create({ type: 'info', content, duration })
+
+defineExpose({
+    create,
+    close,
+    destroy,
+    success,
+    warning,
+    error,
+    info
+})
 </script>
-<style lang="less">
-.y-message-container {
-    user-select: none;
-    position: fixed;
-    top: 50px;
-    left: 50%;
+
+<style scoped>
+/* 布局样式 - 不与 UnoCSS 冲突 */
+.y-message {
     display: flex;
     align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    z-index: 99999;
-
-    .y-message {
-        width: fit-content;
-        transform: translate(-50%);
-        cursor: pointer;
-        min-width: 80px;
-        background: var(--white);
-        display: flex;
-        align-items: center;
-        justify-content: flex-start;
-        margin: 5px;
-        padding: 10px;
-        box-shadow: 0 0 2px 1px #e1e1e1;
-
-        &::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 4px;
-            bottom: 4px;
-            width: 4px;
-            border-radius: 2px; // 竖线圆角，更美观
-        }
-    }
 }
 
-.y-message-success {
-    background-color: var(--success);
-    color: var(--success);
-
-    &::before {
-        background-color: var(--success);
-    }
+.y-message:hover .y-message__indicator {
+    transform: scaleY(1.2);
 }
 
-.y-message-warning {
-    background-color: var(--warning);
-    color: var(--warning);
-
-    &::before {
-        background-color: var(--warning);
-    }
+.y-message__close:hover {
+    background-color: rgba(0, 0, 0, 0.05);
 }
 
-.y-message-error {
-    background-color: var(--error);
-    color: var(--error);
-
-    &::before {
-        background-color: var(--error);
-    }
+/* 动画效果 */
+.message-enter-active,
+.message-leave-active {
+    transition: all 0.3s ease;
 }
 
-.y-message-info {
-    background-color: var(--info);
-    color: var(--info);
-
-    &::before {
-        background-color: var(--info);
-    }
+.message-move {
+    transition: transform 0.3s ease;
 }
 
-.v-enter-active,
-.v-leave-active {
-    transition: all 0.5s ease;
-}
-
-.v-enter-from,
-.v-leave-to {
+.message-enter-from {
     opacity: 0;
-    transform: translateY(60px);
+    transform: translateY(-60px) translateX(-50%);
+}
+
+.message-leave-to {
+    opacity: 0;
+    transform: translateY(60px) translateX(-50%);
+}
+
+/* 暗色模式覆盖 */
+@media (prefers-color-scheme: dark) {
+    .y-message {
+        background: var(--y-bg-primary-dark, #1f2937);
+        border-color: var(--y-border-dark, #374151);
+    }
+
+    .y-message__content {
+        color: var(--y-text-primary-dark, #f3f4f6);
+        /* color: var(--y-text-primary-dark, #f3f4f6); */
+    }
+
+    .y-message-success {
+        border-color: var(--y-success-dark, #065f46);
+        background: rgba(16, 185, 129, 0.1);
+    }
+
+    .y-message-warning {
+        border-color: var(--y-warning-dark, #92400e);
+        background: rgba(245, 158, 11, 0.1);
+    }
+
+    .y-message-error {
+        border-color: var(--y-danger-dark, #991b1b);
+        background: rgba(239, 68, 68, 0.1);
+    }
+
+    .y-message-info {
+        border-color: var(--y-info-dark, #075985);
+        background: rgba(6, 182, 212, 0.1);
+    }
+}
+
+/* 响应式覆盖 */
+@media (max-width: 768px) {
+    .y-message {
+        max-width: calc(100vw - 32px);
+    }
+}
+
+/* 打印样式 */
+@media print {
+    .y-message-container {
+        display: none;
+    }
 }
 </style>

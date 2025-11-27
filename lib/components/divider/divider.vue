@@ -1,81 +1,191 @@
 <template>
-  <div class="transition-colors duration-200" :class="computedClass" :style="computedStyle">
-    <span v-if="direction === 'horizontal' && slots.default" class="divider-text">
-      <slot></slot>
+  <div :class="dividerClass" :style="dividerStyle">
+    <span v-if="direction === 'horizontal' && hasContent" class="y-divider__text">
+      <slot />
     </span>
   </div>
 </template>
 
 <script setup>
-import { computed,useSlots  } from 'vue';
-const slots = useSlots();
+import { computed, useSlots } from 'vue'
+
+defineOptions({ name: 'y-divider' })
+
+const slots = useSlots()
 const props = defineProps({
-  // 方向：水平（默认）/垂直
+  // 方向
   direction: {
     type: String,
     default: 'horizontal',
     validator: (val) => ['horizontal', 'vertical'].includes(val)
   },
-  // 颜色：贴合GitHub灰调风格，支持自定义
+  // 颜色
   color: {
     type: String,
-    default: 'gray-200' // GitHub默认分割线颜色
+    default: 'border-light'
   },
-  // 粗细：默认1px，支持自定义
+  // 粗细
   thickness: {
+    type: [String, Number],
+    default: 1
+  },
+  // 间距
+  margin: {
+    type: [String, Number],
+    default: 16
+  },
+  // 样式类型
+  variant: {
     type: String,
-    default: '1px'
+    default: 'solid',
+    validator: (val) => ['solid', 'dashed', 'dotted'].includes(val)
   },
-  // 间距：水平方向控制上下间距，垂直方向控制左右间距
-  gap: {
-    type: [Number,String],
-    default: '0',
-  },
-  // 是否虚线
-  dashed: {
-    type: Boolean,
-    default: false
-  },
-  // 水平分割线文本位置（仅水平方向生效）
+  // 文本位置
   position: {
     type: String,
     default: 'center',
-    validator: (value) => ['center', 'left', 'right'].includes(value)
+    validator: (val) => ['left', 'center', 'right'].includes(val)
+  },
+  // 自定义类名
+  class: {
+    type: String,
+    default: ''
   }
-});
-const computedClass = computed(() => {
-  // 方向基础样式
-  const directionClasses = {
-    horizontal: 'w-full flex items-center',
-    vertical: 'h-full inline-flex align-middle'
+})
+
+// 检查是否有内容
+const hasContent = computed(() => !!(slots.default?.().length))
+
+// 分割线类名
+const dividerClass = computed(() => {
+  const classes = ['y-divider', 'transition-colors', 'duration-200']
+  
+  // 方向样式
+  if (props.direction === 'horizontal') {
+    classes.push('w-full', 'flex', 'items-center')
+    if (hasContent.value) {
+      classes.push('y-divider--horizontal-with-text')
+    }
+  } else {
+    classes.push('h-full', 'inline-flex', 'flex-col', 'justify-center')
   }
-  // 线条样式（实线/虚线）
-  const lineStyle = props.dashed ? 'border-dashed' : 'border-solid';
-  // 间距样式：水平=上下间距，垂直=左右间距
-  const gapClasses = props.direction === 'horizontal'
-    ? `my-${props.gap}` // 提取数值（如"8px"→"8"），适配Unocss的my-8
-    : `mx-${props.gap}`;
-  // 文本样式（仅水平方向）
-  const textClasses = props.direction === 'horizontal' && slots.default
-    ? `divider-text:px-3 divider-text:text-gray-500 divider-text:text-sm ${props.position === 'left' ? 'justify-start' :
-      props.position === 'right' ? 'justify-end' : 'justify-center'
-    }`
-    : ''
-  return `${directionClasses[props.direction]} ${lineStyle} ${gapClasses} ${textClasses}`
-});
-const computedStyle = computed(() => {
-  const baseStyle = {
-    // 水平分割线=边框底部，垂直分割线=边框左侧
-    borderColor: props.color,
-    [props.direction === 'horizontal' ? 'borderBottomWidth' : 'borderLeftWidth']: props.thickness
+  
+  // 边框样式
+  const variantMap = {
+    solid: 'border-solid',
+    dashed: 'border-dashed',
+    dotted: 'border-dotted'
   }
-  return baseStyle;
-});
+  classes.push(variantMap[props.variant] || 'border-solid')
+  
+  // 间距样式
+  const marginNum = typeof props.margin === 'number' ? props.margin : parseInt(props.margin) || 16
+  const spacingClass = props.direction === 'horizontal' 
+    ? `my-${Math.round(marginNum / 4)}`
+    : `mx-${Math.round(marginNum / 4)}`
+  classes.push(spacingClass)
+  
+  // 文本对齐
+  if (hasContent.value && props.direction === 'horizontal') {
+    const positionMap = {
+      left: 'justify-start',
+      center: 'justify-center',
+      right: 'justify-end'
+    }
+    classes.push(positionMap[props.position] || 'justify-center')
+  }
+  
+  // 自定义类名
+  if (props.class) {
+    classes.push(props.class)
+  }
+  
+  return classes.join(' ')
+})
+
+// 分割线样式
+const dividerStyle = computed(() => {
+  const style = {}
+  
+  // 使用主题颜色变量
+  const colorMap = {
+    'border-light': 'var(--y-border-light)',
+    'border': 'var(--y-border)',
+    'border-dark': 'var(--y-border-dark)',
+    'primary': 'var(--y-primary)',
+    'success': 'var(--y-success)',
+    'warning': 'var(--y-warning)',
+    'error': 'var(--y-error)',
+    'neutral': 'var(--y-neutral-300)'
+  }
+  
+  style.borderColor = colorMap[props.color] || props.color
+  
+  // 边框粗细
+  const thickness = typeof props.thickness === 'number' ? `${props.thickness}px` : props.thickness
+  if (props.direction === 'horizontal') {
+    style.borderBottomWidth = thickness
+  } else {
+    style.borderLeftWidth = thickness
+  }
+  
+  return style
+})
 </script>
 
 <style scoped>
-/* 继承父容器背景，避免线条穿过文本 */
-.divider-text {
-  background-color: inherit;
+.y-divider {
+  box-sizing: border-box;
+  border-color: inherit;
+}
+
+/* 水平分割线基础样式 */
+.y-divider--horizontal-with-text {
+  border-bottom-style: inherit;
+  border-bottom-width: inherit;
+}
+
+/* 垂直分割线基础样式 */
+.y-divider:not(.y-divider--horizontal-with-text) {
+  border-left-style: inherit;
+  border-left-width: inherit;
+}
+
+/* 文本样式 */
+.y-divider__text {
+  display: inline-block;
+  padding: 0 12px;
+  background-color: var(--y-bg-primary);
+  color: var(--y-text-secondary);
+  font-size: 14px;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+/* 暗色模式适配 */
+@media (prefers-color-scheme: dark) {
+  .y-divider__text {
+    background-color: var(--y-bg-dark);
+    color: var(--y-text-secondary-dark);
+  }
+}
+
+/* 响应式间距 */
+@media (max-width: 768px) {
+  .y-divider__text {
+    padding: 0 8px;
+    font-size: 12px;
+  }
+}
+
+/* 动画效果 */
+.y-divider {
+  transition: border-color 0.2s ease-in-out;
+}
+
+/* 焦点状态 */
+.y-divider:focus-visible {
+  outline: 2px solid var(--y-primary);
+  outline-offset: 2px;
 }
 </style>

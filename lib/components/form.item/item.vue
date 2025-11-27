@@ -1,24 +1,29 @@
 <template>
-  <div class="y-form-item" :class="formItemClasses">
-    <!-- 标签 + 输入区域容器 -->
-    <div class="y-form-item__label-input-container" :class="labelInputContainerClasses">
+  <div :class="formItemClass">
+    <!-- 标签和输入区域 -->
+    <div :class="containerClass">
       <!-- 表单项标签 -->
       <label 
         v-if="label"
-        class="y-form-item__label"
-        :style="labelStyle"
+        :class="labelClass"
+        :for="fieldId"
       >
         <span class="y-form-item__label-text">{{ label }}</span>
         <span v-if="required" class="y-form-item__required">*</span>
       </label>
 
-      <!-- 输入组件容器（插槽：支持 Input、Select 等自定义组件） -->
-      <div class="y-form-item__input-container" :style="inputContainerStyle">
-        <slot></slot> <!-- 自定义输入组件 -->
+      <!-- 输入组件容器 -->
+      <div class="y-form-item__content">
+        <slot />
         
-        <!-- 错误提示（验证失败时显示） -->
-        <p v-if="errors[prop]" class="y-form-item__error">
-          {{ errors[prop] }}
+        <!-- 帮助文本 -->
+        <p v-if="helpText" class="y-form-item__help">
+          {{ helpText }}
+        </p>
+        
+        <!-- 错误提示 -->
+        <p v-if="errorMessage" class="y-form-item__error">
+          {{ errorMessage }}
         </p>
       </div>
     </div>
@@ -26,169 +31,386 @@
 </template>
 
 <script setup>
-import { computed, inject, watch, ref } from 'vue'
+import { computed, provide,onUnmounted,inject, watch, ref } from 'vue'
 
 defineOptions({ name: 'y-form-item' })
 
-// 注入表单上下文（确保嵌套在 y-form 中使用）
-const { model, rules, labelPosition, labelWidth, errors, validateField } = inject('formContext')
-if (!model) {
-  throw new Error('[y-form-item] 必须嵌套在 <y-form> 组件中使用')
-}
+// 注入表单上下文
+const formContext = inject('formContext', null)
 
-// Props 定义（保留原有功能）
+// Props定义
 const props = defineProps({
+  // 标签文本
   label: { type: String, default: '' },
+  // 字段名
   prop: { type: String, required: true },
+  // 是否必填
   required: { type: Boolean, default: false },
-  padding: {
-    type: [String, Number],
-    default: '0',
-    validator: val => val >= 0 && val <= 120
-  }
+  // 帮助文本
+  helpText: { type: String, default: '' },
+  // 标签宽度
+  labelWidth: { type: [String, Number], default: 'auto' },
+  // 验证触发时机
+  validateTrigger: {
+    type: String,
+    default: 'blur',
+    validator: (val) => ['blur', 'change', 'manual'].includes(val)
+  },
+  // 是否显示校验图标
+  showValidateIcon: { type: Boolean, default: true },
+  // 自定义类名
+  class: { type: String, default: '' }
 })
 
-// 格式化单位（数字自动转 px，支持字符串单位）
-const formatUnit = (val) => {
-  if (typeof val === 'number') return `${val}px`
-  return /^\d+(px|rem|em)$/.test(val) ? val : '0px'
+// 响应式数据
+const fieldId = computed(() => `field_${props.prop}`)
+const isValidatePending = ref(false)
+
+// 检查是否在表单中
+if (!formContext) {
+  console.warn('[y-form-item] 建议在 <y-form> 组件中使用以获得完整功能')
 }
 
-// 计算表单项整体样式（布局方向）
-const formItemClasses = computed(() => {
-  return {
-    'y-form-item--vertical': labelPosition === 'top', // 垂直布局（标签在上）
-    'y-form-item--horizontal': labelPosition === 'left' // 水平布局（标签在左）
-  }
-})
-
-// 计算标签+输入容器样式
-const labelInputContainerClasses = computed(() => {
-  return labelPosition === 'top' 
-    ? 'y-form-item__label-input-container--vertical' 
-    : 'y-form-item__label-input-container--horizontal'
-})
-
-// 计算标签样式（宽度、对齐、间距）
-const labelStyle = computed(() => {
-  const style = {
-    fontSize: '14px',
-    fontWeight: 500,
-    color: '#4b5563' // GitHub 灰色文本
-  }
-
-  // 水平布局：固定宽度 + 右对齐
+// 表单项类名
+const formItemClass = computed(() => {
+  const classes = ['y-form-item', 'w-full', 'box-border', 'transition-all', 'duration-200']
+  
+  // 布局方向
+  const labelPosition = formContext?.labelPosition?.value || 'top'
   if (labelPosition === 'left') {
-    style.width = labelWidth || '100px'
-    style.textAlign = 'right'
-    style.marginRight = '8px'
+    classes.push('y-form-item--horizontal')
+  } else {
+    classes.push('y-form-item--vertical')
   }
-
-  // 垂直布局：底部间距
-  if (labelPosition === 'top') {
-    style.marginBottom = '8px'
+  
+  // 状态
+  if (hasError.value) {
+    classes.push('y-form-item--error')
   }
+  
+  if (isValidatePending.value) {
+    classes.push('y-form-item--validating')
+  }
+  
+  // 禁用/只读状态
+  if (formContext?.disabled?.value) {
+    classes.push('y-form-item--disabled')
+  }
+  
+  if (formContext?.readonly?.value) {
+    classes.push('y-form-item--readonly')
+  }
+  
+  // 自定义类名
+  if (props.class) {
+    classes.push(props.class)
+  }
+  
+  return classes.join(' ')
+})
 
+// 容器类名
+const containerClass = computed(() => {
+  const labelPosition = formContext?.labelPosition?.value || 'top'
+  return labelPosition === 'left' 
+    ? 'y-form-item__container--horizontal' 
+    : 'y-form-item__container--vertical'
+})
+
+// 标签类名
+const labelClass = computed(() => {
+  const classes = ['y-form-item__label', 'text-text-secondary', 'font-medium', 'text-sm']
+  
+  // 对齐方式
+  if (formContext?.labelPosition?.value === 'left') {
+    classes.push('text-right')
+  }
+  
+  return classes.join(' ')
+})
+
+// 标签样式
+const labelStyle = computed(() => {
+  const style = {}
+  const labelWidth = props.labelWidth === 'auto' 
+    ? formContext?.labelWidth?.value 
+    : props.labelWidth
+  
+  if (formContext?.labelPosition?.value === 'left' && labelWidth) {
+    const width = typeof labelWidth === 'number' ? `${labelWidth}px` : labelWidth
+    style.width = width
+    style.flexShrink = '0'
+  }
+  
   return style
 })
 
-// 计算输入容器样式（内边距、自适应）
-const inputContainerStyle = computed(() => {
-  return {
-    padding: formatUnit(props.padding),
-    flex: 1 // 占满剩余宽度
+// 错误信息
+const errorMessage = computed(() => {
+  if (!formContext) return ''
+  return formContext.errors.value?.[props.prop] || ''
+})
+
+// 是否有错误
+const hasError = computed(() => !!errorMessage.value)
+
+// 监听字段值变化
+if (formContext) {
+  watch(
+    () => formContext.model.value?.[props.prop],
+    async (newVal, oldVal) => {
+      if (props.validateTrigger === 'change' && newVal !== oldVal) {
+        isValidatePending.value = true
+        await formContext.validateField(props.prop)
+        isValidatePending.value = false
+      }
+    },
+    { deep: true }
+  )
+  
+  // 监听blur事件
+  const handleBlur = async () => {
+    if (props.validateTrigger === 'blur') {
+      isValidatePending.value = true
+      await formContext.validateField(props.prop)
+      isValidatePending.value = false
+    }
+  }
+  
+  // 注册字段
+  if (formContext.registerField) {
+    formContext.registerField(props.prop)
+  }
+  
+  // 暴露blur处理方法给子组件
+  provide('formItemContext', {
+    prop: props.prop,
+    required: props.required,
+    validateTrigger: props.validateTrigger,
+    handleBlur,
+    hasError,
+    isValidatePending
+  })
+}
+
+// 清理
+onUnmounted(() => {
+  if (formContext?.unregisterField) {
+    formContext.unregisterField(props.prop)
   }
 })
 
-// 监听字段值变化，触发单个字段验证（优化触发逻辑：非空/有错误时验证）
-watch(
-  () => model[props.prop],
-  async (newVal) => {
-    // 仅当字段有值、有错误记录时触发，避免初始空值误触发
-    if (newVal !== undefined && newVal !== '' || errors[props.prop]) {
-      await validateField(props.prop)
-    }
-  },
-  { immediate: false, deep: true }
-)
-
-// 暴露输入组件相关（保留原有功能）
-const inputRef = ref(null)
-defineExpose({ inputRef })
+// 暴露方法
+defineExpose({
+  validateField: () => formContext?.validateField?.(props.prop),
+  resetField: () => formContext?.resetField?.(props.prop),
+  clearError: () => formContext?.clearFieldError?.(props.prop)
+})
 </script>
 
-<style lang="less" scoped>
-// 表单项基础样式：统一间距、过渡
+<style scoped>
 .y-form-item {
-  width: 100%;
-  box-sizing: border-box;
-  margin-bottom: 16px; // 表单项之间间距
-  transition: all 0.2s ease;
+  margin-bottom: 16px;
+  position: relative;
 }
 
-// 标签+输入容器：核心布局
-.y-form-item__label-input-container {
+/* 垂直布局 */
+.y-form-item--vertical {
   display: flex;
-  align-items: flex-start; // 标签与输入框顶部对齐（避免输入框高度变化导致错位）
-  width: 100%;
-}
-
-// 垂直布局（标签在上）
-.y-form-item__label-input-container--vertical {
   flex-direction: column;
+}
+
+.y-form-item__container--vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* 水平布局 */
+.y-form-item--horizontal {
+  display: flex;
+  flex-direction: column;
+}
+
+.y-form-item__container--horizontal {
+  display: flex;
   align-items: flex-start;
+  gap: 12px;
 }
 
-// 水平布局（标签在左）
-.y-form-item__label-input-container--horizontal {
-  flex-direction: row;
-  align-items: center; // 水平布局时垂直居中
-}
-
-// 标签样式：简洁低调
+/* 标签样式 */
 .y-form-item__label {
   display: inline-flex;
   align-items: center;
-  box-sizing: border-box;
+  min-height: 32px;
+  line-height: 1.5;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: color 0.2s ease-in-out;
 }
 
-// 必填星号：GitHub 红色风格，不突兀
+.y-form-item__label:hover {
+  color: var(--y-text-primary);
+}
+
 .y-form-item__required {
-  color: #cf222e;
+  color: var(--y-error);
   margin-left: 4px;
-  font-size: 14px;
+  font-size: 12px;
 }
 
-// 输入容器：自适应宽度，容纳控件和错误提示
-.y-form-item__input-container {
-  box-sizing: border-box;
+/* 内容区域 */
+.y-form-item__content {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 4px; // 控件与错误提示间距
+  gap: 4px;
 }
 
-// 错误提示：浅红色、小字体，位置贴合控件
-.y-form-item__error {
+/* 帮助文本 */
+.y-form-item__help {
   font-size: 12px;
-  color: #cf222e;
   line-height: 1.4;
+  color: var(--y-text-tertiary);
   margin: 0;
   padding: 0;
-  height: 16px; // 固定高度，避免布局跳动
 }
 
-// 响应式适配：小屏幕自动转为垂直布局
-@media (max-width: 575px) {
-  .y-form-item__label-input-container--horizontal {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+/* 错误提示 */
+.y-form-item__error {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--y-error);
+  margin: 0;
+  padding: 0;
+  min-height: 16px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
 
-  .y-form-item__label {
-    width: 100% !important;
-    text-align: left !important;
-    margin-right: 0 !important;
-    margin-bottom: 8px !important;
+.y-form-item__error::before {
+  content: '⚠';
+  font-size: 10px;
+}
+
+/* 状态样式 */
+.y-form-item--error {
+  --y-input-border-color: var(--y-error);
+}
+
+.y-form-item--validating {
+  position: relative;
+}
+
+.y-form-item--validating::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--y-primary);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.y-form-item--disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.y-form-item--readonly {
+  pointer-events: none;
+}
+
+/* 验证成功图标 */
+.y-form-item--success :deep(input:not(:focus):not(:hover)) {
+  border-color: var(--y-success);
+  padding-right: 24px;
+}
+
+.y-form-item--success :deep(input:not(:focus):not(:hover))::after {
+  content: '✓';
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--y-success);
+}
+
+/* 动画效果 */
+.y-form-item__error {
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
   }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  from { transform: translateY(-50%) rotate(0deg); }
+  to { transform: translateY(-50%) rotate(360deg); }
+}
+
+/* 响应式适配 */
+@media (max-width: 768px) {
+  .y-form-item {
+    margin-bottom: 12px;
+  }
+  
+  .y-form-item__container--horizontal {
+    flex-direction: column;
+    gap: 6px;
+  }
+  
+  .y-form-item__label {
+    min-height: auto;
+    text-align: left !important;
+    width: 100% !important;
+    margin-bottom: 4px;
+  }
+  
+  .y-form-item__content {
+    gap: 3px;
+  }
+}
+
+/* 暗色模式适配 */
+@media (prefers-color-scheme: dark) {
+  .y-form-item__help {
+    color: var(--y-text-tertiary-dark);
+  }
+}
+
+/* 焦点状态 */
+.y-form-item:focus-within .y-form-item__label {
+  color: var(--y-primary);
+}
+
+/* 空状态 */
+.y-form-item:empty {
+  min-height: 40px;
+  background-color: var(--y-bg-tertiary);
+  border: 1px dashed var(--y-border-light);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--y-text-placeholder);
+  font-size: 12px;
+}
+
+.y-form-item:empty::before {
+  content: '请添加表单项';
 }
 </style>

@@ -1,10 +1,8 @@
 <template>
-  <div class="y-skeleton-item" :class="itemClass" :style="itemStyle">
-    <div class="y-skeleton-item__content"></div>
-  </div>
+  <div :class="itemClass" :style="itemStyle"></div>
 </template>
 
-<script>
+<script setup>
 import { computed } from 'vue'
 
 defineOptions({ name: 'y-skeleton-item' })
@@ -33,56 +31,65 @@ const props = defineProps({
   }
 })
 
+// 样式类
 const itemClass = computed(() => [
   'y-skeleton-item',
-  `y-skeleton-item--${props.variant}`,
+  'inline-block',
+  'bg-gray-100',
   {
+    'rounded-full': props.variant === 'circle',
+    'rounded': props.variant !== 'circle' && props.variant !== 'rect',
     'y-skeleton-item--animated': props.animated
   }
 ])
 
-const itemStyle = computed(() => ({
-  width: typeof props.width === 'number' ? `${props.width}px` : props.width,
-  height: typeof props.height === 'number' ? `${props.height}px` : props.height
-}))
+// 默认高度
+const defaultHeight = computed(() => {
+  switch (props.variant) {
+    case 'text': return '16px'
+    case 'button': return '32px'
+    default: return props.height
+  }
+})
+
+// 样式
+const itemStyle = computed(() => {
+  const width = typeof props.width === 'number' ? `${props.width}px` : props.width
+  const height = props.height === 'auto' ? defaultHeight.value : 
+                 (typeof props.height === 'number' ? `${props.height}px` : props.height)
+  
+  return {
+    width: width,
+    height: height,
+    backgroundColor: 'var(--y-skeleton-bg, #f3f4f6)'
+  }
+})
 </script>
 
 <style scoped>
-.y-skeleton-item {
-  display: inline-block;
-  background: #f0f0f0;
-  border-radius: 4px;
-}
-
-.y-skeleton-item--text {
-  height: 16px;
-}
-
-.y-skeleton-item--circle {
-  border-radius: 50%;
-}
-
-.y-skeleton-item--rect {
-  border-radius: 0;
-}
-
-.y-skeleton-item--button {
-  height: 32px;
-  border-radius: 6px;
-}
-
 .y-skeleton-item--animated {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%) !important;
   background-size: 400% 100%;
-  animation: y-skeleton-loading 1.5s ease-in-out infinite;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
 }
 
-@keyframes y-skeleton-loading {
+@keyframes skeleton-loading {
   0% {
     background-position: 100% 50%;
   }
   100% {
     background-position: 0 50%;
+  }
+}
+
+/* 暗色模式 */
+@media (prefers-color-scheme: dark) {
+  .y-skeleton-item {
+    background-color: var(--y-skeleton-bg-dark, #374151) !important;
+  }
+  
+  .y-skeleton-item--animated {
+    background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%) !important;
   }
 }
 </style>

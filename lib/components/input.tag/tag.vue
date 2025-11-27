@@ -1,417 +1,499 @@
 <template>
-  <div
-    class="y-input-tag"
-    :style="containerStyle"
-    @click="focusInput"
-  >
-    <!-- 标签+输入框容器 -->
-    <div class="y-input-tag__content">
-      <!-- 标签列表 -->
+  <div :class="inputTagClass" @click="focusInput">
+    <!-- 标签容器 -->
+    <div class="y-input-tag__container">
+      <!-- 已添加的标签 -->
       <div
-        v-for="(tag, index) in currentTags"
+        v-for="(tag, index) in tags"
         :key="index"
         class="y-input-tag__tag"
-        :class="tagCustomClass"
+        :class="tagClass"
       >
         <span class="y-input-tag__tag-text">{{ tag }}</span>
         <button
           type="button"
           class="y-input-tag__tag-close"
           @click.stop="removeTag(index)"
-          :disabled="disabled"
+          :disabled="isDisabled"
         >
-          ×
+          <svg class="y-input-tag__tag-close-icon" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+          </svg>
         </button>
       </div>
 
       <!-- 输入框 -->
       <input
         ref="inputRef"
-        type="text"
-        class="y-input-tag__input"
-        :style="{ minWidth: minInputWidth }"
+        v-model="inputValue"
+        :class="inputClass"
         :placeholder="placeholder"
-        :value="inputValue"
-        :disabled="disabled || (maxTags && currentTags.length >= maxTags)"
+        :disabled="isDisabled"
+        :maxlength="maxlength"
         @input="handleInput"
         @keydown="handleKeydown"
         @blur="handleBlur"
-        @focus="isFocused = true"
-      >
+        @focus="handleFocus"
+      />
     </div>
 
     <!-- 清空按钮 -->
     <button
-      v-if="allowClear && currentTags.length > 0 && !disabled"
+      v-if="allowClear && tags.length > 0 && !isDisabled"
       type="button"
       class="y-input-tag__clear"
-      @click.stop="clearAllTags"
+      @click.stop="clearAll"
     >
-      ✕
+      <svg class="y-input-tag__clear-icon" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+      </svg>
     </button>
 
-    <!-- 底部提示 -->
-    <p
-      v-if="(maxTags && currentTags.length >= maxTags) || errorMessage"
-      class="y-input-tag__hint"
-      :class="hintTextClasses"
-    >
-      {{ errorMessage || `最多添加 ${maxTags} 个标签` }}
-    </p>
+    <!-- 提示信息 -->
+    <div v-if="showHint" class="y-input-tag__hint">
+      {{ hintMessage }}
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, watch, computed, onMounted, inject } from 'vue'
+import { ref, computed, inject, nextTick } from 'vue'
 
 defineOptions({ name: 'y-input-tag' })
 
-// Props 保留原有核心功能，优化默认值
-const props = defineProps({
-  modelValue: { type: Array, default: () => [] },
-  placeholder: { type: String, default: '输入标签，按回车/逗号添加' },
-  maxTags: { type: Number, default: 0 }, // 0 表示无限制
-  allowDuplicate: { type: Boolean, default: false },
-  allowClear: { type: Boolean, default: true },
-  separators: { type: Array, default: () => ['Enter', 'Comma', 'Tab'] },
-  disabled: { type: Boolean, default: false },
-  minInputWidth: { type: String, default: '80px' },
-  tagClass: { type: String, default: '' }, // 自定义标签类
-  errorMessage: { type: String, default: '' },
-  // 新增：标签间距（贴合组件库风格）
-  tagGap: { type: [String, Number], default: 8 }
+// 使用 defineModel
+const tags = defineModel({
+  type: Array,
+  default: () => []
 })
 
-const emit = defineEmits([
-  'update:modelValue',
-  'tag-add',
-  'tag-remove',
-  'clear',
-  'change'
-])
-
-// 状态管理
-const inputRef = ref(null)
-const inputValue = ref('')
-const isFocused = ref(false)
-const currentTags = ref([...props.modelValue])
-
-// 表单适配：与 y-form/y-form-item 联动
-const formContext = inject('formContext', null)
-const formItemContext = inject('yFormItemContext', { disabled: false })
-const prop = inject('formItemProp', '')
-
-// 格式化单位（统一处理数字/字符串单位）
-const formatUnit = (val) => {
-  if (typeof val === 'number') return `${val}px`
-  return val
-}
-
-// 计算容器核心样式（替代 Tailwind 原子类）
-const containerStyle = computed(() => {
-  return {
-    width: '100%',
-    boxSizing: 'border-box',
-    position: 'relative',
-    transition: 'all 0.2s ease',
-    marginBottom: '4px' // 与底部提示间距
+const props = defineProps({
+  // 基础配置
+  placeholder: { type: String, default: '输入标签，按回车添加' },
+  maxlength: { type: [String, Number], default: 50 },
+  
+  // 功能控制
+  maxTags: { type: Number, default: 0 }, // 0为无限制
+  allowDuplicate: { type: Boolean, default: false },
+  allowClear: { type: Boolean, default: true },
+  
+  // 分隔符
+  separators: {
+    type: Array,
+    default: () => ['Enter', ',', ' ']
+  },
+  
+  // 状态
+  disabled: { type: Boolean, default: false },
+  readonly: { type: Boolean, default: false },
+  
+  // 自定义
+  tagClass: { type: String, default: '' },
+  errorMessage: { type: String, default: '' },
+  size: {
+    type: String,
+    default: 'md',
+    validator: (val) => ['sm', 'md', 'lg'].includes(val)
   }
 })
 
-// 标签自定义类（合并默认类与自定义类）
-const tagCustomClass = computed(() => {
-  return props.tagClass ? `y-input-tag__tag--custom ${props.tagClass}` : ''
+const emit = defineEmits(['tag-add', 'tag-remove', 'clear', 'change', 'focus', 'blur'])
+
+// 注入表单上下文
+const formItemContext = inject('formItemContext', null)
+
+// 响应式数据
+const inputRef = ref()
+const inputValue = ref('')
+const isFocused = ref(false)
+
+// 计算属性
+const isDisabled = computed(() => {
+  return props.disabled || formItemContext?.disabled?.value || false
 })
 
-// 提示文本样式（错误/普通提示区分）
-const hintTextClasses = computed(() => {
-  return props.errorMessage ? 'y-input-tag__hint--error' : 'y-input-tag__hint--normal'
+const isReadonly = computed(() => {
+  return props.readonly || formItemContext?.readonly?.value || false
 })
 
-// 监听模型值变化，同步当前标签
-watch(
-  () => props.modelValue,
-  (newVal) => {
-    if (Array.isArray(newVal)) currentTags.value = [...newVal]
-  },
-  { deep: true }
-)
+const canAddTag = computed(() => {
+  if (props.maxTags === 0) return true
+  return tags.value.length < props.maxTags
+})
 
-// 标签变化时触发事件与表单验证
-watch(
-  currentTags,
-  (newTags) => {
-    emit('update:modelValue', [...newTags])
-    emit('change', [...newTags])
-    // 触发表单单项验证
-    if (formContext && prop) formContext.validateField(prop)
-  },
-  { deep: true }
-)
+const showHint = computed(() => {
+  return props.errorMessage || (!canAddTag.value && props.maxTags > 0)
+})
 
-// 输入事件：去空格
+const hintMessage = computed(() => {
+  if (props.errorMessage) return props.errorMessage
+  return `最多添加 ${props.maxTags} 个标签`
+})
+
+// 样式计算
+const inputTagClass = computed(() => {
+  const classes = [
+    'y-input-tag',
+    'y-input-tag--' + props.size,
+    'w-full'
+  ]
+  
+  if (isDisabled.value) classes.push('y-input-tag--disabled')
+  if (isReadonly.value) classes.push('y-input-tag--readonly')
+  if (isFocused.value) classes.push('y-input-tag--focused')
+  if (formItemContext?.hasError?.value) classes.push('y-input-tag--error')
+  
+  return classes.join(' ')
+})
+
+const tagClass = computed(() => {
+  const classes = ['y-input-tag__tag']
+  if (props.tagClass) classes.push(props.tagClass)
+  return classes.join(' ')
+})
+
+const inputClass = computed(() => {
+  return [
+    'y-input-tag__input',
+    'bg-transparent',
+    'border-none',
+    'outline-none',
+    'flex-1',
+    'min-w-0'
+  ].join(' ')
+})
+
+// 事件处理
 const handleInput = (e) => {
   inputValue.value = e.target.value.trim()
 }
 
-// 键盘事件：支持分隔符添加标签、退格删除最后一个标签
 const handleKeydown = (e) => {
   const key = e.key
-  const isSeparator = props.separators.includes(key) || (key === ',' && props.separators.includes('Comma'))
-
-  // 分隔符添加标签
-  if (isSeparator && inputValue.value) {
+  const value = inputValue.value.trim()
+  
+  // 检查是否为分隔符
+  const isSeparator = props.separators.includes(key) || 
+    (key === 'Enter' && props.separators.includes('Enter')) ||
+    (key === ',' && props.separators.includes(',')) ||
+    (key === ' ' && props.separators.includes(' '))
+  
+  if (isSeparator && value) {
     e.preventDefault()
-    addTag(inputValue.value)
+    addTag(value)
+    return
   }
-
-  // 退格删除最后一个标签（输入框为空时）
-  if (key === 'Backspace' && !inputValue.value && currentTags.value.length > 0) {
-    removeTag(currentTags.value.length - 1)
+  
+  // 退格键删除最后一个标签
+  if (key === 'Backspace' && !value && tags.value.length > 0) {
+    removeTag(tags.value.length - 1)
   }
-
-  // 禁止 Tab 键默认行为（避免失焦）
-  if (key === 'Tab' && isSeparator) e.preventDefault()
+  
+  // Tab键聚焦
+  if (key === 'Tab') {
+    e.preventDefault()
+    if (value) {
+      addTag(value)
+    }
+  }
 }
 
-// 失焦时添加标签
-const handleBlur = () => {
+const handleBlur = (e) => {
   isFocused.value = false
-  if (inputValue.value) addTag(inputValue.value)
-}
-
-// 添加标签：校验重复、最大数量
-const addTag = (tagText) => {
-  if (props.maxTags > 0 && currentTags.value.length >= props.maxTags) return
-  if (!props.allowDuplicate && currentTags.value.includes(tagText)) return
-
-  currentTags.value.push(tagText)
-  emit('tag-add', tagText)
-  inputValue.value = ''
-  focusInput() // 保持输入框聚焦
-}
-
-// 移除指定索引标签
-const removeTag = (index) => {
-  const removedTag = currentTags.value[index]
-  currentTags.value.splice(index, 1)
-  emit('tag-remove', removedTag, index)
-  focusInput()
-}
-
-// 清空所有标签
-const clearAllTags = () => {
-  currentTags.value = []
-  emit('clear')
-  focusInput()
-}
-
-// 聚焦输入框
-const focusInput = () => {
-  if (!props.disabled && !formItemContext.disabled && inputRef.value) {
-    inputRef.value.focus()
-    isFocused.value = true
+  emit('blur', e)
+  
+  // 失焦时添加标签
+  const value = inputValue.value.trim()
+  if (value) {
+    addTag(value)
+  }
+  
+  // 触发表单验证
+  if (formItemContext?.validateTrigger === 'blur') {
+    formItemContext.handleBlur?.()
   }
 }
 
-// 暴露 API
+const handleFocus = (e) => {
+  isFocused.value = true
+  emit('focus', e)
+}
+
+const addTag = (tag) => {
+  if (!canAddTag.value) return
+  if (!props.allowDuplicate && tags.value.includes(tag)) return
+  
+  const newTags = [...tags.value, tag]
+  tags.value = newTags
+  inputValue.value = ''
+  
+  emit('tag-add', tag)
+  emit('change', newTags)
+  
+  // 触发表单验证
+  if (formItemContext?.validateTrigger === 'change') {
+    formItemContext.handleBlur?.()
+  }
+  
+  // 保持输入框聚焦
+  nextTick(() => {
+    inputRef.value?.focus()
+  })
+}
+
+const removeTag = (index) => {
+  const removedTag = tags.value[index]
+  const newTags = tags.value.filter((_, i) => i !== index)
+  
+  tags.value = newTags
+  emit('tag-remove', removedTag, index)
+  emit('change', newTags)
+  
+  // 保持输入框聚焦
+  nextTick(() => {
+    inputRef.value?.focus()
+  })
+}
+
+const clearAll = () => {
+  tags.value = []
+  inputValue.value = ''
+  
+  emit('clear')
+  emit('change', [])
+  
+  // 保持输入框聚焦
+  nextTick(() => {
+    inputRef.value?.focus()
+  })
+}
+
+const focusInput = () => {
+  if (!isDisabled.value && !isReadonly.value) {
+    inputRef.value?.focus()
+  }
+}
+
+// 暴露方法
 defineExpose({
   focus: focusInput,
+  blur: () => inputRef.value?.blur(),
   addTag,
   removeTag,
-  clearAllTags,
-  getTags: () => [...currentTags.value]
-})
-
-// 初始化：无标签时自动聚焦
-onMounted(() => {
-  if (props.modelValue.length === 0) focusInput()
+  clearAll,
+  getTags: () => tags.value
 })
 </script>
 
-<style lang="less" scoped>
-// 容器基础样式：贴合 GitHub 风格
+<style scoped>
 .y-input-tag {
-  &__content {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px; // 默认标签间距，可通过 tagGap props 覆盖
-    padding: 6px 12px;
-    border: 1px solid #e5e7eb;
-    border-radius: 4px;
-    background-color: #ffffff;
-    transition: all 0.2s ease;
-    align-items: center;
+  display: inline-flex;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
+  position: relative;
+}
 
-    // 聚焦态：蓝色边框 + 轻微阴影（与 y-input 一致）
-    .y-input-tag__input:focus + & {
-      border-color: #0969da;
-      box-shadow: 0 0 0 2px rgba(9, 105, 218, 0.1);
-    }
+/* 容器样式 */
+.y-input-tag__container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 6px 8px;
+  border: 1px solid var(--y-border);
+  border-radius: 4px;
+  background-color: var(--y-bg-primary);
+  gap: 6px;
+  min-height: 32px;
+  transition: all 0.2s ease-in-out;
+}
 
-    // 错误态：红色边框
-    .y-input-tag__hint--error ~ &,
-    &:has(.y-input-tag__input:focus:invalid) {
-      border-color: #cf222e;
-      &:focus-within {
-        box-shadow: 0 0 0 2px rgba(207, 34, 46, 0.1);
-      }
-    }
+/* 尺寸变体 */
+.y-input-tag--sm .y-input-tag__container {
+  padding: 4px 6px;
+  min-height: 28px;
+  gap: 4px;
+}
 
-    // 禁用态：浅灰边框 + 背景
-    &:has(.y-input-tag__input:disabled) {
-      border-color: #f3f4f6;
-      background-color: #f9fafb;
-    }
+.y-input-tag--lg .y-input-tag__container {
+  padding: 8px 10px;
+  min-height: 40px;
+  gap: 8px;
+}
+
+/* 状态样式 */
+.y-input-tag--focused .y-input-tag__container {
+  border-color: var(--y-primary);
+  box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1);
+}
+
+.y-input-tag--error .y-input-tag__container {
+  border-color: var(--y-error);
+  box-shadow: 0 0 0 2px rgba(227, 77, 89, 0.1);
+}
+
+.y-input-tag--disabled .y-input-tag__container,
+.y-input-tag--readonly .y-input-tag__container {
+  background-color: var(--y-bg-tertiary);
+  border-color: var(--y-border-light);
+  color: var(--y-text-disabled);
+  cursor: not-allowed;
+}
+
+/* 标签样式 */
+.y-input-tag__tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 6px;
+  background-color: var(--y-bg-tertiary);
+  border: 1px solid var(--y-border-light);
+  border-radius: 3px;
+  color: var(--y-text-primary);
+  font-size: 12px;
+  line-height: 1.2;
+  gap: 4px;
+  transition: all 0.15s ease-in-out;
+}
+
+.y-input-tag__tag:hover {
+  background-color: var(--y-bg-secondary);
+  border-color: var(--y-border);
+}
+
+/* 标签文本 */
+.y-input-tag__tag-text {
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 标签关闭按钮 */
+.y-input-tag__tag-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: all 0.15s;
+}
+
+.y-input-tag__tag-close-icon {
+  width: 12px;
+  height: 12px;
+  color: var(--y-text-tertiary);
+}
+
+.y-input-tag__tag-close:hover .y-input-tag__tag-close-icon {
+  color: var(--y-text-secondary);
+  background-color: var(--y-bg-secondary);
+  border-radius: 50%;
+}
+
+/* 输入框样式 */
+.y-input-tag__input {
+  height: 20px;
+  line-height: 20px;
+  font-size: 12px;
+  color: var(--y-text-primary);
+  background: transparent;
+}
+
+.y-input-tag__input::placeholder {
+  color: var(--y-text-placeholder);
+}
+
+/* 清空按钮 */
+.y-input-tag__clear {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 4px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: all 0.15s;
+  color: var(--y-text-tertiary);
+}
+
+.y-input-tag__clear:hover {
+  color: var(--y-text-secondary);
+  background-color: var(--y-bg-secondary);
+}
+
+.y-input-tag__clear-icon {
+  width: 14px;
+  height: 14px;
+}
+
+/* 提示信息 */
+.y-input-tag__hint {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--y-text-tertiary);
+  margin-top: 4px;
+  padding: 0;
+  transition: all 0.2s ease-in-out;
+}
+
+.y-input-tag--error .y-input-tag__hint {
+  color: var(--y-error);
+}
+
+/* 动画效果 */
+.y-input-tag__tag {
+  animation: fadeIn 0.15s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
   }
-
-  // 标签样式：GitHub 浅灰风格
-  &__tag {
-    display: inline-flex;
-    align-items: center;
-    padding: 4px 8px;
-    font-size: 13px;
-    color: #4b5563;
-    background-color: #f3f4f6;
-    border-radius: 3px;
-    border: 1px solid #e5e7eb;
-    transition: all 0.15s ease;
-
-    // 自定义标签类扩展
-    &--custom {
-      border: none;
-    }
-
-    // 禁用态标签
-    &:has(.y-input-tag__tag-close:disabled) {
-      background-color: #f9fafb;
-      color: #9ca3af;
-    }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
+}
 
-  // 标签文本
-  &__tag-text {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 120px; // 限制标签最大宽度，避免溢出
+/* 响应式适配 */
+@media (max-width: 768px) {
+  .y-input-tag__container {
+    padding: 4px 6px;
+    gap: 4px;
   }
-
-  // 标签关闭按钮
-  &__tag-close {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 16px;
-    height: 16px;
-    margin-left: 6px;
-    padding: 0;
-    border: none;
-    border-radius: 50%;
-    background: transparent;
-    color: #9ca3af;
-    font-size: 12px;
-    cursor: pointer;
-    transition: all 0.15s ease;
-
-    &:hover:not(:disabled) {
-      color: #cf222e;
-      background-color: #fef2f2;
-    }
-
-    &:disabled {
-      cursor: not-allowed;
-      color: #d1d5db;
-    }
+  
+  .y-input-tag__tag {
+    padding: 2px 4px;
+    font-size: 11px;
   }
-
-  // 输入框样式：透明背景，融入容器
-  &__input {
-    flex: 1;
-    min-width: 80px;
-    padding: 4px 0;
-    border: none;
-    background: transparent;
-    outline: none;
-    font-size: 14px;
-    color: #1f2937;
-    transition: all 0.2s ease;
-
-    &::placeholder {
-      color: #9ca3af;
-      font-size: 13px;
-    }
-
-    &:disabled {
-      color: #9ca3af;
-      cursor: not-allowed;
-      &::placeholder {
-        color: #d1d5db;
-      }
-    }
-
-    // 输入框聚焦时，容器同步高亮
-    &:focus {
-      & + .y-input-tag__content {
-        border-color: #0969da;
-        box-shadow: 0 0 0 2px rgba(9, 105, 218, 0.1);
-      }
-    }
+  
+  .y-input-tag__tag-text {
+    max-width: 80px;
   }
+}
 
-  // 清空按钮
-  &__clear {
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    padding: 2px;
-    border: none;
-    background: transparent;
-    color: #9ca3af;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-
-    &:hover {
-      color: #cf222e;
-    }
+/* 暗色模式 */
+@media (prefers-color-scheme: dark) {
+  .y-input-tag__container {
+    background-color: var(--y-bg-dark);
+    border-color: var(--y-border-dark);
   }
-
-  // 底部提示文本
-  &__hint {
-    margin: 4px 0 0 0;
-    padding: 0;
-    font-size: 12px;
-    line-height: 1.4;
-
-    // 错误提示
-    &--error {
-      color: #cf222e;
-    }
-
-    // 普通提示
-    &--normal {
-      color: #6b7280;
-    }
+  
+  .y-input-tag__tag {
+    background-color: var(--y-bg-tertiary-dark);
+    border-color: var(--y-border-dark);
   }
+}
 
-  // 响应式适配：小屏幕优化
-  @media (max-width: 575px) {
-    &__content {
-      padding: 4px 8px;
-      gap: 6px;
-    }
-
-    &__tag {
-      padding: 3px 6px;
-      font-size: 12px;
-    }
-
-    &__input {
-      min-width: 60px;
-      font-size: 13px;
-    }
-  }
+/* 焦点无障碍 */
+.y-input-tag:focus-within {
+  outline: 2px solid var(--y-primary);
+  outline-offset: 2px;
 }
 </style>
